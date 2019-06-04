@@ -9,11 +9,11 @@ gen_bp_data = function(n_id, m_obs)
                       center = 100) {
     times = c(0, sort(runif(n_obs - 1)))*ti_max
     resp = switch(type,
-                  rep(center, length(times)),
-                  center*sin(pi/4 + pi*times/ti_max/2),
-                  tanh((times - ti_max/2)*2*pi/ti_max)*(center/5) + center
+                  rep(center, length(times)), # constant
+                  center*sin(pi/4 + pi*times/ti_max/2), # part of sin curve
+                  tanh((times - ti_max/2)*2*pi/ti_max)*(center/5) + center # tanh
                   )
-    cbind(times, resp + rnorm(n_obs, sd = center/20))
+    cbind(times, resp + rnorm(n_obs, sd = center/20)) # add Gaussian noise
   }
 
   gendata = function(n_id, m_obs, n_typ = 3, t_max = 365*10) {
