@@ -2,7 +2,7 @@
 #' @param n_id Number of trajectories
 #' @param m_obs Poisson mean for number of observations per trajectory 
 #' @export
-gen_bp_data = function(n_id, m_obs)
+gen_bp_data = function(n_id, m_obs, plots = FALSE)
 {
   ## response functions
   response = function(n_obs, type = 1, ti_max,
@@ -31,8 +31,12 @@ gen_bp_data = function(n_id, m_obs)
   id_df = as.data.frame(do.call(rbind, id_list))
   names(id_df) = c("id", "age", "sbp")
 
-  id_df
-
   ## plot to check result
-  ## for(id in id_list) plot(c(0, id[, 2]), c(0, id[, 3]))
+  if(plots) {
+    iplot = sample(unique(id_df$id), plots)
+    print(ggplot(filter(id_df, id %in% iplot), aes(x = age, y = sbp)) +
+            facet_wrap(~ id) + geom_point())
+  }
+  
+  id_df
 }

@@ -3,12 +3,12 @@ library(data.table)
 library(tidyverse)
 library(mgcv)
 
-dir = "~/SciApplications/VA-MVP/03-Longitudinal/Trajectories"
+dir = "~/Git/mvp-champion/trajectories/"
 set.seed(88)
 setwd(dir)
 
-source("generate.R")
-id_df = gen_bp_data(n_id = 1000, m_obs = 25)
+source("R/generate.R")
+id_df = gen_bp_data(n_id = 1000, m_obs = 25, plots = 10)
 
 trajectories = function(id_df, ngroups = 5, iter = 1, maxdf = 50) {
   ## start with random group assignments
