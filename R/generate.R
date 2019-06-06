@@ -1,8 +1,9 @@
 ## generate longitudinal blood pressure data
 #' @param n_id Number of trajectories
-#' @param m_obs Poisson mean for number of observations per trajectory 
+#' @param m_obs Poisson mean for number of observations in a trajectory
+#' @param lrange Vector c(min, max) range for last observation time generation 
 #' @export
-gen_bp_data = function(n_id, m_obs, plots = FALSE)
+gen_bp_data = function(n_id, m_obs, lrange = c(365*3, 365*10), plots = FALSE)
 {
   ## response functions
   response = function(n_obs, type = 1, ti_max,
@@ -16,15 +17,12 @@ gen_bp_data = function(n_id, m_obs, plots = FALSE)
     cbind(times, resp + rnorm(n_obs, sd = center/20)) # add Gaussian noise
   }
 
-  gendata = function(n_id, m_obs, n_typ = 3, t_max = 365*10) {
-    id_list = vector("list", n_id)
-    for(i in seq(1, n_id)) {
-      n_obs = 1 + rpois(1, lambda = m_obs)
-      type = sample(n_typ, 1)
-      ti_max = runif(1, min = 600, max = t_max)
-      id_list[[i]] = cbind(rep(i, n_obs), response(n_obs, type, ti_max))
-    }
-    id_list
+  ## support
+  gendata = function(n_id, m_obs, n_typ = 3, t_min = lrange[1], t_max = lrange[2]) {
+    ti_max = runif(n_id, min = t_min, max = t_max) # last observation
+    n_obs = 1 + rpois(n_id, lambda = m_obs) # number of observations
+    type = sample(n_typ, n_id, replace = TRUE) # curve type
+    lapply(1:n_id, function(i) cbind(rep(i, n_obs[i]), response(n_obs[i], type[i], ti_max[i])))
   }
 
   id_list = gendata(n_id, m_obs)
