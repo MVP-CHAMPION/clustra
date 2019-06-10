@@ -1,7 +1,7 @@
 ## This is the R translation of trajectories v2.sas code
 library(data.table)
 library(tidyverse)
-library(mgcv)
+library(mgcViz)
 library(parallel)
 library(pbdIO)
 
@@ -11,7 +11,6 @@ setwd(dir)
 a0 = a = deltime()
 
 source("R/generate.R")
-t0 = deltime()
 n_id = 1000
 df = gen_bp_data(n_id = n_id, m_obs = 25, plots = 10)
 a = deltime(a, "Data generated")
@@ -25,7 +24,7 @@ trajectories = function(df, ngroups, iter = 20, maxdf = 50) {
   
   ## Fn to fit thin plate spline (tps) to a group with gam from mgcv package
   spline_k = function(k, df_group) 
-    gam(sbp ~ s(age, k = maxdf), data = df, weights = df_group == k)
+    mgcv::gam(sbp ~ s(age, k = maxdf), data = df, weights = df_group == k)
   ## Fn to compute mse for each id to a tps center
   mse_k = function(x, fit) 
     tapply((df$sbp - fit[[x]]$fitted.values)^2, INDEX = df_id, FUN = mean)
@@ -41,9 +40,9 @@ trajectories = function(df, ngroups, iter = 20, maxdf = 50) {
                         mc.cores = 4)
     a = deltime(a, "M-step")
     ## E-step:
-    ##   compute mse to each tp spline
+    ##   compute mse of each id to each tp spline
     mse = sapply(1:ngroups, FUN = mse_k, fit = tps_mean)
-    ## get nearest tp spline
+    ## get mse-nearest tp spline for each id
     new_group = apply(mse, 1, which.min)
     a = deltime(a, "E-step")
     
@@ -60,9 +59,23 @@ trajectories = function(df, ngroups, iter = 20, maxdf = 50) {
 }
 #Rprof()
 f = trajectories(df, 3)
+g1 = getViz(f$tps_mean[[1]])
+g2 = getViz(f$tps_mean[[2]])
+g3 = getViz(f$tps_mean[[3]])
+plot( sm(g1, 1) ) + l_fitLine(colour = "red") +
+  l_rug(mapping = aes(x=x, y=y), alpha = 0.8) +
+  l_ciLine(mul = 5, colour = "blue", linetype = 2) + 
+  l_points(shape = 19, size = 1, alpha = 0.1) + theme_classic()
+plot( sm(g2, 1) ) + l_fitLine(colour = "red") +
+  l_rug(mapping = aes(x=x, y=y), alpha = 0.8) +
+  l_ciLine(mul = 5, colour = "blue", linetype = 2) + 
+  l_points(shape = 19, size = 1, alpha = 0.1) + theme_classic()
+plot( sm(g3, 1) ) + l_fitLine(colour = "red") +
+  l_rug(mapping = aes(x=x, y=y), alpha = 0.8) +
+  l_ciLine(mul = 5, colour = "blue", linetype = 2) + 
+  l_points(shape = 19, size = 1, alpha = 0.1) + theme_classic()
 
 #Rprof(NULL)
 a = deltime(a0, "Total time")
-
 
 #summaryRprof()
