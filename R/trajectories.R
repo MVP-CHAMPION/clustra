@@ -3,16 +3,20 @@ library(data.table)
 library(tidyverse)
 library(mgcv)
 library(parallel)
+library(pbdIO)
 
 dir = "~/Git/mvp-champion/trajectories/"
-set.seed(89)
+set.seed(883)
 setwd(dir)
+a0 = a = deltime()
 
 source("R/generate.R")
+t0 = deltime()
 n_id = 1000
 df = gen_bp_data(n_id = n_id, m_obs = 25, plots = 10)
+a = deltime(a, "Data generated")
 
-trajectories = function(df, ngroups = 3, iter = 15, maxdf = 50) {
+trajectories = function(df, ngroups, iter = 20, maxdf = 50) {
   ## FIXME n_id as parameter
   ## start with random group assignments
   group = sample(ngroups, n_id, replace = TRUE)
@@ -24,23 +28,26 @@ trajectories = function(df, ngroups = 3, iter = 15, maxdf = 50) {
     gam(sbp ~ s(age, k = maxdf), data = df, weights = df_group == k)
   ## Fn to compute mse for each id to a tps center
   mse_k = function(x, fit) 
-    tapply((df$sbp - fit[[x]]$fitted.values)^2, INDEX = df$id, FUN = mean)
+    tapply((df$sbp - fit[[x]]$fitted.values)^2, INDEX = df_id, FUN = mean)
 
   ## EM algorithm to cluster ids into ngroups
-  ## iterate fitting a spline center to each group (M-step)
+  ## iterate fitting a thin plate spline center to each group (M-step)
   ##         regroup each id to nearest spline center (E-step)
+  a = deltime(a, "Starting iteration")
   for(i in 1:iter) {
     ## M-step:
     ##   fit tp spline centers for each group
-    tps_mean = mclapply(1:ngroups, FUN = spline_k, df_group = df_group, mc.cores = 2)
-    
+    tps_mean = mclapply(1:ngroups, FUN = spline_k, df_group = df_group, 
+                        mc.cores = 4)
+    a = deltime(a, "M-step")
     ## E-step:
     ##   compute mse to each tp spline
-    mse = mclapply(1:ngroups, FUN = mse_k, fit = tps_mean, mc.cores = 2)
+    mse = sapply(1:ngroups, FUN = mse_k, fit = tps_mean)
     ## get nearest tp spline
-    new_group = apply(do.call(cbind, mse), 1, which.min)
+    new_group = apply(mse, 1, which.min)
+    a = deltime(a, "E-step")
     
-    ## done?
+    ## Done?
     changes = sum(new_group != group)
     cat("iteration", i, "changes", changes, "\n")
     group = new_group
@@ -49,6 +56,13 @@ trajectories = function(df, ngroups = 3, iter = 15, maxdf = 50) {
     
     ## add outlier treatment
   }
-  group
+  list(group = group, tps_mean = tps_mean)
 }
-system.time((df = trajectories(id_df)))
+#Rprof()
+f = trajectories(df, 3)
+
+#Rprof(NULL)
+a = deltime(a0, "Total time")
+
+
+#summaryRprof()
