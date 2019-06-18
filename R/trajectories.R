@@ -4,30 +4,32 @@ library(tidyverse)
 library(mgcViz)
 library(parallel)
 library(pbdIO)
-
-dir = "~/Git/mvp-champion/trajectories/"
-set.seed(883)
-setwd(dir)
 a0 = a = deltime()
 
-source("R/generate.R")
-n_id = 1000
-df = gen_bp_data(n_id = n_id, m_obs = 25, plots = 10)
-a = deltime(a, "Data generated")
-
-trajectories = function(df, ngroups, iter = 20, maxdf = 50) {
-  ## FIXME n_id as parameter
+#' Cluster longitudinal trajectories of a response variable. Trajectory means
+#' are splines fit to all ids in a cluster.
+#' @param dat Data frame with response measurements, one per observation. Column
+#' names are id, time, response.
+#' @param ngroups 
+#' @param iter Maximum number of iterations.
+#' @param maxdf Maximum degrees of freedom for trajectory spline centers.
+#' @export
+trajectories = function(dat, ngroups, iter = 20, maxdf = 50) {
+  ## get number of unique id
+  n_id = length(unique(dat$id)) 
+  
   ## start with random group assignments
   group = sample(ngroups, n_id, replace = TRUE)
-  df_id = df$id
-  df_group = group[df_id]
+  dat_id = dat$id
+  dat_group = group[dat_id] # expand group assignment to all responses
   
   ## Fn to fit thin plate spline (tps) to a group with gam from mgcv package
-  spline_k = function(k, df_group) 
-    mgcv::gam(sbp ~ s(age, k = maxdf), data = df, weights = df_group == k)
+  spline_k = function(k, dat_group, dat, maxdf) 
+    mgcv::gam(response ~ s(time, k = maxdf), data = dat, weights = dat_group == k)
   ## Fn to compute mse for each id to a tps center
-  mse_k = function(x, fit) 
-    tapply((df$sbp - fit[[x]]$fitted.values)^2, INDEX = df_id, FUN = mean)
+  mse_k = function(x, tps_mean, dat_id) 
+    tapply((dat$response - fitted(tps_mean[[x]]))^2, INDEX = dat_id, FUN = mean)
+  ## Fn to compute points outside CI
 
   ## EM algorithm to cluster ids into ngroups
   ## iterate fitting a thin plate spline center to each group (M-step)
@@ -35,13 +37,13 @@ trajectories = function(df, ngroups, iter = 20, maxdf = 50) {
   a = deltime(a, "Starting iteration")
   for(i in 1:iter) {
     ## M-step:
-    ##   fit tp spline centers for each group
-    tps_mean = mclapply(1:ngroups, FUN = spline_k, df_group = df_group, 
-                        mc.cores = 4)
+    ##   fit tp spline centers for each group separately (via weights of gam)
+    tps_mean = mclapply(1:ngroups, FUN = spline_k, dat_group = dat_group, dat = dat,
+                        maxdf = maxdf, mc.cores = 4)
     a = deltime(a, "M-step")
     ## E-step:
-    ##   compute mse of each id to each tp spline
-    mse = sapply(1:ngroups, FUN = mse_k, fit = tps_mean)
+    ##   compute MSE of each id to each tp spline
+    mse = sapply(1:ngroups, FUN = mse_k, tps_mean = tps_mean, dat_id = dat_id)
     ## get mse-nearest tp spline for each id
     new_group = apply(mse, 1, which.min)
     a = deltime(a, "E-step")
@@ -50,32 +52,40 @@ trajectories = function(df, ngroups, iter = 20, maxdf = 50) {
     changes = sum(new_group != group)
     cat("iteration", i, "changes", changes, "\n")
     group = new_group
-    df_group = group[df_id]
+    dat_group = group[dat_id]
     if(changes == 0) break
     
-    ## add outlier treatment
+    ## add outlier treatment as probability of belonging?
+      
   }
   list(group = group, tps_mean = tps_mean)
 }
-#Rprof()
-f = trajectories(df, 3)
+
+source("R/generate.R")
+setwd("~/Git/mvp-champion/trajectories/")
+set.seed(883)
+
+dat = gen_long_data(n_id = 1000, m_obs = 25, plots = 10)
+a = deltime(a, "Data generated")
+
+Rprof()
+gam_ctl = gam.control(nthreads = 1)
+f = trajectories(dat, 3)
+Rprof(NULL)
+summaryRprof()
+
 g1 = getViz(f$tps_mean[[1]])
 g2 = getViz(f$tps_mean[[2]])
 g3 = getViz(f$tps_mean[[3]])
 plot( sm(g1, 1) ) + l_fitLine(colour = "red") +
-  l_rug(mapping = aes(x=x, y=y), alpha = 0.8) +
   l_ciLine(mul = 5, colour = "blue", linetype = 2) + 
   l_points(shape = 19, size = 1, alpha = 0.1) + theme_classic()
 plot( sm(g2, 1) ) + l_fitLine(colour = "red") +
-  l_rug(mapping = aes(x=x, y=y), alpha = 0.8) +
   l_ciLine(mul = 5, colour = "blue", linetype = 2) + 
   l_points(shape = 19, size = 1, alpha = 0.1) + theme_classic()
 plot( sm(g3, 1) ) + l_fitLine(colour = "red") +
-  l_rug(mapping = aes(x=x, y=y), alpha = 0.8) +
   l_ciLine(mul = 5, colour = "blue", linetype = 2) + 
   l_points(shape = 19, size = 1, alpha = 0.1) + theme_classic()
 
-#Rprof(NULL)
 a = deltime(a0, "Total time")
 
-#summaryRprof()

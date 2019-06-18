@@ -1,15 +1,17 @@
-## generate longitudinal blood pressure data
+## generate longitudinal data for a response variable
 #' @param n_id Number of trajectories
 #' @param m_obs Poisson mean for number of observations in a trajectory
-#' @param lrange Vector c(min, max) range for last observation time generation 
+#' @param lrange Vector c(min, max) range for last observation time (uniformly
+#' distributed in this range). Observations start at time 0 for allignment. 
+#' Other allignments are not yet implemented.
 #' @export
-gen_bp_data = function(n_id, m_obs, lrange = c(365*3, 365*10), plots = FALSE)
+gen_long_data = function(n_id, m_obs, lrange = c(365*3, 365*10), plots = FALSE)
 {
   ## response functions
   response = function(n_obs, type = 1, ti_max,
                       center = 100) {
     times = c(0, sort(runif(n_obs - 1)))*ti_max
-    resp = switch(type,
+    resp = switch(type, # 1 = constant, 2 = sin, 3 = tanh
                   rep(center, length(times)), # constant
                   center*sin(pi/4 + pi*times/ti_max/2), # part of sin curve
                   tanh((times - ti_max/2)*2*pi/ti_max)*(center/5) + center # tanh
@@ -27,12 +29,12 @@ gen_bp_data = function(n_id, m_obs, lrange = c(365*3, 365*10), plots = FALSE)
 
   id_list = gendata(n_id, m_obs)
   id_df = as.data.frame(do.call(rbind, id_list))
-  names(id_df) = c("id", "age", "sbp")
+  names(id_df) = c("id", "time", "response")
 
   ## plot to check result
   if(plots) {
     iplot = sample(unique(id_df$id), plots)
-    print(ggplot(filter(id_df, id %in% iplot), aes(x = age, y = sbp)) +
+    print(ggplot(filter(id_df, id %in% iplot), aes(x = time, y = response)) +
             facet_wrap(~ id) + geom_point())
   }
   
