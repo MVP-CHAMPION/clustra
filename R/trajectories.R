@@ -23,12 +23,14 @@ trajectories = function(dat, ngroups, iter = 20, maxdf = 50) {
   dat_id = dat$id
   dat_group = group[dat_id] # expand group assignment to all responses
   
-  ## Fn to fit thin plate spline (tps) to a group with gam from mgcv package
+  ## Function to fit thin plate spline (tps) to a group with gam from mgcv package
   spline_k = function(k, dat_group, dat, maxdf) 
     mgcv::gam(response ~ s(time, k = maxdf), data = dat, weights = dat_group == k)
-  ## Fn to compute mse for each id to a tps center
-  mse_k = function(x, tps_mean, dat_id) 
+  ## Loss function for each id to a tps center
+  mse_k = function(x, tps_mean, dat_id) # mean squared error
     tapply((dat$response - fitted(tps_mean[[x]]))^2, INDEX = dat_id, FUN = mean)
+  mxe_k = function(x, tps_mean, dat_id) # maximum error
+    tapply(abs(dat$response - fitted(tps_mean[[x]])), INDEX = dat_id, FUN = max)
   ## Fn to compute points outside CI
 
   ## EM algorithm to cluster ids into ngroups
@@ -63,29 +65,32 @@ trajectories = function(dat, ngroups, iter = 20, maxdf = 50) {
 
 source("R/generate.R")
 setwd("~/Git/mvp-champion/trajectories/")
-set.seed(883)
+set.seed(8837)
 
-dat = gen_long_data(n_id = 1000, m_obs = 25, plots = 10)
+dat = gen_long_data(n_id = 1000, m_obs = 25, plots = 20)
 a = deltime(a, "Data generated")
 
-Rprof()
+## Rprof() # uncomment to profile time
 gam_ctl = gam.control(nthreads = 1)
 f = trajectories(dat, 3)
-Rprof(NULL)
-summaryRprof()
+## Rprof(NULL)
+## summaryRprof()
 
 g1 = getViz(f$tps_mean[[1]])
 g2 = getViz(f$tps_mean[[2]])
 g3 = getViz(f$tps_mean[[3]])
-plot( sm(g1, 1) ) + l_fitLine(colour = "red") +
+p1 = plot( sm(g1, 1) ) + l_fitLine(colour = "red") +
   l_ciLine(mul = 5, colour = "blue", linetype = 2) + 
   l_points(shape = 19, size = 1, alpha = 0.1) + theme_classic()
-plot( sm(g2, 1) ) + l_fitLine(colour = "red") +
+p2 = plot( sm(g2, 1) ) + l_fitLine(colour = "red") +
   l_ciLine(mul = 5, colour = "blue", linetype = 2) + 
   l_points(shape = 19, size = 1, alpha = 0.1) + theme_classic()
-plot( sm(g3, 1) ) + l_fitLine(colour = "red") +
+p3 = plot( sm(g3, 1) ) + l_fitLine(colour = "red") +
   l_ciLine(mul = 5, colour = "blue", linetype = 2) + 
   l_points(shape = 19, size = 1, alpha = 0.1) + theme_classic()
+print(p1)
+print(p2)
+print(p3)
 
 a = deltime(a0, "Total time")
 

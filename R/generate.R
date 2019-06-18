@@ -13,8 +13,8 @@ gen_long_data = function(n_id, m_obs, lrange = c(365*3, 365*10), plots = FALSE)
     times = c(0, sort(runif(n_obs - 1)))*ti_max
     resp = switch(type, # 1 = constant, 2 = sin, 3 = tanh
                   rep(center, length(times)), # constant
-                  center*sin(pi/4 + pi*times/ti_max/2), # part of sin curve
-                  tanh((times - ti_max/2)*2*pi/ti_max)*(center/5) + center # tanh
+                  center*sin(pi/4 + pi*times/lrange[2]), # part of sin curve
+                  center*(1.5 - 1/(1 + exp(-times/max(times)*5))) # 1 - sigmoid
                   )
     cbind(times, resp + rnorm(n_obs, sd = center/20)) # add Gaussian noise
   }
