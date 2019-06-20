@@ -1,96 +1,104 @@
 ## This is the R translation of trajectories v2.sas code
-library(data.table)
-library(tidyverse)
-library(mgcViz)
+# library(data.table) # possibly for reading data
+# library(tidyverse)
+# library(mgcViz)
+library(gratia) # from GitHub: "gavinsimpson/gratia"
 library(parallel)
 library(pbdIO)
 a0 = a = deltime()
+
+## Function to fit thin plate spline (tps) to a group with gam from mgcv package
+## Crossvalidation does not know about zero weights, resulting in different
+## smoothing parameters, so subset is used and separate prediction.
+## Do we need to use credible regions or is se.fit enough??
+tps_g = function(g, dat, mxdf) {
+  tps = mgcv::gam(response ~ s(time, k = mxdf), data = dat, 
+                  subset = dat$group == g)
+  pred = predict(tps, newdata = dat, type = "response", se.fit = TRUE)
+  pred$tps = tps
+  pred
+}
+## Loss functions for each id to a group tps center
+mse_g = function(g, tps, dat) # mean squared error
+  as.numeric(tapply((dat$response - tps[[g]]$fit)^2, dat$id, mean))
+mxe_g = function(g, tps, dat) # maximum error
+  as.numeric(tapply(abs(dat$response - tps[[g]]$fit), dat$id, max))
+## Fn to compute points outside CI
+## Mean distance in probability (a multi-Mahalanobis distance)
+mpd_g = function(g, tps, dat) {
+  
+}
 
 #' Cluster longitudinal trajectories of a response variable. Trajectory means
 #' are splines fit to all ids in a cluster.
 #' @param dat Data frame with response measurements, one per observation. Column
 #' names are id, time, response.
-#' @param ngroups 
+#' @param ng Number of clusters
 #' @param iter Maximum number of iterations.
-#' @param maxdf Maximum degrees of freedom for trajectory spline centers.
+#' @param mxdf Maximum degrees of freedom for trajectory spline smooths.
 #' @export
-trajectories = function(dat, ngroups, iter = 20, maxdf = 50) {
+trajectories = function(dat, ng, iter = 20, mxdf = 50, plot = FALSE) {
   ## get number of unique id
   n_id = length(unique(dat$id)) 
   
   ## start with random group assignments
-  group = sample(ngroups, n_id, replace = TRUE)
-  dat_id = dat$id
-  dat_group = group[dat_id] # expand group assignment to all responses
+  group = sample(ng, n_id, replace = TRUE)
+  dat$group = group[dat$id] # expand group assignment to all responses
   
-  ## Function to fit thin plate spline (tps) to a group with gam from mgcv package
-  spline_k = function(k, dat_group, dat, maxdf) 
-    mgcv::gam(response ~ s(time, k = maxdf), data = dat, weights = dat_group == k)
-  ## Loss function for each id to a tps center
-  mse_k = function(x, tps_mean, dat_id) # mean squared error
-    tapply((dat$response - fitted(tps_mean[[x]]))^2, INDEX = dat_id, FUN = mean)
-  mxe_k = function(x, tps_mean, dat_id) # maximum error
-    tapply(abs(dat$response - fitted(tps_mean[[x]])), INDEX = dat_id, FUN = max)
-  ## Fn to compute points outside CI
-
-  ## EM algorithm to cluster ids into ngroups
+  ## EM algorithm to cluster ids into ng groups
   ## iterate fitting a thin plate spline center to each group (M-step)
-  ##         regroup each id to nearest spline center (E-step)
+  ##         regroup each id to nearest tps center (E-step)
   a = deltime(a, "Starting iteration")
   for(i in 1:iter) {
     ## M-step:
-    ##   fit tp spline centers for each group separately (via weights of gam)
-    tps_mean = mclapply(1:ngroups, FUN = spline_k, dat_group = dat_group, dat = dat,
-                        maxdf = maxdf, mc.cores = 4)
+    ##   fit tp spline centers for each group separately
+    tps = mclapply(1:ng, tps_g, dat = dat, mxdf = mxdf, mc.cores = 4)
     a = deltime(a, "M-step")
+
     ## E-step:
-    ##   compute MSE of each id to each tp spline
-    mse = sapply(1:ngroups, FUN = mse_k, tps_mean = tps_mean, dat_id = dat_id)
+    ##   compute loss of each id to each tp spline
+    loss = mclapply(1:ng, mse_g, tps = tps, dat = dat, mc.cores = 4)
     ## get mse-nearest tp spline for each id
-    new_group = apply(mse, 1, which.min)
+    new_group = apply(do.call(cbind, loss), 1, which.min)
     a = deltime(a, "E-step")
     
     ## Done?
     changes = sum(new_group != group)
-    cat("iteration", i, "changes", changes, "\n")
+    counts = tabulate(new_group)
+    deviance = sum(unlist(lapply(1:ng, function(g) deviance(tps[[g]]$tps))))
+    cat("Iteration:", i, "changes:", changes, "counts:", counts,
+        "deviance:", deviance, "\n")
     group = new_group
-    dat_group = group[dat_id]
+    dat$group = as.factor(group[dat$id])
     if(changes == 0) break
     
     ## add outlier treatment as probability of belonging?
-      
+    ## use predict.gam(), probably for each group separately? weights??
   }
-  list(group = group, tps_mean = tps_mean)
+  a = deltime(a, "Done iteration")
+  
+  if(plot) print(
+    ggplot(dat, aes(time, response, color = group, group = group)) +
+      geom_point(alpha = 0.1) +
+      stat_smooth(method = "gam", formula = y ~ s(x, k = maxdf), size = 1) +
+      theme_bw())
+  a = deltime(a, "Done plots")
+  
+  list(group = group, dat_group = dat$group, tps = tps)
 }
 
 source("R/generate.R")
 setwd("~/Git/mvp-champion/trajectories/")
-set.seed(8837)
+set.seed(83793)
 
-dat = gen_long_data(n_id = 1000, m_obs = 25, plots = 20)
+dat = gen_long_data(n_id = 1000, m_obs = 25, plots = FALSE)
 a = deltime(a, "Data generated")
 
-## Rprof() # uncomment to profile time
-gam_ctl = gam.control(nthreads = 1)
-f = trajectories(dat, 3)
-## Rprof(NULL)
-## summaryRprof()
-
-g1 = getViz(f$tps_mean[[1]])
-g2 = getViz(f$tps_mean[[2]])
-g3 = getViz(f$tps_mean[[3]])
-p1 = plot( sm(g1, 1) ) + l_fitLine(colour = "red") +
-  l_ciLine(mul = 5, colour = "blue", linetype = 2) + 
-  l_points(shape = 19, size = 1, alpha = 0.1) + theme_classic()
-p2 = plot( sm(g2, 1) ) + l_fitLine(colour = "red") +
-  l_ciLine(mul = 5, colour = "blue", linetype = 2) + 
-  l_points(shape = 19, size = 1, alpha = 0.1) + theme_classic()
-p3 = plot( sm(g3, 1) ) + l_fitLine(colour = "red") +
-  l_ciLine(mul = 5, colour = "blue", linetype = 2) + 
-  l_points(shape = 19, size = 1, alpha = 0.1) + theme_classic()
-print(p1)
-print(p2)
-print(p3)
+n_clusters = 4
+iterations = 20
+maxdf = 50
+f = trajectories(dat, n_clusters, iterations, maxdf, plot = TRUE)
+dat$group = f$dat_group
 
 a = deltime(a0, "Total time")
 

@@ -33,8 +33,9 @@ gen_long_data = function(n_id, m_obs, lrange = c(365*3, 365*10), plots = FALSE)
 
   ## plot to check result
   if(plots) {
+    require(ggplot2)
     iplot = sample(unique(id_df$id), plots)
-    print(ggplot(filter(id_df, id %in% iplot), aes(x = time, y = response)) +
+    print(ggplot(dplyr::filter(id_df, id %in% iplot), aes(x = time, y = response)) +
             facet_wrap(~ id) + geom_point())
   }
   
