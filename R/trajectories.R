@@ -14,6 +14,7 @@ a0 = a = deltime()
 tps_g = function(g, dat, mxdf) {
   tps = mgcv::gam(response ~ s(time, k = mxdf), data = dat, 
                   subset = dat$group == g)
+  if(class(tps) == "try-error") print(attr(tps, "condition")$message)
   pred = predict(tps, newdata = dat, type = "response", se.fit = TRUE)
   pred$tps = tps
   pred
@@ -26,8 +27,8 @@ mxe_g = function(g, tps, dat) # maximum error
 ## Fn to compute points outside CI
 ## Mean distance in probability (a multi-Mahalanobis distance)
 mpd_g = function(g, tps, dat) {
-  
 }
+
 
 #' Cluster longitudinal trajectories of a response variable. Trajectory means
 #' are splines fit to all ids in a cluster.
@@ -36,6 +37,7 @@ mpd_g = function(g, tps, dat) {
 #' @param ng Number of clusters
 #' @param iter Maximum number of iterations.
 #' @param mxdf Maximum degrees of freedom for trajectory spline smooths.
+#' @param plot Plot clustered data with superimposed trajectory spline smooths.
 #' @export
 trajectories = function(dat, ng, iter = 20, mxdf = 50, plot = FALSE) {
   ## get number of unique id
@@ -44,7 +46,7 @@ trajectories = function(dat, ng, iter = 20, mxdf = 50, plot = FALSE) {
   ## start with random group assignments
   group = sample(ng, n_id, replace = TRUE)
   dat$group = group[dat$id] # expand group assignment to all responses
-  
+    
   ## EM algorithm to cluster ids into ng groups
   ## iterate fitting a thin plate spline center to each group (M-step)
   ##         regroup each id to nearest tps center (E-step)
@@ -62,12 +64,17 @@ trajectories = function(dat, ng, iter = 20, mxdf = 50, plot = FALSE) {
     new_group = apply(do.call(cbind, loss), 1, which.min)
     a = deltime(a, "E-step")
     
-    ## Done?
+    ## Check if done or degenrate
     changes = sum(new_group != group)
     counts = tabulate(new_group)
     deviance = sum(unlist(lapply(1:ng, function(g) deviance(tps[[g]]$tps))))
-    cat("Iteration:", i, "changes:", changes, "counts:", counts,
-        "deviance:", deviance, "\n")
+    cat("Iteration:", i, "Changes:", changes, "Counts:", counts,
+        "Deviance:", deviance, "\n")
+    if(length(counts) < ng | any(counts == 0)) {
+      cat("Empty group encountered. Restarting on next iteration.\n")
+      new_group = sample(ng, n_id, replace = TRUE)
+      counts = tabulate(new_group)
+    }
     group = new_group
     dat$group = as.factor(group[dat$id])
     if(changes == 0) break
@@ -89,12 +96,13 @@ trajectories = function(dat, ng, iter = 20, mxdf = 50, plot = FALSE) {
 
 source("R/generate.R")
 setwd("~/Git/mvp-champion/trajectories/")
-set.seed(83793)
+set.seed(90)
 
-dat = gen_long_data(n_id = 1000, m_obs = 25, plots = FALSE)
+dat = gen_long_data(n_id = 1000, m_obs = 25, e_range = c(365*3, 365*10),
+                    plots = 20)
 a = deltime(a, "Data generated")
 
-n_clusters = 4
+n_clusters = 3
 iterations = 20
 maxdf = 50
 f = trajectories(dat, n_clusters, iterations, maxdf, plot = TRUE)
