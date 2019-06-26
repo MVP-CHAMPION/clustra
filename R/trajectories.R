@@ -1,16 +1,21 @@
 ## This is the R translation of trajectories v2.sas code
 # library(data.table) # possibly for reading data
-# library(tidyverse)
-# library(mgcViz)
 library(gratia) # from GitHub: "gavinsimpson/gratia"
 library(parallel)
 library(pbdIO)
 a0 = a = deltime()
 
-## Function to fit thin plate spline (tps) to a group with gam from mgcv package
-## Crossvalidation does not know about zero weights, resulting in different
-## smoothing parameters, so subset is used and separate prediction.
-## Do we need to use credible regions or is se.fit enough??
+## Function to fit thin plate spline (tps) to a group with gam from the mgcv
+## package. Crossvalidation does not know about zero weights, resulting in 
+## different smoothing parameters, so subset is used and a separate prediction
+## function.
+## TODO Add best of multiple random starts based on minimum deviance.
+## TODO Add uncertainty moderated outlier detection.
+## TODO Do we need to use credible regions or is se.fit enough??
+## TODO Explore relationship with bam (a "large" version of gam). Initial tries
+## took loner to compute.
+## TODO Add Rand index determination of k, explore AIC and BIC. Lots of parallel
+## opportunities.
 tps_g = function(g, dat, mxdf) {
   tps = mgcv::gam(response ~ s(time, k = mxdf), data = dat, 
                   subset = dat$group == g)
