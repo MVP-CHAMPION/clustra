@@ -10,10 +10,10 @@ a0 = a = deltime()
 ## different smoothing parameters, so subset is used and a separate prediction
 ## function.
 ## TODO Add best of multiple random starts based on minimum deviance.
-## TODO Add uncertainty moderated outlier detection.
-## TODO Do we need to use credible regions or is se.fit enough??
+## TODO Add uncertainty moderated outlier detection. Do we need to use credible
+##      regions or is se.fit enough??
 ## TODO Explore relationship with bam (a "large" version of gam). Initial tries
-## took loner to compute.
+##      took loner to compute.
 ## TODO Add Rand index determination of k, explore AIC and BIC. Lots of parallel
 ## opportunities.
 tps_g = function(g, dat, mxdf) {
