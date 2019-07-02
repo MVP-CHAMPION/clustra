@@ -2,7 +2,7 @@
 # library(data.table) # possibly for reading data
 library(gratia) # from GitHub: "gavinsimpson/gratia"
 library(parallel)
-library(pbdIO)
+source("R/deltime.R")
 a0 = a = deltime()
 
 ## Function to fit thin plate spline (tps) to a group with gam from the mgcv
