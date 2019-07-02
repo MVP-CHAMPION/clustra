@@ -32,6 +32,7 @@ mxe_g = function(g, tps, dat) # maximum error
 ## Fn to compute points outside CI
 ## Mean distance in probability (a multi-Mahalanobis distance)
 mpd_g = function(g, tps, dat) {
+  ## TODO 
 }
 
 
