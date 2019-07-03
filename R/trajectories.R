@@ -101,7 +101,6 @@ trajectories = function(dat, ng, iter = 20, mxdf = 50, plot = FALSE) {
 }
 
 source("R/generate.R")
-setwd("~/Git/mvp-champion/trajectories/")
 set.seed(90)
 
 dat = gen_long_data(n_id = 1000, m_obs = 25, e_range = c(365*3, 365*10),
