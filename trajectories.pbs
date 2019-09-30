@@ -7,7 +7,7 @@
 #PBS -e trajectories.e
 #PBS -o trajectories.o
 
-cd ~/R/trajectories/R
+cd ~/R/trajectories
 pwd
 
 ## modules can vary on platforms
@@ -19,4 +19,4 @@ module list
 ## prevent warning when fork is used with MPI
 export OMPI_MCA_mpi_warn_on_fork=0
 
-Rscript trajectories.R
+Rscript R/trajectories.R
