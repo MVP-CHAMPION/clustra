@@ -38,8 +38,9 @@ gen_long_data = function(n_id, m_obs, s_range = c(0, 0),
     end = runif(n_id, min = e_range[1], max = e_range[2]) # last observation time
     n_obs = 1 + rpois(n_id, lambda = m_obs) # number of observations
     type = sample(n_typ, n_id, replace = TRUE) # curve type
+    id_vec = sample.int(3*n_id, n_id, replace = FALSE) # make id non-consecutive
     lapply(1:n_id,   # construct by id bunches of responses
-           function(i) cbind(rep(i, n_obs[i]), 
+           function(i) cbind(rep(id_vec[i], n_obs[i]),
                              response(n_obs[i], type[i], start[i], end[i], center)))
   }
   ## response

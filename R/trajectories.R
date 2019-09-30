@@ -51,6 +51,7 @@ trajectories = function(dat, ng, iter = 20, mxdf = 50, plot = FALSE) {
   
   ## start with random group assignments
   group = sample(ng, n_id, replace = TRUE)
+  dat$id = as.numeric(factor(dat$id)) # removes assumption id are sequential
   dat$group = group[dat$id] # expand group assignment to all responses
     
   ## EM algorithm to cluster ids into ng groups
@@ -105,12 +106,13 @@ set.seed(90)
 
 dat = gen_long_data(n_id = 1000, m_obs = 25, e_range = c(365*3, 365*10),
                     plots = 20)
-a = deltime(a, "Data generated")
+a = deltime(a, paste0("Data (", paste(dim(dat), collapse = ","), ") generated"))
 
 n_clusters = 3
 iterations = 20
 maxdf = 50
 f = trajectories(dat, n_clusters, iterations, maxdf, plot = TRUE)
+
 dat$group = f$dat_group
 
 a = deltime(a0, "Total time")
