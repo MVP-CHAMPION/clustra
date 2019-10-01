@@ -1,9 +1,9 @@
 #!/bin/bash
 #PBS -N trajectories
-#PBS -A ccsd
+#PBS -A ccsd-burst
 #PBS -l qos=burst,nodes=1:ppn=32,walltime=00:02:00
 #PBS -q batch
-#PBS -W group_list=cades-ccsd
+#PBS -W group_list=cades-user
 #PBS -e trajectories.e
 #PBS -o trajectories.o
 
