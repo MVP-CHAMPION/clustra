@@ -16,14 +16,16 @@ a0 = a = deltime()
 ##      took loner to compute.
 ## TODO Add Rand index determination of k, explore AIC and BIC. Lots of parallel
 ## opportunities.
+## TODO Configure with gam-bam choice for benchmaarking #####################
 tps_g = function(g, dat, mxdf) {
-  tps = mgcv::gam(response ~ s(time, k = mxdf), data = dat, 
-                  subset = dat$group == g)
+  tps = mgcv::bam(response ~ s(time, k = mxdf), data = dat, 
+                  subset = dat$group == g, discrete = TRUE)
   if(class(tps) == "try-error") print(attr(tps, "condition")$message)
   pred = predict(tps, newdata = dat, type = "response", se.fit = TRUE)
   pred$tps = tps
   pred
 }
+
 ## Loss functions for each id to a group tps center
 mse_g = function(g, tps, dat) # mean squared error
   as.numeric(tapply((dat$response - tps[[g]]$fit)^2, dat$id, mean))
@@ -103,17 +105,20 @@ trajectories = function(dat, ng, iter = 20, mxdf = 50, plot = FALSE) {
 
 source("R/generate.R")
 set.seed(90)
-
 dat = gen_long_data(n_id = 1000, m_obs = 25, e_range = c(365*3, 365*10),
                     plots = 20)
 a = deltime(a, paste0("Data (", paste(dim(dat), collapse = ","), ") generated"))
 
-n_clusters = 3
-iterations = 20
-maxdf = 50
-f = trajectories(dat, n_clusters, iterations, maxdf, plot = TRUE)
+f = trajectories(dat = dat, ng = 3, iter = 20, mxdf = 50, plot = TRUE)
 
 dat$group = f$dat_group
+
+sessionInfo()
+
+set.seed(90)
+dat = gen_long_data(n_id = 1000, m_obs = 25, e_range = c(365*3, 365*10),
+                    plots = 20)
+bench_core(FUN = trajectories, dat = dat, ng = 3, iter = 20, mxdf = 50, plot = FALSE)
 
 a = deltime(a0, "Total time")
 
