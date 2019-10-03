@@ -2,6 +2,7 @@
 # library(data.table) # possibly for reading data
 library(gratia) # from GitHub: "gavinsimpson/gratia"
 library(parallel)
+library(mgcv)
 source("R/deltime.R")
 a0 = a = deltime()
 
@@ -108,7 +109,7 @@ trajectories = function(dat, ng, iter = 20, maxdf = 50, plot = FALSE) {
 sessionInfo()
 source("R/generate.R")
 set.seed(90)
-dat = gen_long_data(n_id = 20000, m_obs = 25, e_range = c(365*3, 365*10),
+dat = gen_long_data(n_id = 10000, m_obs = 25, e_range = c(365*3, 365*10),
                     plots = 20)
 a = deltime(a, paste0("Data (", paste(dim(dat), collapse = ","), ") generated"))
 
@@ -126,6 +127,16 @@ hotPaths(pd, total.pct = 10.0)
 plotProfileCallGraph(pd)
 flameGraph(pd)
 callTreeMap(pd)
+pd_gam = filterProfileData(pd, select = "gam.setup")
+funSummary(pd_gam)
+funSummary(pd_gam, srclines = FALSE)
+callSummary(pd_gam)
+srcSummary(pd_gam)
+hotPaths(pd_gam, total.pct = 10.0)
+plotProfileCallGraph(pd_gam)
+flameGraph(pd_gam)
+callTreeMap(pd_gam)
+
 dat$group = f$dat_group
 
 # source("R/benchmark.R")
