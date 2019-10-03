@@ -116,7 +116,8 @@ source("R/benchmark.R")
 set.seed(90)
 dat = gen_long_data(n_id = 1000, m_obs = 25, e_range = c(365*3, 365*10),
                     plots = 20)
-bench_core(FUN = trajectories, dat = dat, ng = 3, iter = 20, maxdf = 50, plot = FALSE)
+bench_cores(FUN = trajectories, dat = dat, ng = 3, iter = 20, maxdf = 50,
+            plot = FALSE)
 
 a = deltime(a0, "Total time")
 
