@@ -126,7 +126,7 @@ srcSummary(pd)
 hotPaths(pd, total.pct = 10.0)
 plotProfileCallGraph(pd)
 flameGraph(pd)
-callTreeMap(pd)
+calleeTreeMap(pd)
 pd_gam = filterProfileData(pd, select = "gam.setup")
 funSummary(pd_gam)
 funSummary(pd_gam, srclines = FALSE)
@@ -135,7 +135,7 @@ srcSummary(pd_gam)
 hotPaths(pd_gam, total.pct = 10.0)
 plotProfileCallGraph(pd_gam)
 flameGraph(pd_gam)
-callTreeMap(pd_gam)
+calleeTreeMap(pd_gam)
 
 dat$group = f$dat_group
 
