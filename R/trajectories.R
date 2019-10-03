@@ -17,8 +17,8 @@ a0 = a = deltime()
 ## TODO Add Rand index determination of k, explore AIC and BIC. Lots of parallel
 ## opportunities.
 ## TODO Configure with gam-bam choice for benchmaarking #####################
-tps_g = function(g, dat, mxdf) {
-  tps = mgcv::bam(response ~ s(time, k = mxdf), data = dat, 
+tps_g = function(g, dat, maxdf) {
+  tps = mgcv::bam(response ~ s(time, k = maxdf), data = dat, 
                   subset = dat$group == g, discrete = TRUE)
   if(class(tps) == "try-error") print(attr(tps, "condition")$message)
   pred = predict(tps, newdata = dat, type = "response", se.fit = TRUE)
@@ -44,10 +44,10 @@ mpd_g = function(g, tps, dat) {
 #' names are id, time, response.
 #' @param ng Number of clusters
 #' @param iter Maximum number of iterations.
-#' @param mxdf Maximum degrees of freedom for trajectory spline smooths.
+#' @param maxdf Maximum degrees of freedom for trajectory spline smooths.
 #' @param plot Plot clustered data with superimposed trajectory spline smooths.
 #' @export
-trajectories = function(dat, ng, iter = 20, mxdf = 50, plot = FALSE) {
+trajectories = function(dat, ng, iter = 20, maxdf = 50, plot = FALSE) {
   ## get number of unique id
   n_id = length(unique(dat$id)) 
   
@@ -63,7 +63,7 @@ trajectories = function(dat, ng, iter = 20, mxdf = 50, plot = FALSE) {
   for(i in 1:iter) {
     ## M-step:
     ##   fit tp spline centers for each group separately
-    tps = mclapply(1:ng, tps_g, dat = dat, mxdf = mxdf, mc.cores = 4)
+    tps = mclapply(1:ng, tps_g, dat = dat, maxdf = maxdf, mc.cores = 4)
     a = deltime(a, "M-step")
 
     ## E-step:
@@ -108,18 +108,15 @@ set.seed(90)
 dat = gen_long_data(n_id = 1000, m_obs = 25, e_range = c(365*3, 365*10),
                     plots = 20)
 a = deltime(a, paste0("Data (", paste(dim(dat), collapse = ","), ") generated"))
-
-f = trajectories(dat = dat, ng = 3, iter = 20, mxdf = 50, plot = TRUE)
-
+f = trajectories(dat = dat, ng = 3, iter = 20, maxdf = 50, plot = TRUE)
 dat$group = f$dat_group
 
 sessionInfo()
-
 source("R/benchmark.R")
 set.seed(90)
 dat = gen_long_data(n_id = 1000, m_obs = 25, e_range = c(365*3, 365*10),
                     plots = 20)
-bench_core(FUN = trajectories, dat = dat, ng = 3, iter = 20, mxdf = 50, plot = FALSE)
+bench_core(FUN = trajectories, dat = dat, ng = 3, iter = 20, maxdf = 50, plot = FALSE)
 
 a = deltime(a0, "Total time")
 
