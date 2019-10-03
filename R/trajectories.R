@@ -18,8 +18,10 @@ a0 = a = deltime()
 ## opportunities.
 ## TODO Configure with gam-bam choice for benchmaarking #####################
 tps_g = function(g, dat, maxdf) {
-  tps = mgcv::bam(response ~ s(time, k = maxdf), data = dat, 
-                  subset = dat$group == g, discrete = TRUE)
+#  tps = mgcv::bam(response ~ s(time, k = maxdf), data = dat, 
+#                  subset = dat$group == g, discrete = TRUE)
+  tps = mgcv::gam(response ~ s(time, k = maxdf), data = dat, 
+                  subset = dat$group == g)
   if(class(tps) == "try-error") print(attr(tps, "condition")$message)
   pred = predict(tps, newdata = dat, type = "response", se.fit = TRUE)
   pred$tps = tps
@@ -117,7 +119,7 @@ set.seed(90)
 dat = gen_long_data(n_id = 1000, m_obs = 25, e_range = c(365*3, 365*10),
                     plots = 20)
 bench_cores(FUN = trajectories, dat = dat, ng = 3, iter = 20, maxdf = 50,
-            plot = FALSE)
+            plot = FALSE, max2 = 1, reps = 1)
 
 a = deltime(a0, "Total time")
 
