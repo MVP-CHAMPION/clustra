@@ -108,13 +108,22 @@ trajectories = function(dat, ng, iter = 20, maxdf = 50, plot = FALSE) {
 sessionInfo()
 source("R/generate.R")
 set.seed(90)
-dat = gen_long_data(n_id = 5000, m_obs = 25, e_range = c(365*3, 365*10),
+dat = gen_long_data(n_id = 2000, m_obs = 25, e_range = c(365*3, 365*10),
                     plots = 20)
 a = deltime(a, paste0("Data (", paste(dim(dat), collapse = ","), ") generated"))
-Rprof()
-f = trajectories(dat = dat, ng = 3, iter = 20, maxdf = 50, plot = TRUE)
-Rprof(NULL)
-summaryRprof()
+library(proftools)
+pd = profileExpr({
+  f = trajectories(dat = dat, ng = 3, iter = 20, maxdf = 50, plot = TRUE)
+})
+funSummary(pd)
+funSummary(pd, srclines = FALSE)
+callSummary(pd)
+srcSummary(pd)
+hotPaths(pd, total.pct = 10.0)
+plotProfileCallGraph(pd)
+plotProfileCallGraph(filterProfileData(pd, focus = "gam"))
+flameGraph(pd)
+callTreeMap(pd)
 dat$group = f$dat_group
 
 # source("R/benchmark.R")
