@@ -105,21 +105,24 @@ trajectories = function(dat, ng, iter = 20, maxdf = 50, plot = FALSE) {
   list(group = group, dat_group = dat$group, tps = tps)
 }
 
+sessionInfo()
 source("R/generate.R")
 set.seed(90)
-dat = gen_long_data(n_id = 1000, m_obs = 25, e_range = c(365*3, 365*10),
+dat = gen_long_data(n_id = 10000, m_obs = 25, e_range = c(365*3, 365*10),
                     plots = 20)
 a = deltime(a, paste0("Data (", paste(dim(dat), collapse = ","), ") generated"))
+Rprof()
 f = trajectories(dat = dat, ng = 3, iter = 20, maxdf = 50, plot = TRUE)
+Rprof(NULL)
+summaryRprof()
 dat$group = f$dat_group
 
-sessionInfo()
-source("R/benchmark.R")
-set.seed(90)
-dat = gen_long_data(n_id = 1000, m_obs = 25, e_range = c(365*3, 365*10),
-                    plots = 20)
-bench_cores(FUN = trajectories, dat = dat, ng = 3, iter = 20, maxdf = 50,
-            plot = FALSE, max2 = 1, reps = 1)
+# source("R/benchmark.R")
+# set.seed(90)
+# dat = gen_long_data(n_id = 1000, m_obs = 25, e_range = c(365*3, 365*10),
+#                     plots = 20)
+# bench_cores(FUN = trajectories, dat = dat, ng = 3, iter = 20, maxdf = 50,
+#             plot = FALSE, max2 = 1, reps = 1)
 
 a = deltime(a0, "Total time")
 
