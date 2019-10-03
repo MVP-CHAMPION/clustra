@@ -30,7 +30,7 @@ bench_cores = function(FUN, ..., max2 = 5, reps = 4) {
     geom_point() + stat_summary(fun.y=mean, geom="line") +
     ggtitle(paste("Scaling", FUNname))
   
-  pdf("test_blas.pdf", width = 7, height = 7)
+  pdf(paste0(FUNname, "_blas.pdf"), width = 7, height = 7)
   print(p)
   dev.off()
 }
