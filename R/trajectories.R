@@ -124,7 +124,6 @@ callSummary(pd)
 srcSummary(pd)
 hotPaths(pd, total.pct = 10.0)
 plotProfileCallGraph(pd)
-plotProfileCallGraph(filterProfileData(pd))
 flameGraph(pd)
 callTreeMap(pd)
 dat$group = f$dat_group
