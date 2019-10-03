@@ -111,7 +111,10 @@ set.seed(90)
 dat = gen_long_data(n_id = 2000, m_obs = 25, e_range = c(365*3, 365*10),
                     plots = 20)
 a = deltime(a, paste0("Data (", paste(dim(dat), collapse = ","), ") generated"))
+
 library(proftools)
+library(openblasctl)
+openblas_set_num_threads(1)
 pd = profileExpr({
   f = trajectories(dat = dat, ng = 3, iter = 20, maxdf = 50, plot = TRUE)
 })
@@ -121,7 +124,7 @@ callSummary(pd)
 srcSummary(pd)
 hotPaths(pd, total.pct = 10.0)
 plotProfileCallGraph(pd)
-plotProfileCallGraph(filterProfileData(pd, focus = "gam"))
+plotProfileCallGraph(filterProfileData(pd))
 flameGraph(pd)
 callTreeMap(pd)
 dat$group = f$dat_group
