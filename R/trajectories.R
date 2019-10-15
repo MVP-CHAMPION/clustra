@@ -67,12 +67,12 @@ trajectories = function(dat, ng, iter = 20, maxdf = 50, plot = FALSE) {
   for(i in 1:iter) {
     ## M-step:
     ##   fit tp spline centers for each group separately
-    tps = mclapply(1:ng, tps_g, dat = dat, maxdf = maxdf, mc.cores = 8)
+    tps = mclapply(1:ng, tps_g, dat = dat, maxdf = maxdf, mc.cores = 1)
     a = deltime(a, "M-step")
 
     ## E-step:
     ##   compute loss of each id to each tp spline
-    loss = mclapply(1:ng, mse_g, tps = tps, dat = dat, mc.cores = 8)
+    loss = mclapply(1:ng, mse_g, tps = tps, dat = dat, mc.cores = 1)
     ## get mse-nearest tp spline for each id
     new_group = apply(do.call(cbind, loss), 1, which.min)
     a = deltime(a, "E-step")
@@ -116,7 +116,7 @@ a = deltime(a, paste0("Data (", paste(dim(dat), collapse = ","), ") generated"))
 
 ## library(proftools)
 library(openblasctl)
-openblas_set_num_threads(1)
+openblas_set_num_threads(2)
 ## pd = profileExpr({
   f = trajectories(dat = dat, ng = 3, iter = 5, maxdf = 50, plot = TRUE)
 ## })
