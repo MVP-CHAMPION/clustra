@@ -66,12 +66,12 @@ trajectories = function(dat, ng, iter = 20, maxdf = 50, plot = FALSE) {
   for(i in 1:iter) {
     ## M-step:
     ##   fit tp spline centers for each group separately
-    tps = mclapply(1:ng, tps_g, dat = dat, maxdf = maxdf, mc.cores = 4)
+    tps = mclapply(1:ng, tps_g, dat = dat, maxdf = maxdf, mc.cores = 1)
     a = deltime(a, "M-step")
 
     ## E-step:
     ##   compute loss of each id to each tp spline
-    loss = mclapply(1:ng, mse_g, tps = tps, dat = dat, mc.cores = 4)
+    loss = mclapply(1:ng, mse_g, tps = tps, dat = dat, mc.cores = 1)
     ## get mse-nearest tp spline for each id
     new_group = apply(do.call(cbind, loss), 1, which.min)
     a = deltime(a, "E-step")
@@ -110,32 +110,32 @@ sessionInfo()
 source("R/generate.R")
 set.seed(90)
 dat = gen_long_data(n_id = 10000, m_obs = 25, e_range = c(365*3, 365*10),
-                    plots = 20)
+                    plots = FALSE)
 a = deltime(a, paste0("Data (", paste(dim(dat), collapse = ","), ") generated"))
 
-library(proftools)
-library(openblasctl)
+## library(proftools)
+## library(openblasctl)
 openblas_set_num_threads(1)
-pd = profileExpr({
-  f = trajectories(dat = dat, ng = 3, iter = 20, maxdf = 50, plot = TRUE)
-})
-funSummary(pd)
-funSummary(pd, srclines = FALSE)
-callSummary(pd)
-srcSummary(pd)
-hotPaths(pd, total.pct = 10.0)
-plotProfileCallGraph(pd)
-flameGraph(pd)
-calleeTreeMap(pd)
-pd_gam = filterProfileData(pd, select = "gam.setup")
-funSummary(pd_gam)
-funSummary(pd_gam, srclines = FALSE)
-callSummary(pd_gam)
-srcSummary(pd_gam)
-hotPaths(pd_gam, total.pct = 10.0)
-plotProfileCallGraph(pd_gam)
-flameGraph(pd_gam)
-calleeTreeMap(pd_gam)
+## pd = profileExpr({
+  f = trajectories(dat = dat, ng = 3, iter = 5, maxdf = 50, plot = TRUE)
+## })
+## funSummary(pd)
+## funSummary(pd, srclines = FALSE)
+## callSummary(pd)
+## srcSummary(pd)
+## hotPaths(pd, total.pct = 10.0)
+## plotProfileCallGraph(pd)
+## flameGraph(pd)
+## calleeTreeMap(pd)
+## pd_gam = filterProfileData(pd, select = "gam.setup")
+## funSummary(pd_gam)
+## funSummary(pd_gam, srclines = FALSE)
+## callSummary(pd_gam)
+## srcSummary(pd_gam)
+## hotPaths(pd_gam, total.pct = 10.0)
+## plotProfileCallGraph(pd_gam)
+## flameGraph(pd_gam)
+## calleeTreeMap(pd_gam)
 
 dat$group = f$dat_group
 
