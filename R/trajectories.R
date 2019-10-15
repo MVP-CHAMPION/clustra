@@ -52,6 +52,7 @@ mpd_g = function(g, tps, dat) {
 #' @export
 trajectories = function(dat, ng, iter = 20, maxdf = 50, plot = FALSE) {
   ## get number of unique id
+  if(plot) require(ggplot2)
   n_id = length(unique(dat$id)) 
   
   ## start with random group assignments
