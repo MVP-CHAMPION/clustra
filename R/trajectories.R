@@ -67,12 +67,12 @@ trajectories = function(dat, ng, iter = 20, maxdf = 50, plot = FALSE) {
   for(i in 1:iter) {
     ## M-step:
     ##   fit tp spline centers for each group separately
-    tps = mclapply(1:ng, tps_g, dat = dat, maxdf = maxdf, mc.cores = 2)
+    tps = mclapply(1:ng, tps_g, dat = dat, maxdf = maxdf, mc.cores = 4)
     a = deltime(a, "M-step")
 
     ## E-step:
     ##   compute loss of each id to each tp spline
-    loss = mclapply(1:ng, mse_g, tps = tps, dat = dat, mc.cores = 2)
+    loss = mclapply(1:ng, mse_g, tps = tps, dat = dat, mc.cores = 4)
     ## get mse-nearest tp spline for each id
     new_group = apply(do.call(cbind, loss), 1, which.min)
     a = deltime(a, "E-step")
