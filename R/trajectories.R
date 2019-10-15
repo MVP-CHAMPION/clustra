@@ -114,7 +114,7 @@ dat = gen_long_data(n_id = 10000, m_obs = 25, e_range = c(365*3, 365*10),
 a = deltime(a, paste0("Data (", paste(dim(dat), collapse = ","), ") generated"))
 
 ## library(proftools)
-## library(openblasctl)
+library(openblasctl)
 openblas_set_num_threads(1)
 ## pd = profileExpr({
   f = trajectories(dat = dat, ng = 3, iter = 5, maxdf = 50, plot = TRUE)
