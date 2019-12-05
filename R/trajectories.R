@@ -114,7 +114,7 @@ dat = gen_long_data(n_id = 1000, m_obs = 25, e_range = c(365*3, 365*10),
                     plots = FALSE)
 a = deltime(a, paste0("Data (", paste(dim(dat), collapse = ","), ") generated"))
 
-## library(proftools)
+library(proftools)
 library(openblasctl)
 openblas_set_num_threads(1)
 pd = profileExpr({
