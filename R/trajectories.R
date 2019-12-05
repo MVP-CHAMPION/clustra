@@ -50,7 +50,7 @@ mpd_g = function(g, tps, dat) {
 #' @param maxdf Maximum degrees of freedom for trajectory spline smooths.
 #' @param plot Plot clustered data with superimposed trajectory spline smooths.
 #' @export
-trajectories = function(dat, ng, iter = 20, maxdf = 50, plot = FALSE) {
+trajectories = function(dat, ng, iter = 10, maxdf = 50, plot = FALSE) {
   ## get number of unique id
   if(plot) require(ggplot2)
   n_id = length(unique(dat$id)) 
@@ -117,17 +117,17 @@ a = deltime(a, paste0("Data (", paste(dim(dat), collapse = ","), ") generated"))
 ## library(proftools)
 library(openblasctl)
 openblas_set_num_threads(1)
-## pd = profileExpr({
-  f = trajectories(dat = dat, ng = 3, iter = 5, maxdf = 50, plot = TRUE)
-## })
-## funSummary(pd)
-## funSummary(pd, srclines = FALSE)
-## callSummary(pd)
-## srcSummary(pd)
-## hotPaths(pd, total.pct = 10.0)
-## plotProfileCallGraph(pd)
-## flameGraph(pd)
-## calleeTreeMap(pd)
+pd = profileExpr({
+  f = trajectories(dat = dat, ng = 3, iter = 1, maxdf = 50, plot = FALSE)
+})
+funSummary(pd)
+funSummary(pd, srclines = FALSE)
+callSummary(pd)
+srcSummary(pd)
+hotPaths(pd, total.pct = 10.0)
+plotProfileCallGraph(pd)
+flameGraph(pd)
+calleeTreeMap(pd)
 ## pd_gam = filterProfileData(pd, select = "gam.setup")
 ## funSummary(pd_gam)
 ## funSummary(pd_gam, srclines = FALSE)
