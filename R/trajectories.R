@@ -115,7 +115,7 @@ trajectories = function(dat, ng, iter = 10, maxdf = 50, plot = FALSE) {
   srcSummary(pd)
   hotPaths(pd, total.pct = 10.0)
   plotProfileCallGraph(pd)
-  plotProfileCallGraph(pd, focus = "bam")
+  plotProfileCallGraph(pd, focus = "mgcv::bam")
   flameGraph(pd)
   calleeTreeMap(pd)
   
@@ -125,7 +125,7 @@ trajectories = function(dat, ng, iter = 10, maxdf = 50, plot = FALSE) {
 sessionInfo()
 source("R/generate.R")
 set.seed(90)
-dat = gen_long_data(n_id = 10000, m_obs = 25, e_range = c(365*3, 365*10),
+dat = gen_long_data(n_id = 2000000, m_obs = 25, e_range = c(365*3, 365*10),
                     plots = FALSE)
 a = deltime(a, paste0("Data (", paste(dim(dat), collapse = ","), ") generated"))
 
