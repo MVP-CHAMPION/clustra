@@ -3,6 +3,9 @@
 library(gratia) # from GitHub: "gavinsimpson/gratia"
 library(parallel)
 library(mgcv)
+library(proftools)
+library(openblasctl)
+
 source("R/deltime.R")
 a0 = a = deltime()
 
@@ -126,8 +129,6 @@ dat = gen_long_data(n_id = 10000, m_obs = 25, e_range = c(365*3, 365*10),
                     plots = FALSE)
 a = deltime(a, paste0("Data (", paste(dim(dat), collapse = ","), ") generated"))
 
-library(proftools)
-library(openblasctl)
 openblas_set_num_threads(1)
   f = trajectories(dat = dat, ng = 3, iter = 1, maxdf = 50, plot = FALSE)
 ## pd_gam = filterProfileData(pd, select = "gam.setup")
