@@ -19,10 +19,12 @@ a0 = a = deltime()
 ## opportunities.
 ## TODO Configure with gam-bam choice for benchmaarking #####################
 tps_g = function(g, dat, maxdf) {
-  tps = mgcv::bam(response ~ s(time, k = maxdf), data = dat, 
+  pd = profileExpr({
+    tps = mgcv::bam(response ~ s(time, k = maxdf), data = dat, 
                   subset = dat$group == g, discrete = TRUE)
 #  tps = mgcv::gam(response ~ s(time, k = maxdf), data = dat, 
 #                  subset = dat$group == g)
+  })
   if(class(tps)[1] == "try-error") print(attr(tps, "condition")$message)
   pred = predict(tps, newdata = dat, type = "response", se.fit = TRUE)
   pred$tps = tps
@@ -110,16 +112,14 @@ trajectories = function(dat, ng, iter = 10, maxdf = 50, plot = FALSE) {
 sessionInfo()
 source("R/generate.R")
 set.seed(90)
-dat = gen_long_data(n_id = 10000, m_obs = 25, e_range = c(365*3, 365*10),
+dat = gen_long_data(n_id = 100000, m_obs = 25, e_range = c(365*3, 365*10),
                     plots = FALSE)
 a = deltime(a, paste0("Data (", paste(dim(dat), collapse = ","), ") generated"))
 
 library(proftools)
 library(openblasctl)
 openblas_set_num_threads(1)
-pd = profileExpr({
-  f = trajectories(dat = dat, ng = 3, iter = 1, maxdf = 50, plot = FALSE)
-})
+  f = trajectories(dat = dat, ng = 1, iter = 1, maxdf = 50, plot = FALSE)
 funSummary(pd)
 funSummary(pd, srclines = FALSE)
 callSummary(pd)
