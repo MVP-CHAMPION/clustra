@@ -55,48 +55,42 @@ rand_plot = function(rand_pairs) {
   library(RColorBrewer)
 
   n.col = max(rand_pairs$i.K)*max(rand_pairs$i.R)
-  K.vec <- unique(unlist(rand_pairs[, c("i.K", "j.K")]))
-  K.max <- max(K.vec)
+  K.vec = unique(unlist(rand_pairs[, c("i.K", "j.K")]))
+  K.max = max(K.vec)
   K.len = length(K.vec)
-  unique.R <- unique(unlist(rand_pairs[, c("i.R", "j.R")]))
-  R.vec <- max(unique.R)
+  unique.R = unique(unlist(rand_pairs[, c("i.R", "j.R")]))
+  R.vec = max(unique.R)
   R.max = max(R.vec)
 
-  x <- 1:((K.max - 1) * R.vec)
-  y <- x
-  z <- array(NA, c(max(x), max(x)))
-  diag(z) <- 1
-  var.z <- rand_pairs$adjRand
+  x = 1:((K.max - 1) * R.vec)
+  y = x
+  z = array(NA, c(max(x), max(x)))
+  diag(z) = 1
+  var.z = rand_pairs$adjRand
   for(i in 1:nrow(rand_pairs)){
-    z.i <- (rand_pairs$i.K[i] - 2) * R.vec + rand_pairs$i.R[i]
-    z.j <- (rand_pairs$j.K[i] - 2) * R.vec + rand_pairs$j.R[i]
-    z[z.i, z.j] <- z[z.j, z.i] <- var.z[i]
+    z.i = (rand_pairs$i.K[i] - 2) * R.vec + rand_pairs$i.R[i]
+    z.j = (rand_pairs$j.K[i] - 2) * R.vec + rand_pairs$j.R[i]
+    z[z.i, z.j] = z[z.j, z.i] = var.z[i]
   }
-  lim <- range(x)
-  zlim <- range(c(rand_pairs$adjRand, 1))
-  var.col <- colorRampPalette(brewer.pal(9, "YlOrRd"))(n.col)
+  lim = range(x)
+  zlim = range(c(rand_pairs$adjRand, 1))
+  var.col = colorRampPalette(brewer.pal(9, "YlOrRd"))(n.col)
 
-## Reorder within K for vis effect
+  ## Reorder within K for vis effect
   for(i in 1:K.len) { 
-#    id.z <- order(ret.ic[ret.ic[, 1] == (i + 1), 3], decreasing = TRUE)
-    id.z <- order(z[(i - 1) * R.max + (1:R.max), (i - 1) * R.max + 1], decreasing = TRUE)
-    tmp.z <- z[(i - 1) * R.max + (1:R.max), ]
-    z[(i - 1) * R.max + (1:R.max), ] <- tmp.z[id.z,]
-    tmp.z <- z[, (i - 1) * R.max + (1:R.max)]
-    z[, (i - 1) * R.max + (1:R.max)] <- tmp.z[, id.z]
+    id.z = order(z[(i - 1) * R.max + (1:R.max), (i - 1) * R.max + 1], decreasing = TRUE)
+    tmp.z = z[(i - 1) * R.max + (1:R.max), ]
+    z[(i - 1) * R.max + (1:R.max), ] = tmp.z[id.z,]
+    tmp.z = z[, (i - 1) * R.max + (1:R.max)]
+    z[, (i - 1) * R.max + (1:R.max)] = tmp.z[, id.z]
+  }
 
-##    cat("K = ", i + 1, ", R order =", (1:10)[id.z], "\n")
-}
-
-  bg <- "transparent"
-  fg <- "black"
+  bg = "transparent"
+  fg = "black"
 
   pdf("all_sort1.pdf", width = 6, height = 6, bg = bg)
     par(bg = bg, fg = fg, col = fg, col.axis = fg,
         col.lab = fg, col.main = fg, col.sub = fg)
-        #    cex.main = 2.0, cex.lab = 2.0, cex.axis = 1.5)
-        #layout(matrix(1:2, nrow = 1), width = c(7, 2))
-
     image(x, y, z, zlim, lim, rev(lim), col = var.col, axes = FALSE,
           xlab = "Number of Clusters", ylab = "Number of Clusters",
           main = "Adjusted Rand Index")
@@ -110,8 +104,7 @@ rand_plot = function(rand_pairs) {
   pdf("all_sort2.pdf", width = 0.8, height = 5, bg = bg)
     par(bg = bg, fg = fg, col = fg, col.axis = fg,
         col.lab = fg, col.main = fg, col.sub = fg, mar = c(5, 1, 4, 2))
-
-    z.label <- seq(zlim[1], zlim[2], length = n.col)
+    z.label = seq(zlim[1], zlim[2], length = n.col)
     image(1, z.label, matrix(z.label, nrow = 1), zlim, c(1, 1), zlim,
           col = var.col, axes = FALSE, xlab = "", ylab = "")
     axis(4)
