@@ -1,7 +1,7 @@
 ## Various functions to evaluate results of clustering, like RandIndex
 ## computation and plots of spline fits.
 ##
-#' Plots spline fit from bam, possibly with data
+#' Plots spline fit (modify to use acutal bam results), possibly with data
 #' 
 #' @section Details:
 #'
@@ -14,11 +14,15 @@ plot_tps = function(dat, data = TRUE) {
   print(p)
 }
 
-## Use RandIndex to evaluate number of clusters
-randplot = function(results) {
+#' Use RandIndex to evaluate number of clusters
+#' @param results List with results from trajectories() function
+#' @value A data frame with RandIndex for all pairs from trajectories results.
+#' Note all pairs means lower triangle plus diagonal of an all-pairs symmetric
+#' matrix.
+allpair_RandIndex = function(results) {
   library(MixSim)
   nr = length(results)
-  rand_mat = vector("list", nr*(nr - 1)/2)
+  rand_pairs = vector("list", nr*(nr - 1)/2 + nr)
   irm = 0
   for(i in 1:nr) {
     for(j in i:nr) {
@@ -34,28 +38,27 @@ randplot = function(results) {
       adjRand = ri$AR
       Fow = ri$F
       Mir = ri$M
-      rand_mat[[irm]] = data.frame(i.K = i.K, i.R = i.R, j.K = j.K, j.R = j.R, 
+      rand_pairs[[irm]] = data.frame(i.K = i.K, i.R = i.R, j.K = j.K, j.R = j.R, 
                                    Rand = Rand, adjRand = adjRand, Fow = Fow, Mir = Mir)
     }
   }
-  rand_mat = do.call(rbind, rand_mat)
-  rand_plot(rand_mat)
+  do.call(rbind, rand_pairs)
 }
 
 ## Rand index matrix plot from Technometrics paper
 ## Sorts replicates within cluster K
+## Assumes K starts from 2
 ## Author: Wei-Chen Chen
 ## 
-#' @param randata A data frame with columns 
-rand_plot = function(randata) {
+#' @param rand_pairs A data frame with columns 
+rand_plot = function(rand_pairs) {
   library(RColorBrewer)
 
-  n.col = max(randata$i.K)*max(randata$i.R)
-  randata <- as.data.frame(randata)
-  K.vec <- unique(unlist(randata[, c("i.K", "j.K")]))
+  n.col = max(rand_pairs$i.K)*max(rand_pairs$i.R)
+  K.vec <- unique(unlist(rand_pairs[, c("i.K", "j.K")]))
   K.max <- max(K.vec)
   K.len = length(K.vec)
-  unique.R <- unique(unlist(randata[, c("i.R", "j.R")]))
+  unique.R <- unique(unlist(rand_pairs[, c("i.R", "j.R")]))
   R.vec <- max(unique.R)
   R.max = max(R.vec)
 
@@ -63,14 +66,14 @@ rand_plot = function(randata) {
   y <- x
   z <- array(NA, c(max(x), max(x)))
   diag(z) <- 1
-  var.z <- randata$adjRand
-  for(i in 1:nrow(randata)){
-    z.i <- (randata$i.K[i] - 2) * R.vec + randata$i.R[i]
-    z.j <- (randata$j.K[i] - 2) * R.vec + randata$j.R[i]
+  var.z <- rand_pairs$adjRand
+  for(i in 1:nrow(rand_pairs)){
+    z.i <- (rand_pairs$i.K[i] - 2) * R.vec + rand_pairs$i.R[i]
+    z.j <- (rand_pairs$j.K[i] - 2) * R.vec + rand_pairs$j.R[i]
     z[z.i, z.j] <- z[z.j, z.i] <- var.z[i]
   }
   lim <- range(x)
-  zlim <- range(c(randata$adjRand, 1))
+  zlim <- range(c(rand_pairs$adjRand, 1))
   var.col <- colorRampPalette(brewer.pal(9, "YlOrRd"))(n.col)
 
 ## Reorder within K for vis effect

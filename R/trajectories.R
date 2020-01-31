@@ -178,16 +178,6 @@ trajectories = function(dat, ng, group, iter = 15, maxdf = 50, plot = FALSE,
     plot_tps(dat)
     a = deltime(a, "\nDone plots")
   }
-#  print(funSummary(pd))
-#  print(funSummary(pd, srclines = FALSE))
-#  print(callSummary(pd))
-#  print(srcSummary(pd))
-#  print(hotPaths(pd, total.pct = 10.0))
-#  plotProfileCallGraph(pd)
-#  plotProfileCallGraph(pd, focus = "mgcv::bam")
-#  flameGraph(pd)
-#  calleeTreeMap(pd)
-  
   list(deviance = deviance, group = group, dat_group = dat$group, tps = tps)
 }
 
@@ -204,9 +194,9 @@ a = a_fit = deltime(a, paste0("\nData (", paste(dim(dat), collapse = ","), ") ge
 ngv = c(2, 3, 4, 5)
 maxdf = 50
 starts = 8
-iter = 10
+iter = 20
 start_nid = 20*length(ngv)
-replicates = 5
+replicates = 10
 results = vector("list", replicates*length(ngv))
 for(j in 1:length(ngv)) {
   ng = ngv[j]
@@ -224,15 +214,23 @@ for(j in 1:length(ngv)) {
     ## now dat includes initial group assignment
     f = trajectories(dat = dat, ng, group, iter = iter, maxdf = maxdf, plot = FALSE,
                      cores = cores)
-    results[[(j - 1)*replicates + i]] = list(ng = ng, rep = i, deviance = f$deviance, group = group)
+    results[[(j - 1)*replicates + i]] = list(ng = as.integer(ng), 
+                                             rep = as.integer(i),
+                                             deviance = f$deviance,
+                                             group = f$group)
     dat$group = as.factor(f$group[dat$id])
     a = deltime(a_i, " Replicate time")
   }
 }
 
+## save object results and parameters
+save(results, ngv, maxdf, starts, iter, start_nid, replicates, file = "results.Rdata")
+a = deltime(a, "\nSaved results")
+
 a = deltime(a_fit, "\nTotal Fit time")
 a = deltime(a0, "\nTotal time")
 
 ## plot Rand Index evaluation
-randplot(results)
+RandIndex_pairs = allpair_RandIndex(results)
+rand_plot(RandIndex_pairs)
 a = deltime(a, "\nRandIndex time")
