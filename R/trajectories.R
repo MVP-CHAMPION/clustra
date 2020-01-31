@@ -8,7 +8,7 @@
 library(gratia) # from GitHub: "gavinsimpson/gratia"
 library(parallel)
 library(mgcv)
-library(proftools)
+#library(proftools)
 library(openblasctl)
 
 source("R/deltime.R")
@@ -29,8 +29,6 @@ a0 = a = deltime()
 tps_g = function(g, dat, maxdf, nthreads) {
   tps = mgcv::bam(response ~ s(time, k = maxdf), data = dat, 
                   subset = dat$group == g, discrete = TRUE, nthreads = nthreads)
-#  tps = mgcv::gam(response ~ s(time, k = maxdf), data = dat, 
-#                  subset = dat$group == g)
   if(class(tps)[1] == "try-error") print(attr(tps, "condition")$message)
   tps
 }
@@ -72,7 +70,6 @@ start_groups = function(data, ng, starts, start_nid, cores, maxdf) {
   ##   random starts. Choosing from samples increases diversity of 
   ##   fits (sum of distances between group fits).
   ## Then classifies all ids based on fit from best sample
-#  min_dev = Inf
   max_div = 0
   start_id = sort(sample(unique(data$id), ng*start_nid)) # sample to add diversity!
   dat_start = dat[data$id %in% start_id, ]
@@ -89,10 +86,6 @@ start_groups = function(data, ng, starts, start_nid, cores, maxdf) {
     diversity = sum(dist(
       do.call(rbind, lapply(mclapply(1:ng, pred_g, tps = f$tps, data = test_data,
                               mc.cores = cores$e_mc), function(x) as.numeric(x$fit)))))
-#    if(deviance < min_dev) {
-#      min_dev = deviance
-#      best_tps = f$tps
-#    }
     if(diversity > max_div) {
       max_div = diversity
       best_tps_cov = f$tps
@@ -173,7 +166,7 @@ trajectories = function(dat, ng, group, iter = 15, maxdf = 50, plot = FALSE,
          cat(" Changes:", changes, "Counts:", counts, "Deviance:", deviance)
     }    
     group = new_group
-    dat$group = as.factor(group[dat$id])
+    dat$group = as.factor(group[dat$id]) # expand group to data frame
     if(changes == 0) break
     
     ## add outlier treatment as probability of belonging?
@@ -182,15 +175,7 @@ trajectories = function(dat, ng, group, iter = 15, maxdf = 50, plot = FALSE,
   if(catlev) a = deltime(a_it, " Done")
   
   if(plot) {
-    plot_tps = function() {
-        print(
-          ggplot(dat, aes(time, response, color = group, group = group)) +
-            geom_point(alpha = 0.1) +
-            stat_smooth(method = "gam", formula = y ~ s(x, k = maxdf), size = 1) +
-            theme_bw())
-    }
     plot_tps(dat)
-    
     a = deltime(a, "\nDone plots")
   }
 #  print(funSummary(pd))
@@ -208,8 +193,10 @@ trajectories = function(dat, ng, group, iter = 15, maxdf = 50, plot = FALSE,
 
 sessionInfo()
 source("R/generate.R")
+source("R/scaling.R")
+source("R/evaluate.R")
 set.seed(90)
-cores = list(e_mc = 4, m_mc = 4, bam_nthreads = 1, blas = 1)
+
 dat = gen_long_data(n_id = 20000, m_obs = 25, e_range = c(365*3, 365*10),
                     plots = FALSE)
 a = a_fit = deltime(a, paste0("\nData (", paste(dim(dat), collapse = ","), ") generated"))
@@ -221,7 +208,8 @@ iter = 10
 start_nid = 20*length(ngv)
 replicates = 5
 results = vector("list", replicates*length(ngv))
-for(ng in ngv) {
+for(j in 1:length(ngv)) {
+  ng = ngv[j]
   for(i in 1:replicates) {
     a = a_i = deltime(a)
   
@@ -231,63 +219,20 @@ for(ng in ngv) {
   
     dat$id = as.numeric(factor(dat$id)) # since id are not sequential
     dat$group = group[dat$id] # expand to all responses
-    a = deltime(a, "Starts time")
+    a = deltime(a, " Starts time")
   
     ## now dat includes initial group assignment
     f = trajectories(dat = dat, ng, group, iter = iter, maxdf = maxdf, plot = FALSE,
                      cores = cores)
-    results[[(ng - 1)*length(ngv) + i]] = list(ng = ng, rep = i, deviance = f$deviance, group = group)
+    results[[(j - 1)*replicates + i]] = list(ng = ng, rep = i, deviance = f$deviance, group = group)
     dat$group = as.factor(f$group[dat$id])
     a = deltime(a_i, " Replicate time")
   }
 }
-## pd_gam = filterProfileData(pd, select = "gam.setup")
-## funSummary(pd_gam)
-## funSummary(pd_gam, srclines = FALSE)
-## callSummary(pd_gam)
-## srcSummary(pd_gam)
-## hotPaths(pd_gam, total.pct = 10.0)
-## plotProfileCallGraph(pd_gam)
-## flameGraph(pd_gam)
-## calleeTreeMap(pd_gam)
 
-# dat$group = f$dat_group
-
-# source("R/benchmark.R")
-# set.seed(90)
-# dat = gen_long_data(n_id = 1000, m_obs = 25, e_range = c(365*3, 365*10),
-#                     plots = 20)
-# bench_cores(FUN = trajectories, dat = dat, ng = 3, iter = 20, maxdf = 50,
-#             plot = FALSE, max2 = 1, reps = 1)
-
-a = deltime(a_fit, "Fit time")
+a = deltime(a_fit, "\nTotal Fit time")
 a = deltime(a0, "\nTotal time")
 
-## Use RandIndex to evaluate number of clusters
-randplot = function(results) {
-  library(MixSim)
-  nr = length(ngv)*replicates
-  rand_mat = matrix(NA, nr, nr)
-  for(cng in 1:length(ngv)) {
-    for(cr in 1:replicates) {
-      col = (cng - 1)*replicates + cr
-      group1 = results[[col]]$group
-      if(results[[col]]$ng != cng | results[[col]]$rep != cr) cat("rand: Results coordinates don't match!")
-      for(ng in 1:length(ngv)) {
-        for(r in 1:replicates) {
-          row = (ng - 1)*replicates + r
-          group2 = results[[row]]$group
-          if(results[[col]]$ng != ng | results[[col]]$rep != r) cat("rand: Results coordinates don't match!")
-          rand_mat[row, col] = RandIndex(group1, group2)$AR
-        }
-      }
-    }
-  }
-
-  library(plot.matrix)
-  plot(rand_mat)
-}
+## plot Rand Index evaluation
 randplot(results)
 a = deltime(a, "\nRandIndex time")
-
-
