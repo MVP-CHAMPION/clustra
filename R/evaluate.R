@@ -54,22 +54,26 @@ allpair_RandIndex = function(results) {
 rand_plot = function(rand_pairs) {
   library(RColorBrewer)
 
-  n.col = max(rand_pairs$i.K)*max(rand_pairs$i.R)
   K.vec = unique(unlist(rand_pairs[, c("i.K", "j.K")]))
   K.max = max(K.vec)
   K.len = length(K.vec)
-  unique.R = unique(unlist(rand_pairs[, c("i.R", "j.R")]))
-  R.vec = max(unique.R)
+  R.vec = unique(unlist(rand_pairs[, c("i.R", "j.R")]))
+  R.len = length(R.vec)
   R.max = max(R.vec)
+  n.col = K.len*R.len
 
-  x = 1:((K.max - 1) * R.vec)
+  ## axes
+  x = 0:((K.max - 1) * R.max)
   y = x
+  
+  ## fill square array
   z = array(NA, c(max(x), max(x)))
   diag(z) = 1
   var.z = rand_pairs$adjRand
-  for(i in 1:nrow(rand_pairs)){
-    z.i = (rand_pairs$i.K[i] - 2) * R.vec + rand_pairs$i.R[i]
-    z.j = (rand_pairs$j.K[i] - 2) * R.vec + rand_pairs$j.R[i]
+  for(i in 1:nrow(rand_pairs)){ # allows non-sequential K values
+    Kbase = function(val) (which(K.vec == val) - 1)*R.max
+    z.i = Kbase(rand_pairs$i.K[i]) + rand_pairs$i.R[i]
+    z.j = Kbase(rand_pairs$j.K[i]) + rand_pairs$j.R[i]
     z[z.i, z.j] = z[z.j, z.i] = var.z[i]
   }
   lim = range(x)
@@ -78,30 +82,34 @@ rand_plot = function(rand_pairs) {
 
   ## Reorder within K for vis effect
   for(i in 1:K.len) { 
-    id.z = order(z[(i - 1) * R.max + (1:R.max), (i - 1) * R.max + 1], decreasing = TRUE)
-    tmp.z = z[(i - 1) * R.max + (1:R.max), ]
-    z[(i - 1) * R.max + (1:R.max), ] = tmp.z[id.z,]
-    tmp.z = z[, (i - 1) * R.max + (1:R.max)]
-    z[, (i - 1) * R.max + (1:R.max)] = tmp.z[, id.z]
+    iv = (i - 1) * R.max + (1:R.max)
+    for(j in R.len:1) { # using later rows for breaking ties in earlier rows
+      ic = (i - 1) * R.max + j
+      id.z = order(z[iv, ic], decreasing = TRUE)
+      tmp.z = z[iv, ]
+      z[iv, ] = tmp.z[id.z,]
+      tmp.z = z[, iv]
+      z[, iv] = tmp.z[, id.z]
+    }
   }
 
   bg = "transparent"
   fg = "black"
 
-  pdf("all_sort1.pdf", width = 6, height = 6, bg = bg)
+  pdf("adjRand_mat.pdf", width = 6, height = 6, bg = bg)
     par(bg = bg, fg = fg, col = fg, col.axis = fg,
         col.lab = fg, col.main = fg, col.sub = fg)
     image(x, y, z, zlim, lim, rev(lim), col = var.col, axes = FALSE,
           xlab = "Number of Clusters", ylab = "Number of Clusters",
           main = "Adjusted Rand Index")
-    abline(h = (1:(K.max - 1)) * R.vec + 0.5, lty = 1, col = "black")
-    abline(v = (1:(K.max - 1)) * R.vec + 0.5, lty = 1, col = "black")
-    axis(1, at = ((0:(K.max - 2)) + 0.5) * R.vec, label = 2:K.max)
-    axis(2, at = ((0:(K.max - 2)) + 0.5) * R.vec, label = 2:K.max)
+    abline(h = (1:K.len) * R.max, lty = 1, col = "black")
+    abline(v = (1:K.len) * R.max, lty = 1, col = "black")
+    axis(1, at = ((0:(K.len - 1)) + 0.5) * R.max, label = K.vec)
+    axis(2, at = ((0:(K.len - 1)) + 0.5) * R.max, label = K.vec)
     box()
   dev.off()
 
-  pdf("all_sort2.pdf", width = 0.8, height = 5, bg = bg)
+  pdf("adjRand_leg.pdf", width = 0.8, height = 5, bg = bg)
     par(bg = bg, fg = fg, col = fg, col.axis = fg,
         col.lab = fg, col.main = fg, col.sub = fg, mar = c(5, 1, 4, 2))
     z.label = seq(zlim[1], zlim[2], length = n.col)
