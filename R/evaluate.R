@@ -95,10 +95,13 @@ rand_plot = function(rand_pairs) {
 
   bg = "transparent"
   fg = "black"
-
-  pdf("adjRand_mat.pdf", width = 6, height = 6, bg = bg)
+  wd = 6.5
+  ht = 6
+  pdf("adjRand_mat.pdf", width = wd, height = ht, bg = bg)
     par(bg = bg, fg = fg, col = fg, col.axis = fg,
-        col.lab = fg, col.main = fg, col.sub = fg)
+        col.lab = fg, col.main = fg, col.sub = fg,
+        fig = c(0, ht/wd, 0, 1),
+        mar = par()$mar + c(0, 1, 0, -0.5))
     image(x, y, z, zlim, lim, rev(lim), col = var.col, axes = FALSE,
           xlab = "Number of Clusters", ylab = "Number of Clusters",
           main = "Adjusted Rand Index")
@@ -107,15 +110,15 @@ rand_plot = function(rand_pairs) {
     axis(1, at = ((0:(K.len - 1)) + 0.5) * R.max, label = K.vec)
     axis(2, at = ((0:(K.len - 1)) + 0.5) * R.max, label = K.vec)
     box()
-  dev.off()
 
-  pdf("adjRand_leg.pdf", width = 0.8, height = 5, bg = bg)
     par(bg = bg, fg = fg, col = fg, col.axis = fg,
-        col.lab = fg, col.main = fg, col.sub = fg, mar = c(5, 1, 4, 2))
+        col.lab = fg, col.main = fg, col.sub = fg, mar = c(5, 0, 4, 2),
+        fig = c(ht/wd, 1, 0, .9), new = TRUE)
     z.label = seq(zlim[1], zlim[2], length = n.col)
     image(1, z.label, matrix(z.label, nrow = 1), zlim, c(1, 1), zlim,
           col = var.col, axes = FALSE, xlab = "", ylab = "")
     axis(4)
     box()
   dev.off()
+  layout(1)
 }
