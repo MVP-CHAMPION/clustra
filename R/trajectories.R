@@ -181,25 +181,35 @@ trajectories = function(dat, ng, group, iter = 15, maxdf = 50, plot = FALSE,
   list(deviance = deviance, group = group, dat_group = dat$group, tps = tps)
 }
 
-sessionInfo()
+library(jsonlite)
+PL = list(
+  gen_par = list(n_id = 20000, m_obs = 25, e_range = c(365*3, 365*10), plots = FALSE),
+  cores = list(e_mc = 4, m_mc = 4, bam_nthreads = 1, blas = 1),
+  traj_par = list(maxdf = 50, iter = 20, starts = 8, idperstart = 20,
+                  ng_vec = c(2, 3, 4, 5), replicates = 10)
+)
+write_json(PL, "trajectories.par", pretty = TRUE)
+PL = read_json("trajectories.par", simplifyVector = TRUE)
+
 source("R/generate.R")
 source("R/scaling.R")
 source("R/evaluate.R")
 set.seed(90)
 
-dat = gen_long_data(n_id = 20000, m_obs = 25, e_range = c(365*3, 365*10),
-                    plots = FALSE)
+dat = gen_long_data(n_id = PL$gen_par$n_id, m_obs = PL$gen_par$m_obs,
+                    e_range = PL$gen_par$e_range, plots = PL$gen_par$plots)
 a = a_fit = deltime(a, paste0("\nData (", paste(dim(dat), collapse = ","), ") generated"))
 
-ngv = c(2, 3, 4, 5)
-maxdf = 50
-starts = 8
-iter = 20
-start_nid = 20*length(ngv)
-replicates = 10
-results = vector("list", replicates*length(ngv))
-for(j in 1:length(ngv)) {
-  ng = ngv[j]
+cores = PL$cores
+ng_vec = PL$traj_par$ng_vec
+maxdf = PL$traj_par$maxdf
+starts = PL$traj_par$starts
+iter = PL$traj_par$iter
+start_nid = PL$traj_par$idperstart*length(ng_vec)
+replicates = PL$traj_par$replicates
+results = vector("list", replicates*length(ng_vec))
+for(j in 1:length(ng_vec)) {
+  ng = ng_vec[j]
   for(i in 1:replicates) {
     a = a_i = deltime(a)
   
@@ -224,7 +234,7 @@ for(j in 1:length(ngv)) {
 }
 
 ## save object results and parameters
-save(results, ngv, maxdf, starts, iter, start_nid, replicates, file = "results.Rdata")
+save(results, ng_vec, maxdf, starts, iter, start_nid, replicates, file = "results.Rdata")
 a = deltime(a, "\nSaved results")
 
 a = deltime(a_fit, "\nTotal Fit time")
