@@ -200,6 +200,7 @@ if(file.exists(parname)) {
 source("R/generate.R")
 source("R/scaling.R")
 source("R/evaluate.R")
+source("R/trajectories.R")
 set.seed(PL$gen_par$seed)
 
 dat = gen_long_data(n_id = PL$gen_par$n_id, m_obs = PL$gen_par$m_obs,
