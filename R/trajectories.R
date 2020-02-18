@@ -19,6 +19,9 @@ a0 = a = deltime()
 ## different smoothing parameters, so subset is used and a separate prediction
 ## function.
 ## TODO Add write generated data to a csv file
+## TODO Add Ward's hierarchical clustering of the cluster means (evaluated on a
+##      grid) for a converged high-K trajectories result.
+##      Profile plots can help determine K.
 ## TODO Add uncertainty moderated outlier detection. Do we need to use credible
 ##      regions or is se.fit enough??
 tps_g = function(g, dat, maxdf, nthreads) {
