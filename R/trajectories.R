@@ -18,14 +18,9 @@ a0 = a = deltime()
 ## package. Crossvalidation does not know about zero weights, resulting in 
 ## different smoothing parameters, so subset is used and a separate prediction
 ## function.
-## TODO Add best of multiple random starts based on minimum deviance.
+## TODO Add write generated data to a csv file
 ## TODO Add uncertainty moderated outlier detection. Do we need to use credible
 ##      regions or is se.fit enough??
-## TODO Explore relationship with bam (a "large" version of gam). Initial tries
-##      took loner to compute.
-## TODO Add Rand index determination of k, explore AIC and BIC. Lots of parallel
-## opportunities.
-## TODO Configure with gam-bam choice for benchmarking #####################
 tps_g = function(g, dat, maxdf, nthreads) {
   tps = mgcv::bam(response ~ s(time, k = maxdf), data = dat, 
                   subset = dat$group == g, discrete = TRUE, nthreads = nthreads)
