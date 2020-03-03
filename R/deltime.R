@@ -1,4 +1,4 @@
-#' deltime
+#' Timing function
 #'
 #' @param ltime
 #' Result of last call to deltime. 

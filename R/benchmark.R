@@ -1,4 +1,8 @@
-
+#' @param FUN Function to benchmark.
+#' @param max2 Largest power of 2 in cores (e.g. max2 = 3 implies 1, 2, 4, and 8
+#'  cores will be tested. Core control is via openblasctl package)
+#' @param reps Number of replicates for each core setting
+#' @export
 bench_cores = function(FUN, ..., max2 = 5, reps = 4) {
   require(openblasctl)
   require(dplyr)
