@@ -1,9 +1,12 @@
 source("../R/generate.R")
 source("../R/scaling.R")
 source("../R/evaluate.R")
+source("../R/deltime.R")
 source("../R/trajectories.R")
-library(clustra)
+
+#library(clustra)
 set.seed(PL$gen_par$seed)
+a0 = a = deltime()
 
 dat = gen_long_data(n_id = PL$gen_par$n_id, m_obs = PL$gen_par$m_obs,
                     e_range = PL$gen_par$e_range, plots = PL$gen_par$plots)

@@ -11,7 +11,7 @@ library(mgcv)
 #library(proftools)
 library(openblasctl)
 
-source("R/deltime.R")
+source("../R/deltime.R")
 a0 = a = deltime()
 
 ## Function to fit thin plate spline (tps) to a group with gam from the mgcv

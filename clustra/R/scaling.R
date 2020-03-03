@@ -1,7 +1,7 @@
 ##
 ## Edits a Slurm submission script to exercise a number of scaling options
 ## 
-
+library(jsonlite)
 script = readLines("trajectories.slurm")
 parname = "trajectories.par" 
 if(file.exists(parname)) {
