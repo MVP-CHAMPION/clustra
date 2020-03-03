@@ -5,7 +5,7 @@
 ## 
 ## 
 # library(data.table) # possibly for reading data
-library(gratia) # from GitHub: "gavinsimpson/gratia"
+library(gratia)
 library(parallel)
 library(mgcv)
 #library(proftools)
@@ -112,6 +112,10 @@ start_groups = function(data, ng, starts, start_nid, cores, maxdf) {
 #' displayed for minimal output during start values exploration.
 #' @param maxdf Maximum degrees of freedom for trajectory spline smooths.
 #' @param plot Plot clustered data with superimposed trajectory spline smooths.
+#' @param cores A list specifying multicore parallelism with 
+#' components e_mc (expectation across ng), m_mc (maximization across ng), 
+#' bam_nthreads (see bam documentation), blas (OpenBlas). Care should be taken
+#' that cores are not oversubscribed.
 #' @export
 trajectories = function(dat, ng, group, iter = 15, maxdf = 50, plot = FALSE,
                         cores = list(e_mc = 1, m_mc = 1, bam_nthreads = 1, blas = 1)) {
@@ -177,20 +181,3 @@ trajectories = function(dat, ng, group, iter = 15, maxdf = 50, plot = FALSE,
   list(deviance = deviance, group = group, dat_group = dat$group, tps = tps)
 }
 
-library(jsonlite)
-##
-## Read or create JASON parameter list
-## 
-parname = "trajectories.par" 
-if(file.exists(parname)) {
-  PL = read_json(parname, simplifyVector = TRUE)
-} else {
-  PL = list( # Default parameters
-    gen_par = list(seed = 90, n_id = 20000, m_obs = 25,
-                   e_range = c(365*3, 365*10), plots = FALSE),
-    cores = list(e_mc = 4, m_mc = 4, bam_nthreads = 1, blas = 1),
-    traj_par = list(seed = 79, maxdf = 50, iter = 20, starts = 8, idperstart = 20,
-                    ng_vec = c(2, 3, 4, 5), replicates = 10)
-  )
-  write_json(PL, parname, pretty = TRUE)
-}
