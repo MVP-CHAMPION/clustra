@@ -1,6 +1,6 @@
-## Various functions to evaluate results of clustering, like RandIndex
-## computation and plots of spline fits.
-##
+#' Various functions to evaluate results of clustering, like RandIndex
+#' computation and plots of spline fits.
+#'
 #' Plots spline fit (modify to use acutal bam results), possibly with data
 #' 
 #' @section Details:

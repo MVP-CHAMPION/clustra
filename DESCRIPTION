@@ -13,3 +13,4 @@ Description: Performs k-means clustering, where each mean is a thin plate spline
 LazyLoad: yes
 License: Mozilla Public License 2.0
 NeedsCompilation: no
+RoxygenNote: 6.1.1
