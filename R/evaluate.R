@@ -5,10 +5,11 @@
 #' 
 #' @section Details:
 #'
-#' @param dat  
-plot_tps = function(dat, data = TRUE) {
+#' @param dat Data frame with variables *time*, *response*, *color*, *group*
+#' @param points If true, plot all the data points.
+plot_tps = function(dat, points = TRUE) {
   p = ggplot(dat, aes(time, response, color = group, group = group)) +
-  if(data) p = p + geom_point(alpha = 0.1)
+  if(points) p = p + geom_point(alpha = 0.1)
   p = p + stat_smooth(method = "gam", formula = y ~ s(x, k = maxdf), size = 1)
   p = p + theme_bw()
   print(p)
@@ -19,6 +20,7 @@ plot_tps = function(dat, data = TRUE) {
 #' @value A data frame with RandIndex for all pairs from trajectories results.
 #' Note all pairs means lower triangle plus diagonal of an all-pairs symmetric
 #' matrix.
+#' @param results Output from trajectories loop
 allpair_RandIndex = function(results) {
   library(MixSim)
   nr = length(results)

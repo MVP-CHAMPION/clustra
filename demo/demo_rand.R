@@ -1,10 +1,4 @@
-source("../R/generate.R")
-source("../R/scaling.R")
-source("../R/evaluate.R")
-source("../R/deltime.R")
-source("../R/trajectories.R")
-
-#library(clustra)
+library(clustra)
 
 library(jsonlite)
 ##
@@ -31,6 +25,8 @@ dat = gen_long_data(n_id = PL$gen_par$n_id, m_obs = PL$gen_par$m_obs,
                     e_range = PL$gen_par$e_range, plots = PL$gen_par$plots)
 a = a_fit = deltime(a, paste0("\nData (", paste(dim(dat), collapse = ","), ") generated"))
 
+## TODO make this a function rand_clustra and make one iteration clustra. Export
+##      both.  Then the clustra::: call can be removed!
 set.seed(PL$traj_par$seed)
 cores = PL$cores
 ng_vec = PL$traj_par$ng_vec
@@ -73,6 +69,6 @@ a = deltime(a_fit, "\nTotal Fit time")
 a = deltime(a0, "\nTotal time")
 
 ## plot Rand Index evaluation
-RandIndex_pairs = allpair_RandIndex(results)
-rand_plot(RandIndex_pairs)
+RandIndex_pairs = clustra:::allpair_RandIndex(results)
+clustra:::rand_plot(RandIndex_pairs)
 a = deltime(a, "\nRandIndex time")
