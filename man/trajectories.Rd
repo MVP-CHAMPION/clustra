@@ -5,14 +5,11 @@
 \title{Cluster longitudinal trajectories of a response variable. Trajectory means
 are splines fit to all ids in a cluster.}
 \usage{
-trajectories(dat, ng, group, iter = 15, maxdf = 50, plot = FALSE,
-  cores = list(e_mc = 1, m_mc = 1, bam_nthreads = 1, blas = 1))
+trajectories(data, ng, group, iter = 15, maxdf = 50, plot = FALSE,
+  cores = list(e_mc = 1, m_mc = 1, bam_nthreads = 1, blas = 1),
+  verbose = FALSE)
 }
 \arguments{
-\item{dat}{Data frame with response measurements, one per observation. Column
-names are id, time, response, group. Note that id are already sequential
-starting from 1. This affects expanding group numbers to ids.}
-
 \item{ng}{Number of clusters (groups)}
 
 \item{group}{Group numbers corresponding to sequential ids.}
@@ -24,10 +21,14 @@ displayed for minimal output during start values exploration.}
 
 \item{plot}{Plot clustered data with superimposed trajectory spline smooths.}
 
-\item{cores}{A list specifying multicore parallelism with 
-components e_mc (expectation across ng), m_mc (maximization across ng), 
+\item{cores}{A list specifying multicore parallelism with
+components e_mc (expectation across ng), m_mc (maximization across ng),
 bam_nthreads (see bam documentation), blas (OpenBlas). Care should be taken
 that cores are not oversubscribed.}
+
+\item{datax}{Data frame with response measurements, one per observation. Column
+names are id, time, response, group. Note that id are already sequential
+starting from 1. This affects expanding group numbers to ids.}
 }
 \description{
 Cluster longitudinal trajectories of a response variable. Trajectory means

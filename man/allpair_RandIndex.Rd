@@ -9,6 +9,11 @@ allpair_RandIndex(results)
 \arguments{
 \item{results}{List with results from trajectories() function}
 }
+\value{
+A data frame with RandIndex for all pairs from trajectories results.
+Note all pairs means lower triangle plus diagonal of an all-pairs symmetric
+matrix.
+}
 \description{
 Use RandIndex to evaluate number of clusters
 }

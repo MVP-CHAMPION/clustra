@@ -5,10 +5,12 @@
 \title{Various functions to evaluate results of clustering, like RandIndex
 computation and plots of spline fits.}
 \usage{
-plot_tps(dat, data = TRUE)
+plot_tps(dat, points = TRUE)
 }
 \arguments{
-\item{dat}{}
+\item{dat}{Data frame with variables *time*, *response*, *color*, *group*}
+
+\item{points}{If true, plot all the data points.}
 }
 \description{
 Plots spline fit (modify to use acutal bam results), possibly with data

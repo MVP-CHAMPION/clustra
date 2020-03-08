@@ -17,10 +17,9 @@ plot_tps = function(dat, points = TRUE) {
 
 #' Use RandIndex to evaluate number of clusters
 #' @param results List with results from trajectories() function
-#' @value A data frame with RandIndex for all pairs from trajectories results.
+#' @return A data frame with RandIndex for all pairs from trajectories results.
 #' Note all pairs means lower triangle plus diagonal of an all-pairs symmetric
 #' matrix.
-#' @param results Output from trajectories loop
 allpair_RandIndex = function(results) {
   library(MixSim)
   nr = length(results)
@@ -31,9 +30,9 @@ allpair_RandIndex = function(results) {
       irm = irm + 1
       irow = results[[i]]
       jrow = results[[j]]
-      i.K = as.integer(irow$ng)
+      i.K = as.integer(irow$k)
       i.R = as.integer(irow$rep)
-      j.K = as.integer(jrow$ng)
+      j.K = as.integer(jrow$k)
       j.R = as.integer(jrow$rep)
       ri = RandIndex(irow$group, jrow$group)
       Rand = ri$R
@@ -47,12 +46,12 @@ allpair_RandIndex = function(results) {
   do.call(rbind, rand_pairs)
 }
 
-## Rand index matrix plot from Technometrics paper
-## Sorts replicates within cluster K
-## Assumes K starts from 2
-## Author: Wei-Chen Chen
+#' Rand index matrix plot from Technometrics paper
+#' Sorts replicates within cluster K
+#' Assumes K starts from 2
+#' Author: Wei-Chen Chen
 ## 
-#' @param rand_pairs A data frame with columns 
+#' @param rand_pairs A data frame with columns of cluster assignments
 rand_plot = function(rand_pairs) {
   library(RColorBrewer)
 

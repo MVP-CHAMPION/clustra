@@ -1,3 +1,5 @@
+#' Function to benchmark various core combinations for components of clustra
+#'
 #' @param FUN Function to benchmark.
 #' @param max2 Largest power of 2 in cores (e.g. max2 = 3 implies 1, 2, 4, and 8
 #'  cores will be tested. Core control is via openblasctl package)
