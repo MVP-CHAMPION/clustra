@@ -144,6 +144,7 @@ rand_clustra = function(data, PL, save = FALSE, verbose = FALSE) {
   iter = PL$traj_par$iter
   replicates = PL$traj_par$replicates
   
+  a_rand = deltime()
   results = vector("list", replicates*length(k_vec))
   for(j in 1:length(k_vec)) {
     k = k_vec[j]
@@ -164,16 +165,12 @@ rand_clustra = function(data, PL, save = FALSE, verbose = FALSE) {
   }
   
   ## save object results and parameters
-  save(results, k_vec, maxdf, starts, iter, snid, replicates, file = "results.Rdata")
-  a = deltime(a, "\nSaved results")
-  
-  a = deltime(a_fit, "\nTotal Fit time")
-  a = deltime(a0, "\nTotal time")
+  if(save) save(results, k_vec, maxdf, starts, iter, replicates,
+                file = "results.Rdata")
   
   ## plot Rand Index evaluation
   RandIndex_pairs = allpair_RandIndex(results)
   rand_plot(RandIndex_pairs)
-  a = deltime(a, "\nRandIndex time")
-  
+  if(verbose) a = deltime(a_rand, "\nTotal rand_cluster time")
 }
 
