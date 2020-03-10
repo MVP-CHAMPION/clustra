@@ -4,9 +4,9 @@
 \alias{clustra}
 \title{Cluster trajectories}
 \usage{
-clustra(data, k, starts = list(ns = 5, nid = 20), cores = list(e_mc =
-  1, m_mc = 1, bam_nthreads = 1, blas = 1), maxdf = 50,
-  verbose = FALSE)
+clustra(data, k, group = NULL, starts = list(ns = 5, nid = 20),
+  iter = 10, maxdf = 50, verbose = FALSE, cores = list(e_mc = 1,
+  m_mc = 1, bam_nthreads = 1, blas = 1))
 }
 \arguments{
 \item{data}{Data frame with response measurements, one per observation.
@@ -14,14 +14,19 @@ Column names are id, time, response, group.}
 
 \item{k}{Number of clusters (groups)}
 
+\item{group}{A vector of initial cluster assignments for unique id's in data.
+Normally, this is NULL and a best in a number of random starts is used. Note
+that the number of id's is not the highest id number if id's are not
+sequential starting from 1.}
+
 \item{starts}{A list with two components: ns is the number of sampled starts
 to evaluate as starting cluster assignments, nid is the number of
 trajectories to sample for the starts.}
 
+\item{maxdf}{Maximum spline order to use in tps fits.}
+
 \item{cores}{A list control structure to manage cores used for parallel 
 processing of various parts.}
-
-\item{maxdf}{Maximum spline order to use in tps fits.}
 }
 \description{
 Cluster trajectories

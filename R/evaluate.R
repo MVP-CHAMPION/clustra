@@ -136,12 +136,8 @@ rand_plot = function(rand_pairs) {
 #' printed.
 #' @export
 rand_clustra = function(data, PL, save = FALSE, verbose = FALSE) {
-  cores = PL$cores
   set.seed(PL$traj_par$seed)
   k_vec = PL$traj_par$k_vec
-  maxdf = PL$traj_par$maxdf
-  starts = PL$traj_par$starts
-  iter = PL$traj_par$iter
   replicates = PL$traj_par$replicates
   
   a_rand = deltime()
@@ -151,7 +147,8 @@ rand_clustra = function(data, PL, save = FALSE, verbose = FALSE) {
     for(i in 1:replicates) {
       a_0 = deltime()
       
-      f = clustra(data, k, starts, iter, cores)
+      f = clustra(data, k, starts = PL$traj_par$starts, iter = PL$traj_par$iter,
+                  maxdf = PL$traj_par$maxdf, cores = PL$cores)
       results[[(j - 1)*replicates + i]] = list(k = as.integer(k), 
                                                rep = as.integer(i),
                                                deviance = f$deviance,

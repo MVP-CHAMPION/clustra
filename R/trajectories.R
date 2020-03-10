@@ -192,6 +192,10 @@ trajectories = function(data, k, group, iter = 15, maxdf = 50, plot = FALSE,
 #' @param data Data frame with response measurements, one per observation.
 #' Column names are id, time, response, group.
 #' @param k Number of clusters (groups)
+#' @param group A vector of initial cluster assignments for unique id's in data.
+#' Normally, this is NULL and a best in a number of random starts is used. Note
+#' that the number of id's is not the highest id number if id's are not
+#' sequential starting from 1. 
 #' @param starts A list with two components: ns is the number of sampled starts
 #' to evaluate as starting cluster assignments, nid is the number of
 #' trajectories to sample for the starts.
@@ -199,17 +203,18 @@ trajectories = function(data, k, group, iter = 15, maxdf = 50, plot = FALSE,
 #' processing of various parts.
 #' @param maxdf Maximum spline order to use in tps fits.
 #' @export
-clustra = function(data, k, starts = list(ns = 5, nid = 20), iter = 10,
-                   cores = list(e_mc = 1, m_mc = 1, bam_nthreads = 1, blas = 1),
-                   maxdf = 50, verbose = FALSE) {
-    ## get initial group assignment
+clustra = function(data, k, group = NULL, starts = list(ns = 5, nid = 20),
+                   iter = 10, maxdf = 50, verbose = FALSE,
+                   cores = list(e_mc = 1, m_mc = 1, bam_nthreads = 1, blas = 1)) {
+  ## get initial group assignment
+  if(is.null(group))
     group = start_groups(data, k, nstart = starts$ns, nid = starts$nid,
                          cores = cores, maxdf = maxdf)
 
-    data$id = as.numeric(factor(data$id)) # since id are not sequential
-    data$group = group[data$id] # expand to all responses
+  data$id = as.numeric(factor(data$id)) # since id are not sequential
+  data$group = group[data$id] # expand to all responses
 
-    ## now data includes initial group assignment
-    trajectories(data, k, group, iter, maxdf, plot = FALSE, cores)
+  ## now data includes initial group assignment
+  trajectories(data, k, group, iter, maxdf, plot = FALSE, cores)
 }
 
