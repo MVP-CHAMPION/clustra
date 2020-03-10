@@ -1,7 +1,11 @@
+## Example of running clustra on a single generated data set
+## 
+
+## create a directory to store a json control structure 
 playdir = "~/clustra_play"
 if(!dir.exists(playdir)) dir.create(playdir)
 setwd(playdir)
-  
+
 library(clustra)
 library(jsonlite)
 parname = "trajectories.par" 
@@ -18,6 +22,11 @@ if(file.exists(parname)) {
   )
   write_json(PL, parname, pretty = TRUE)
 }
+
+## develop two examples: clustra and rand_clustra
+## 
+## the double loop below should be transferred to rand_clustra in trajectories
+## !!!!!!!!!!!!!!!!!!!!!!!!!
 
 set.seed(PL$gen_par$seed)
 a0 = a = deltime()

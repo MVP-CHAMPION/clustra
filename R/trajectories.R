@@ -45,40 +45,40 @@ mpd_g = function(g, pred, data) {
 #' @param data Data frame with response measurements, one per observation.
 #' Column names are id, time, response, group. Note that id are already
 #' sequential starting from 1. This affects expanding group numbers to ids.
-#' @param ng Number of clusters (groups).
+#' @param k Number of clusters (groups).
 #' "bestrand" is implemented.
 #' @param starts The number of random start values to consider.
 #' @param snid The number of id's per cluster to sample in evaluating starts.
 #' @param maxdf Maximum degrees of freedom for trajectory spline smooths.
 #' @export
-start_groups = function(data, ng, nstart, nid, cores, maxdf, verbose = FALSE) {
+start_groups = function(data, k, nstart, nid, cores, maxdf, verbose = FALSE) {
   if(verbose) cat("\nStarts : ")
   ## test data for diversity criterion
-  test_data = data.frame(id = rep(0, ng*2*maxdf),
+  test_data = data.frame(id = rep(0, k*2*maxdf),
                 time = rep(seq(min(data$time), max(data$time),
-                               length.out = 2*maxdf), times = ng),
-                response = rep(NA, ng*2*maxdf),
-                group = rep(1:ng, each = 2*maxdf))
+                               length.out = 2*maxdf), times = k),
+                response = rep(NA, k*2*maxdf),
+                group = rep(1:k, each = 2*maxdf))
 
-  ## Samples ng*nid id's. Picks tps fit with best deviance after one iteration among
+  ## Samples k*nid id's. Picks tps fit with best deviance after one iteration among
   ##   random starts. Choosing from samples increases diversity of
   ##   fits (sum of distances between group fits).
   ## Then classifies all ids based on fit from best sample
   max_div = 0
-  start_id = sort(sample(unique(data$id), ng*nid)) # for speed and diversity!
+  start_id = sort(sample(unique(data$id), k*nid)) # for speed and diversity!
   data_start = data[data$id %in% start_id, ]
   data_start$id = as.numeric(factor(data_start$id)) # since id are not sequential (Am I losing correspondence to ids? No, because spline modesl do not know about ids. The classification process only needs who has same id, not what is the id.)
   for(i in 1:nstart) {
-    group = sample(ng, ng*nid, replace = TRUE) # random groups
+    group = sample(k, k*nid, replace = TRUE) # random groups
     data_start$group = group[data_start$id] # expand group to all responses
 
-    f = trajectories(data_start, ng, group, iter = 1, maxdf = maxdf,
+    f = trajectories(data_start, k, group, iter = 1, maxdf = maxdf,
                      plot = FALSE, cores = cores)
     if(any(lapply(f$tps, class) == "try-error")) next
-#    deviance = sum(unlist(lapply(1:ng, function(g) deviance(f$tps[[g]]))))
+#    deviance = sum(unlist(lapply(1:k, function(g) deviance(f$tps[[g]]))))
 
     diversity = sum(dist(
-        do.call(rbind, lapply(mclapply(1:ng, pred_g, tps = f$tps,
+        do.call(rbind, lapply(mclapply(1:k, pred_g, tps = f$tps,
                                        data = test_data, mc.cores = cores$e_mc),
                               function(x) as.numeric(x$fit)))
     ))
@@ -90,10 +90,10 @@ start_groups = function(data, ng, nstart, nid, cores, maxdf, verbose = FALSE) {
   }
   if(verbose) cat("->", max_div, "")
   ## predict for all observations of all ids
-  pred = mclapply(1:ng, pred_g, tps = best_tps_cov, data = data,
+  pred = mclapply(1:k, pred_g, tps = best_tps_cov, data = data,
                   mc.cores = cores$e_mc)
   ## compute mse for each id
-  loss = mclapply(1:ng, mse_g, pred = pred, data = data,
+  loss = mclapply(1:k, mse_g, pred = pred, data = data,
                   mc.cores = cores$e_mc) # !!! loss is not data dimensioned!!!!
   ## classify id to group with min mse
   group = apply(do.call(cbind, loss), 1, which.min)
@@ -106,18 +106,18 @@ start_groups = function(data, ng, nstart, nid, cores, maxdf, verbose = FALSE) {
 #' @param datax Data frame with response measurements, one per observation. Column
 #' names are id, time, response, group. Note that id are already sequential
 #' starting from 1. This affects expanding group numbers to ids.
-#' @param ng Number of clusters (groups)
+#' @param k Number of clusters (groups)
 #' @param group Group numbers corresponding to sequential ids.
 #' @param iter Maximum number of iterations. Note if iter <= 2, only deviance is
 #' displayed for minimal output during start values exploration.
 #' @param maxdf Maximum degrees of freedom for trajectory spline smooths.
 #' @param plot Plot clustered data with superimposed trajectory spline smooths.
 #' @param cores A list specifying multicore parallelism with
-#' components e_mc (expectation across ng), m_mc (maximization across ng),
+#' components e_mc (expectation across k), m_mc (maximization across k),
 #' bam_nthreads (see bam documentation), blas (OpenBlas). Care should be taken
 #' that cores are not oversubscribed.
 #' @export
-trajectories = function(data, ng, group, iter = 15, maxdf = 50, plot = FALSE,
+trajectories = function(data, k, group, iter = 15, maxdf = 50, plot = FALSE,
                         cores = list(e_mc = 1, m_mc = 1, bam_nthreads = 1, blas = 1),
                         verbose = FALSE) {
   if(verbose) a = a_0 = deltime(a)
@@ -131,7 +131,7 @@ trajectories = function(data, ng, group, iter = 15, maxdf = 50, plot = FALSE,
   if(plot) require(ggplot2)
   n_id = length(unique(data$id))
 
-  ## EM algorithm to cluster ids into ng groups
+  ## EM algorithm to cluster ids into k groups
   ## iterate fitting a thin plate spline center to each group (M-step)
   ##         regroup each id to nearest tps center (E-step)
   try_errors = 0
@@ -140,7 +140,7 @@ trajectories = function(data, ng, group, iter = 15, maxdf = 50, plot = FALSE,
     ##
     ## M-step:
     ##   Estimate tps model parameters for each cluster from id's in that cluster
-    tps = mclapply(1:ng, tps_g, data = data, maxdf = maxdf,
+    tps = mclapply(1:k, tps_g, data = data, maxdf = maxdf,
                    mc.cores = cores$m_mc, nthreads = cores$bam_nthreads)
     if(verbose) a = deltime(a, "M-step")
 
@@ -148,26 +148,26 @@ trajectories = function(data, ng, group, iter = 15, maxdf = 50, plot = FALSE,
       try_errors = try_errors + 1
       if(verbose) {
         cat("\n")
-        for(g in 1:ng) if(class(tps[[g]])[1] == "try-error")
+        for(g in 1:k) if(class(tps[[g]])[1] == "try-error")
           print(paste0("Group ", g, " :", attr(tps[[g]], "condition")$message))
         cat("Random reshuffle for next iteration.\n")
       }
-      new_group = sample(ng, n_id, replace = TRUE)
+      new_group = sample(k, n_id, replace = TRUE)
       changes = sum(new_group != group)
       counts = tabulate(new_group)
     } else {
       ##
       ## E-step:
       ##   predict each id trajectory from each tps model
-      pred = mclapply(1:ng, pred_g, tps = tps, data = data, mc.cores = cores$e_mc)
+      pred = mclapply(1:k, pred_g, tps = tps, data = data, mc.cores = cores$e_mc)
       ##   compute loss of each id to each to spline
-      loss = mclapply(1:ng, mse_g, pred = pred, data = data, mc.cores = cores$e_mc)
+      loss = mclapply(1:k, mse_g, pred = pred, data = data, mc.cores = cores$e_mc)
       ## classify each id to mse-nearest tps model
       new_group = apply(do.call(cbind, loss), 1, which.min)
       if(verbose) a = deltime(a, " E-step")
       changes = sum(new_group != group)
       counts = tabulate(new_group)
-      deviance = sum(unlist(lapply(1:ng, function(g) deviance(tps[[g]]))))
+      deviance = sum(unlist(lapply(1:k, function(g) deviance(tps[[g]]))))
       if(verbose)
          cat(" Changes:", changes, "Counts:", counts, "Deviance:", deviance)
     }
@@ -217,20 +217,20 @@ clustra = function(data, k, starts = list(ns = 5, nid = 20),
 rand_clustra = function() {
     set.seed(PL$traj_par$seed)
     cores = PL$cores
-    ng_vec = PL$traj_par$ng_vec
+    k_vec = PL$traj_par$k_vec
     maxdf = PL$traj_par$maxdf
     nstart = PL$traj_par$starts
     iter = PL$traj_par$iter
     nid = PL$traj_par$idperstart
     replicates = PL$traj_par$replicates
-    results = vector("list", replicates*length(ng_vec))
-    for(j in 1:length(ng_vec)) {
-        ng = ng_vec[j]
+    results = vector("list", replicates*length(k_vec))
+    for(j in 1:length(k_vec)) {
+        k = k_vec[j]
         for(i in 1:replicates) {
             a = a_i = deltime(a)
 
             ## get initial group assignment
-            group = start_groups(data, ng, nstart = nstart, nid = nid,
+            group = start_groups(data, k, nstart = nstart, nid = nid,
                                  cores = cores, maxdf = maxdf)
 
             data$id = as.numeric(factor(data$id)) # since id are not sequential
@@ -238,9 +238,9 @@ rand_clustra = function() {
             a = deltime(a, " Starts time")
 
             ## now data includes initial group assignment
-            f = trajectories(data = data, ng, group, iter = iter, maxdf = maxdf, plot = FALSE,
+            f = trajectories(data = data, k, group, iter = iter, maxdf = maxdf, plot = FALSE,
                              cores = cores)
-            results[[(j - 1)*replicates + i]] = list(ng = as.integer(ng),
+            results[[(j - 1)*replicates + i]] = list(k = as.integer(k),
                                                      rep = as.integer(i),
                                                      deviance = f$deviance,
                                                      group = f$group)
@@ -248,9 +248,25 @@ rand_clustra = function() {
             a = deltime(a_i, " Replicate time")
         }
     }
-
+    for(j in 1:length(k_vec)) {
+      k = k_vec[j]
+      for(i in 1:replicates) {
+        a_0 = deltime()
+        
+        f = clustra(data, k, starts, cores)
+        results[[(j - 1)*replicates + i]] = list(k = as.integer(k), 
+                                                 rep = as.integer(i),
+                                                 deviance = f$deviance,
+                                                 group = f$group)
+        data$group = as.factor(f$group[data$id])
+        a = deltime()
+        cat(k, i, "it =", f$iterations, "dev =", f$deviance, "err =", f$try_errors,
+            "ch =", f$changes, "time =", a - a_0, "\n")
+      }
+    }
+    
     ## save object results and parameters
-    save(results, ng_vec, maxdf, starts, iter, snid, replicates, file = "results.Rdata")
+    save(results, k_vec, maxdf, starts, iter, snid, replicates, file = "results.Rdata")
     a = deltime(a, "\nSaved results")
 
     a = deltime(a_fit, "\nTotal Fit time")

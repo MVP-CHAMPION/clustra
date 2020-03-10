@@ -4,14 +4,14 @@
 \alias{start_groups}
 \title{Function to assign starting groups.}
 \usage{
-start_groups(data, ng, nstart, nid, cores, maxdf, verbose = FALSE)
+start_groups(data, k, nstart, nid, cores, maxdf, verbose = FALSE)
 }
 \arguments{
 \item{data}{Data frame with response measurements, one per observation.
 Column names are id, time, response, group. Note that id are already
 sequential starting from 1. This affects expanding group numbers to ids.}
 
-\item{ng}{Number of clusters (groups).
+\item{k}{Number of clusters (groups).
 "bestrand" is implemented.}
 
 \item{maxdf}{Maximum degrees of freedom for trajectory spline smooths.}
