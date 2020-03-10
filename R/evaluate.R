@@ -150,7 +150,7 @@ rand_clustra = function(data, PL, save = FALSE, verbose = FALSE) {
     for(i in 1:replicates) {
       a_0 = deltime()
       
-      f = clustra(data, k, starts, cores)
+      f = clustra(data, k, starts, iter, cores)
       results[[(j - 1)*replicates + i]] = list(k = as.integer(k), 
                                                rep = as.integer(i),
                                                deviance = f$deviance,

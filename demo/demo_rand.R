@@ -30,4 +30,4 @@ data = gen_long_data(n_id = PL$gen_par$n_id, m_obs = PL$gen_par$m_obs,
                     e_range = PL$gen_par$e_range, plots = PL$gen_par$plots)
 a = a_fit = deltime(a, paste0("\nData (", paste(dim(data), collapse = ","), ") generated"))
 
-rand_clustra(data, PL)
+rand_clustra(data, PL, verbose = TRUE)

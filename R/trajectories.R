@@ -125,7 +125,6 @@ trajectories = function(data, k, group, iter = 15, maxdf = 50, plot = FALSE,
   openblasctl::openblas_set_num_threads(cores$blas)
   if(max(data$id) != length(group))
     cat("\ntrajectories: imput id's NOT sequential!\n")
-  if(iter > 2) catlev = 1 else catlev = 0
 
   ## get number of unique id
   if(plot) require(ggplot2)
@@ -200,7 +199,7 @@ trajectories = function(data, k, group, iter = 15, maxdf = 50, plot = FALSE,
 #' processing of various parts.
 #' @param maxdf Maximum spline order to use in tps fits.
 #' @export
-clustra = function(data, k, starts = list(ns = 5, nid = 20),
+clustra = function(data, k, starts = list(ns = 5, nid = 20), iter = 10,
                    cores = list(e_mc = 1, m_mc = 1, bam_nthreads = 1, blas = 1),
                    maxdf = 50, verbose = FALSE) {
     ## get initial group assignment
