@@ -1,7 +1,7 @@
-## Example of running a clustra ensemble with Rand index to choose k
+## Example of running clustra on a single generated data set
 ## 
 
-## Create a directory to store a json control structure 
+## create a directory to store a json control structure 
 playdir = "~/clustra_play"
 if(!dir.exists(playdir)) dir.create(playdir)
 setwd(playdir)
@@ -28,9 +28,10 @@ if(file.exists(parname)) {
 set.seed(PL$gen_par$seed)
 a0 = a = deltime()
 
-data = gen_traj_data(n_id = PL$gen_par$n_id, m_obs = PL$gen_par$m_obs,
+## Generate a data set
+data = gen_long_data(n_id = PL$gen_par$n_id, m_obs = PL$gen_par$m_obs,
                     e_range = PL$gen_par$e_range, plots = PL$gen_par$plots)
 a = a_fit = deltime(a, paste0("\nData (", paste(dim(data), collapse = ","), ") generated"))
 
 ## cluster the trajectories
-rand_clustra(data, PL, verbose = TRUE)
+clustra(data, PL, verbose = TRUE, plot = TRUE)

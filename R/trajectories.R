@@ -199,12 +199,16 @@ trajectories = function(data, k, group, iter = 15, maxdf = 50, plot = FALSE,
 #' @param starts A list with two components: ns is the number of sampled starts
 #' to evaluate as starting cluster assignments, nid is the number of
 #' trajectories to sample for the starts.
+#' @param iter Maximum number of iterations.
+#' @param maxdf Basis dimension for bspline smooth.
+#' @param verbose Logical to turn on more output during fit iterations.
+#' @param plot Logical to indicate 
 #' @param cores A list control structure to manage cores used for parallel 
 #' processing of various parts.
 #' @param maxdf Maximum spline order to use in tps fits.
 #' @export
 clustra = function(data, k, group = NULL, starts = list(ns = 5, nid = 20),
-                   iter = 10, maxdf = 50, verbose = FALSE,
+                   iter = 10, maxdf = 50, verbose = FALSE, plot = FALSE,
                    cores = list(e_mc = 1, m_mc = 1, bam_nthreads = 1, blas = 1)) {
   ## get initial group assignment
   if(is.null(group))
@@ -215,6 +219,6 @@ clustra = function(data, k, group = NULL, starts = list(ns = 5, nid = 20),
   data$group = group[data$id] # expand to all responses
 
   ## now data includes initial group assignment
-  trajectories(data, k, group, iter, maxdf, plot = FALSE, cores)
+  trajectories(data, k, group, iter, maxdf, plot, cores)
 }
 

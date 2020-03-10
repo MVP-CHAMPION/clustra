@@ -3,7 +3,7 @@
 export(bench_cores)
 export(clustra)
 export(deltime)
-export(gen_long_data)
+export(gen_traj_data)
 export(rand_clustra)
 export(start_groups)
 export(trajectories)

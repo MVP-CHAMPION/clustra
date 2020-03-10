@@ -5,8 +5,8 @@
 \title{Cluster trajectories}
 \usage{
 clustra(data, k, group = NULL, starts = list(ns = 5, nid = 20),
-  iter = 10, maxdf = 50, verbose = FALSE, cores = list(e_mc = 1,
-  m_mc = 1, bam_nthreads = 1, blas = 1))
+  iter = 10, maxdf = 50, verbose = FALSE, plot = FALSE,
+  cores = list(e_mc = 1, m_mc = 1, bam_nthreads = 1, blas = 1))
 }
 \arguments{
 \item{data}{Data frame with response measurements, one per observation.
@@ -23,10 +23,18 @@ sequential starting from 1.}
 to evaluate as starting cluster assignments, nid is the number of
 trajectories to sample for the starts.}
 
-\item{maxdf}{Maximum spline order to use in tps fits.}
+\item{iter}{Maximum number of iterations.}
+
+\item{maxdf}{Basis dimension for bspline smooth.}
+
+\item{verbose}{Logical to turn on more output during fit iterations.}
+
+\item{plot}{Logical to indicate}
 
 \item{cores}{A list control structure to manage cores used for parallel 
 processing of various parts.}
+
+\item{maxdf}{Maximum spline order to use in tps fits.}
 }
 \description{
 Cluster trajectories
