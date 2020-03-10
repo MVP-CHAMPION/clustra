@@ -39,8 +39,9 @@ allpair_RandIndex = function(results) {
       adjRand = ri$AR
       Fow = ri$F
       Mir = ri$M
-      rand_pairs[[irm]] = data.frame(i.K = i.K, i.R = i.R, j.K = j.K, j.R = j.R, 
-                                   Rand = Rand, adjRand = adjRand, Fow = Fow, Mir = Mir)
+      rand_pairs[[irm]] = 
+        data.frame(i.K = i.K, i.R = i.R, j.K = j.K, j.R = j.R, 
+                   Rand = Rand, adjRand = adjRand, Fow = Fow, Mir = Mir)
     }
   }
   do.call(rbind, rand_pairs)
@@ -49,7 +50,7 @@ allpair_RandIndex = function(results) {
 #' Rand index matrix plot from Technometrics paper
 #' Sorts replicates within cluster K
 #' Assumes K starts from 2
-#' Author: Wei-Chen Chen
+#' Author: Wei-Chen Chen (wcsnow@gmail.com)
 ## 
 #' @param rand_pairs A data frame with columns of cluster assignments
 rand_plot = function(rand_pairs) {
@@ -123,3 +124,56 @@ rand_plot = function(rand_pairs) {
   dev.off()
   layout(1)
 }
+
+#' Performs clustra runs for several k and several random start replicates per k.
+#' Then prepares a Rand index comparison between all pairs of clusterings, that
+#' are displayed in a matrix plot.
+#' @param data The data (see clustra description).
+#' @param PL A list data structure (a list of lists) giving all needed
+#' parameters for the clustra runs.
+#' @param save Logical. When TRUE, save all results as file results.Rdata
+#' @param verbose Logical. When TRUE, information about each run of clustra is
+#' printed.
+#' @export
+rand_clustra = function(data, PL, save = FALSE, verbose = FALSE) {
+  cores = PL$cores
+  set.seed(PL$traj_par$seed)
+  k_vec = PL$traj_par$k_vec
+  maxdf = PL$traj_par$maxdf
+  starts = PL$traj_par$starts
+  iter = PL$traj_par$iter
+  replicates = PL$traj_par$replicates
+  
+  results = vector("list", replicates*length(k_vec))
+  for(j in 1:length(k_vec)) {
+    k = k_vec[j]
+    for(i in 1:replicates) {
+      a_0 = deltime()
+      
+      f = clustra(data, k, starts, cores)
+      results[[(j - 1)*replicates + i]] = list(k = as.integer(k), 
+                                               rep = as.integer(i),
+                                               deviance = f$deviance,
+                                               group = f$group)
+      data$group = as.factor(f$group[data$id])
+      a = deltime()
+      if(verbose) cat(k, i, "it =", f$iterations, "dev =", f$deviance,
+                      "err =", f$try_errors, "ch =", f$changes, "time =",
+                      a - a_0, "\n")
+    }
+  }
+  
+  ## save object results and parameters
+  save(results, k_vec, maxdf, starts, iter, snid, replicates, file = "results.Rdata")
+  a = deltime(a, "\nSaved results")
+  
+  a = deltime(a_fit, "\nTotal Fit time")
+  a = deltime(a0, "\nTotal time")
+  
+  ## plot Rand Index evaluation
+  RandIndex_pairs = allpair_RandIndex(results)
+  rand_plot(RandIndex_pairs)
+  a = deltime(a, "\nRandIndex time")
+  
+}
+

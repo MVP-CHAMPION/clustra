@@ -5,7 +5,7 @@
 \title{Rand index matrix plot from Technometrics paper
 Sorts replicates within cluster K
 Assumes K starts from 2
-Author: Wei-Chen Chen}
+Author: Wei-Chen Chen (wcsnow@gmail.com)}
 \usage{
 rand_plot(rand_pairs)
 }
@@ -16,5 +16,5 @@ rand_plot(rand_pairs)
 Rand index matrix plot from Technometrics paper
 Sorts replicates within cluster K
 Assumes K starts from 2
-Author: Wei-Chen Chen
+Author: Wei-Chen Chen (wcsnow@gmail.com)
 }
