@@ -207,18 +207,18 @@ trajectories = function(data, k, group, iter = 15, maxdf = 50, plot = FALSE,
 #' processing of various parts.
 #' @param maxdf Maximum spline order to use in tps fits.
 #' @export
-clustra = function(data, k, group = NULL, starts = list(ns = 5, nid = 20),
-                   iter = 10, maxdf = 50, verbose = FALSE, plot = FALSE,
-                   cores = list(e_mc = 1, m_mc = 1, bam_nthreads = 1, blas = 1)) {
+clustra = function(data, k, PL, group = NULL, verbose = FALSE, plot = FALSE) {
   ## get initial group assignment
   if(is.null(group))
-    group = start_groups(data, k, nstart = starts$ns, nid = starts$nid,
-                         cores = cores, maxdf = maxdf)
+    group = start_groups(data, k, nstart = PL$traj_par$starts$ns,
+                         nid = PL$traj_par$starts$nid, cores = PL$cores,
+                         maxdf = PL$traj_par$maxdf)
 
   data$id = as.numeric(factor(data$id)) # since id are not sequential
   data$group = group[data$id] # expand to all responses
 
   ## now data includes initial group assignment
-  trajectories(data, k, group, iter, maxdf, plot, cores)
+  trajectories(data, k, group, PL$traj_par$iter, PL$traj_par$maxdf, plot,
+               PL$cores)
 }
 

@@ -4,9 +4,7 @@
 \alias{clustra}
 \title{Cluster trajectories}
 \usage{
-clustra(data, k, group = NULL, starts = list(ns = 5, nid = 20),
-  iter = 10, maxdf = 50, verbose = FALSE, plot = FALSE,
-  cores = list(e_mc = 1, m_mc = 1, bam_nthreads = 1, blas = 1))
+clustra(data, k, PL, group = NULL, verbose = FALSE, plot = FALSE)
 }
 \arguments{
 \item{data}{Data frame with response measurements, one per observation.
@@ -19,6 +17,10 @@ Normally, this is NULL and a best in a number of random starts is used. Note
 that the number of id's is not the highest id number if id's are not
 sequential starting from 1.}
 
+\item{verbose}{Logical to turn on more output during fit iterations.}
+
+\item{plot}{Logical to indicate}
+
 \item{starts}{A list with two components: ns is the number of sampled starts
 to evaluate as starting cluster assignments, nid is the number of
 trajectories to sample for the starts.}
@@ -26,10 +28,6 @@ trajectories to sample for the starts.}
 \item{iter}{Maximum number of iterations.}
 
 \item{maxdf}{Basis dimension for bspline smooth.}
-
-\item{verbose}{Logical to turn on more output during fit iterations.}
-
-\item{plot}{Logical to indicate}
 
 \item{cores}{A list control structure to manage cores used for parallel 
 processing of various parts.}

@@ -33,7 +33,7 @@
 #' 
 #' @export
 gen_traj_data = function(n_id, lambda_obs, first = c(-50, -10), last = c(50,100),
-                         reference = 100, 
+                         reference = 100,
                          noise = c(0, abs(reference/20)), k = 3, plots = 0)
 {
   # n_id = PL$gen_par$n_id
@@ -45,8 +45,8 @@ gen_traj_data = function(n_id, lambda_obs, first = c(-50, -10), last = c(50,100)
   ## support
   ## start . . . . . 0 . . . . end
   gendata = function(n_id, lambda_obs, first, last, k) {
-    start = runif(n_id, min = first[1], max = first[2]) # 1st observation time
-    end = runif(n_id, min = last[1], max = last[2]) # last observation time
+    start = floor(runif(n_id, min = first[1], max = first[2])) # 1st observation time
+    end = floor(runif(n_id, min = last[1], max = last[2])) # last observation time
     n_obs = 3 + rpois(n_id, lambda = lambda_obs) # number of observations
     type = sample(k, n_id, replace = TRUE) # curve type
     id_vec = sample.int(3*n_id, n_id, replace = FALSE) # make id non-consecutive
@@ -56,7 +56,9 @@ gen_traj_data = function(n_id, lambda_obs, first = c(-50, -10), last = c(50,100)
   }
   ## response
   response = function(n_obs, type, start, end, reference) {
-    times = c(start, sort(runif(n_obs - 1))*end)
+    times = c(start,
+              start + sort(floor(runif(n_obs - 3, min = start, max = end))),
+              end)
     times = c(times[times <= 0], 0, times[times > 0]) # insert 0
     ## TODO add user supplied functions
     resp = switch(type, # 1 = constant, 2 = sin, 3 = sigmoid
