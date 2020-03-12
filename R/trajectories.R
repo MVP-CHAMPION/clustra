@@ -5,6 +5,53 @@
 ##
 ##
 
+#' Function to set and maintain clustra parameters and working directory.
+#' 
+#' @details
+#' Objective is to simplify clustra function invocation and manage sets of
+#' clustra runs using a \code{jsonlite} file. Sets working directory to playdir.
+#' Parameters PL set in the following order: if PL is supplied, it is written to
+#' a json file and returned; if PL is NULL, attempts to find parname file in
+#' playdir and use that; if PL is NULL and parname file is not present, PL is
+#' set to defaults.
+#' 
+#' @param parname
+#' Character string filename.
+#' @param playdir 
+#' Character string directory where filename is expected and written. 
+#' @param PL 
+#' A list of lists parameter data structure.
+#' @export
+clustra_par = function(parname = "clustra.par", playdir = "~/clustra_play",
+                       PL = NULL) {
+  setwd(playdir)
+  if(!is.null(PL)) { # have new PL so write it out and use it
+    jsonlite::write_json(PL, parname, pretty = TRUE)
+  } else { # use PL from file or set default and write it
+    if(file.exists(parname)) {
+      PL = jsonlite::read_json(parname, simplifyVector = TRUE)
+    } else {
+      PL = list(
+        gen_par = list(seed = 90, 
+                       n_id = 10000, 
+                       lambda_obs = 25,
+                       first = c(-50, -10),
+                       last = c(365*3, 365*10), 
+                       plots = FALSE),
+        cores = list(e_mc = 4, m_mc = 4, bam_nthreads = 1, blas = 1),
+        traj_par = list(seed = 79,
+                        maxdf = 30,
+                        iter = 8, 
+                        starts = list(ns = 5, nid = 10),
+                        k_vec = c(2, 3, 4),
+                        replicates = 4)
+      )
+      jsonlite::write_json(PL, parname, pretty = TRUE)
+    }
+  } 
+  PL
+}
+
 library(gratia)
 library(mgcv)
 ## TODO add controls to use one core if OpenBLAS is not available

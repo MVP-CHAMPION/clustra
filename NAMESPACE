@@ -2,6 +2,7 @@
 
 export(bench_cores)
 export(clustra)
+export(clustra_par)
 export(deltime)
 export(gen_traj_data)
 export(rand_clustra)

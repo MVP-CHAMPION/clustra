@@ -7,7 +7,7 @@ Sorts replicates within cluster K
 Assumes K starts from 2
 Author: Wei-Chen Chen (wcsnow@gmail.com)}
 \usage{
-rand_plot(rand_pairs)
+rand_plot(rand_pairs, name)
 }
 \arguments{
 \item{rand_pairs}{A data frame with columns of cluster assignments}
