@@ -14,6 +14,7 @@ plot_tps(dat, points = TRUE)
 }
 \description{
 Plots spline fit (modify to use acutal bam results), possibly with data
+TODO use actual tps fit rather than redo it with stat_smooth
 }
 \section{Details}{
 

@@ -2,13 +2,14 @@
 #' computation and plots of spline fits.
 #'
 #' Plots spline fit (modify to use acutal bam results), possibly with data
+#' TODO use actual tps fit rather than redo it with stat_smooth
 #' 
 #' @section Details:
 #'
 #' @param dat Data frame with variables *time*, *response*, *color*, *group*
 #' @param points If true, plot all the data points.
 plot_tps = function(dat, points = TRUE) {
-  p = ggplot(dat, aes(time, response, color = group, group = group)) +
+  p = ggplot(dat, aes(time, response, color = group, group = group))
   if(points) p = p + geom_point(alpha = 0.1)
   p = p + stat_smooth(method = "gam", formula = y ~ s(x, k = maxdf), size = 1)
   p = p + theme_bw()
