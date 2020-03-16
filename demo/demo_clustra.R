@@ -1,6 +1,6 @@
 ## Example of running clustra on a single generated data set
 ## 
-
+library(clustra)
 PL = clustra_par()
 
 ## Set seed for reproducibility
@@ -15,4 +15,5 @@ data = gen_traj_data(n_id = PL$gen_par$n_id, lambda_obs = PL$gen_par$lambda_obs,
 a = a_fit = deltime(a, paste0("\nData (", paste(dim(data), collapse = ","), ") generated"))
 
 ## cluster the trajectories
-clustra(data, 3, PL, verbose = TRUE, plot = TRUE)
+cl = clustra(data, 3, PL, verbose = TRUE, plot = TRUE)
+

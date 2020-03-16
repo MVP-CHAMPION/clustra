@@ -63,7 +63,7 @@ gen_traj_data = function(n_id, lambda_obs, first = c(-50, -10), last = c(50,100)
     ## TODO add user supplied functions
     resp = switch(type, # 1 = constant, 2 = sin, 3 = sigmoid
                   rep(reference, length(times)), # constant
-                  reference*sin(pi/4 + 0.5*pi*times/last[2]), # part of sin curve
+                  reference*sin(pi/4 + pi*times/last[2]), # part of sin curve
                   reference*(1.5 - 1/(1 + exp(-times/last[2]*5))) # 1 - sigmoid
                   )
     cbind(times, resp + rnorm(n_obs, mean = noise[1], sd = noise[2])) # add Gaussian noise

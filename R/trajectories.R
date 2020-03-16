@@ -35,7 +35,7 @@ clustra_par = function(parname = "clustra.par", playdir = "~/clustra_play",
         gen_par = list(seed = 90, 
                        n_id = 10000, 
                        lambda_obs = 25,
-                       first = c(-50, -10),
+                       first = c(-365, -10),
                        last = c(365*3, 365*10), 
                        plots = FALSE),
         cores = list(e_mc = 4, m_mc = 4, bam_nthreads = 1, blas = 1),
@@ -226,7 +226,7 @@ trajectories = function(data, k, group, iter = 15, maxdf = 50, plot = FALSE,
   }
 
   if(plot) {
-    plot_tps(data)
+    plot_tps(data, tps)
     if(verbose) a = deltime(a, "\nDone plots")
   }
   if(verbose) deltime(a_0, " trajectories time =")
@@ -266,6 +266,6 @@ clustra = function(data, k, PL, group = NULL, verbose = FALSE, plot = FALSE) {
 
   ## now data includes initial group assignment
   trajectories(data, k, group, PL$traj_par$iter, PL$traj_par$maxdf, plot,
-               PL$cores)
+               PL$cores, verbose)
 }
 
