@@ -2,9 +2,7 @@
 ## 
 
 library(clustra)
-library(jsonlite)
-
-PL = clustra_par()
+PL = clustra_par(parname = "clustra.par", playdir = "~/clustra_play")
 
 ## Set seed for reproducibility
 ## TODO Check if reproducible when running parallel

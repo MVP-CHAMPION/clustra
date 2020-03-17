@@ -22,8 +22,7 @@
 #' @param PL 
 #' A list of lists parameter data structure.
 #' @export
-clustra_par = function(parname = "clustra.par", playdir = "~/clustra_play",
-                       PL = NULL) {
+clustra_par = function(parname, playdir, PL = NULL) {
   setwd(playdir)
   if(!is.null(PL)) { # have new PL so write it out and use it
     jsonlite::write_json(PL, parname, pretty = TRUE)
