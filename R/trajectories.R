@@ -171,7 +171,7 @@ trajectories = function(data, k, group, iter = 15, maxdf = 50, plot = FALSE,
                         verbose = FALSE) {
   if(verbose) a = a_0 = deltime(a)
   library(parallel)
-  openblasctl::openblas_set_num_threads(cores$blas)
+##  openblasctl::openblas_set_num_threads(cores$blas)
   if(max(data$id) != length(group))
     cat("\ntrajectories: imput id's NOT sequential!\n")
 
