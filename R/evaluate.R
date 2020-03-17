@@ -7,12 +7,16 @@
 #' @section Details:
 #'
 #' @param dat Data frame with variables *time*, *response*, *color*, *group*
-#' @param points If true, plot all the data points.
-plot_tps = function(dat, tps, points = FALSE) {
+#' @param tps A list, where each element is an output from \code{mgcv::bam}.
+#' @param file Character string with the filename for pdf output.
+#' @param points If true, plot all the data points. Not implemented yet.
+plot_tps = function(dat, tps, file, points = FALSE) {
   ## TODO figure out a way to make getViz plot the points. The function 
   ##      plot.mgamViz seems to extract only the smooths, not the data. See
   ##      values in tps[[1]]$model$time and tps[[1]]$model$response, same 2, 3.
-  print(plot(mgcViz::getViz(tps)))
+  pdf(file)
+    print(plot(mgcViz::getViz(tps)))
+  dev.off()
 }
 
 #' Use RandIndex to evaluate number of clusters

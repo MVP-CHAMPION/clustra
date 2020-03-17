@@ -5,12 +5,16 @@
 \title{Various functions to evaluate results of clustering, like RandIndex
 computation and plots of spline fits.}
 \usage{
-plot_tps(dat, tps, points = FALSE)
+plot_tps(dat, tps, file, points = FALSE)
 }
 \arguments{
 \item{dat}{Data frame with variables *time*, *response*, *color*, *group*}
 
-\item{points}{If true, plot all the data points.}
+\item{tps}{A list, where each element is an output from \code{mgcv::bam}.}
+
+\item{file}{Character string with the filename for pdf output.}
+
+\item{points}{If true, plot all the data points. Not implemented yet.}
 }
 \description{
 Plots spline fit (modify to use acutal bam results), possibly with data

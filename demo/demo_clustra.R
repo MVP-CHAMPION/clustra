@@ -17,4 +17,3 @@ head(data)
 
 ## cluster the trajectories
 cl = clustra(data, 3, PL, verbose = TRUE, plot = TRUE)
-

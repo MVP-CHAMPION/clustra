@@ -228,7 +228,7 @@ trajectories = function(data, k, group, iter = 15, maxdf = 50, plot = FALSE,
   }
 
   if(plot) {
-    plot_tps(data, tps)
+    plot_tps(data, tps, "plot_tps.pdf")
     if(verbose) a = deltime(a, "\nDone plots")
   }
   if(verbose) deltime(a_0, " trajectories time =")
