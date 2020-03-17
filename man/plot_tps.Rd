@@ -5,7 +5,7 @@
 \title{Various functions to evaluate results of clustering, like RandIndex
 computation and plots of spline fits.}
 \usage{
-plot_tps(dat, points = TRUE)
+plot_tps(dat, tps, points = FALSE)
 }
 \arguments{
 \item{dat}{Data frame with variables *time*, *response*, *color*, *group*}

@@ -1,7 +1,7 @@
 ## This is the R translation of trajectories v2.sas code
 ##
-## This is multithreaded code that expects Unix OS with fork and
-## multithreaded OpenBLAS matrix support. Do not run on Mac or Win!
+## This is multithreaded code that expects a Unix OS with fork (and
+## multithreaded OpenBLAS matrix support - soon). Do not run on Mac or Win!
 ##
 ##
 
@@ -122,7 +122,6 @@ start_groups = function(data, k, nstart, nid, cores, maxdf, verbose = FALSE) {
     f = trajectories(data_start, k, group, iter = 1, maxdf = maxdf,
                      plot = FALSE, cores = cores)
     if(any(lapply(f$tps, class) == "try-error")) next
-#    deviance = sum(unlist(lapply(1:k, function(g) deviance(f$tps[[g]]))))
 
     diversity = sum(dist(
         do.call(rbind, lapply(mclapply(1:k, pred_g, tps = f$tps,
@@ -148,10 +147,14 @@ start_groups = function(data, k, nstart, nid, cores, maxdf, verbose = FALSE) {
 }
 
 
-#' Cluster longitudinal trajectories of a response variable. Trajectory means
-#' are splines fit to all ids in a cluster.
+#' Cluster longitudinal trajectories of a response variable.
+#' 
+#' Trajectory means are splines fit to all ids in a cluster. Typically, this
+#' function is called by \code{clustra()}.
+#' 
 #' @param datax Data frame with response measurements, one per observation. Column
-#' names are id, time, response, group. Note that id are already sequential
+#' names are \code{id}, \code{time}, \code{response}, \code{group}. Note that
+#'  id are already sequential.
 #' starting from 1. This affects expanding group numbers to ids.
 #' @param k Number of clusters (groups)
 #' @param group Group numbers corresponding to sequential ids.
@@ -236,35 +239,32 @@ trajectories = function(data, k, group, iter = 15, maxdf = 50, plot = FALSE,
 
 #' Cluster trajectories 
 #' 
+#' Most users will run the \code{clustra()} function, which takes care of
+#' starting values and completes kmeans iteration according to parameters in
+#' \code{PL} supplied by \code{clustra_par()} (see \code{demo} directory for
+#' examples).
+#' 
 #' @param data Data frame with response measurements, one per observation.
 #' Column names are id, time, response, group.
-#' @param k Number of clusters (groups)
+#' @param k Number of clusters (groups).
+#' @param PL A list of lists control structure created by \code{clustra_par}.
 #' @param group A vector of initial cluster assignments for unique id's in data.
-#' Normally, this is NULL and a best in a number of random starts is used. Note
-#' that the number of id's is not the highest id number if id's are not
-#' sequential starting from 1. 
-#' @param starts A list with two components: ns is the number of sampled starts
-#' to evaluate as starting cluster assignments, nid is the number of
-#' trajectories to sample for the starts.
-#' @param iter Maximum number of iterations.
-#' @param maxdf Basis dimension for bspline smooth.
+#' Normally, this is NULL and starts are provided by \code{start_groups()}. 
 #' @param verbose Logical to turn on more output during fit iterations.
 #' @param plot Logical to indicate 
-#' @param cores A list control structure to manage cores used for parallel 
-#' processing of various parts.
-#' @param maxdf Maximum spline order to use in tps fits.
 #' @export
 clustra = function(data, k, PL, group = NULL, verbose = FALSE, plot = FALSE) {
-  ## get initial group assignment
+  ## get initial group assignments
   if(is.null(group))
     group = start_groups(data, k, nstart = PL$traj_par$starts$ns,
                          nid = PL$traj_par$starts$nid, cores = PL$cores,
                          maxdf = PL$traj_par$maxdf)
 
-  data$id = as.numeric(factor(data$id)) # since id are not sequential
-  data$group = group[data$id] # expand to all responses
+  ## provide sequential id's and add initial group assignments to data
+  data$id = as.numeric(factor(data$id))
+  data$group = group[data$id] # expand to all observations
 
-  ## now data includes initial group assignment
+  ## kmeans iteration to assign id's to groups
   trajectories(data, k, group, PL$traj_par$iter, PL$traj_par$maxdf, plot,
                PL$cores, verbose)
 }

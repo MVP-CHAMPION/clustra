@@ -26,16 +26,20 @@
 #' c(mean, sd), of added N(mean, sd) noise.
 #' @param plots Number of plots of randomly selected trajectories to check
 #' generated data
+#' @param wfile If not NULL, the generated data is also written in CSV format
+#' to a file so named.
 #' 
 #' @section Value:
 #' A data frame with one response per row and three columns: id (an integer in 
-#' 1:n_id), time (an iteger in 0 to last observation time), and response.
+#' 1:(3*n_id), time (an iteger in 0 to last observation time), and response.
 #' 
 #' @export
-gen_traj_data = function(n_id, lambda_obs, first = c(-50, -10), last = c(50,100),
-                         reference = 100,
-                         noise = c(0, abs(reference/20)), k = 3, plots = 0)
+gen_traj_data = function(n_id, lambda_obs, first = c(-50, -10), 
+                         last = c(50,100), reference = 100,
+                         noise = c(0, abs(reference/20)),
+                         k = 3, plots = 0, wfile = NULL)
 {
+  ## TODO convert to PL structure
   # n_id = PL$gen_par$n_id
   # lambda_obs = PL$gen_par$lambda_obs
   # first = PL$gen_par$first
@@ -80,6 +84,8 @@ gen_traj_data = function(n_id, lambda_obs, first = c(-50, -10), last = c(50,100)
     print(ggplot(dplyr::filter(id_df, id %in% iplot), aes(x = time, y = response)) +
             facet_wrap(~ id) + geom_point())
   }
+  
+  if(!is.null(wfile)) write.table(id_df, file = wfile)
   
   id_df
 }

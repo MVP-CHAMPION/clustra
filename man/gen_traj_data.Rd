@@ -6,7 +6,7 @@
 \usage{
 gen_traj_data(n_id, lambda_obs, first = c(-50, -10), last = c(50, 100),
   reference = 100, noise = c(0, abs(reference/20)), k = 3,
-  plots = 0)
+  plots = 0, wfile = NULL)
 }
 \arguments{
 \item{n_id}{Number of trajectories}
@@ -28,6 +28,9 @@ c(mean, sd), of added N(mean, sd) noise.}
 
 \item{plots}{Number of plots of randomly selected trajectories to check
 generated data}
+
+\item{wfile}{If not NULL, the generated data is also written in CSV format
+to a file so named.}
 }
 \description{
 Collection of longitudinal responses with possibly varying lengths and 
@@ -48,6 +51,6 @@ selected response function with added N(mean, sd) error.
 \section{Value}{
 
 A data frame with one response per row and three columns: id (an integer in 
-1:n_id), time (an iteger in 0 to last observation time), and response.
+1:(3*n_id), time (an iteger in 0 to last observation time), and response.
 }
 
