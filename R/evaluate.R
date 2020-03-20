@@ -108,8 +108,8 @@ rand_plot = function(rand_pairs, name) {
           main = "Adjusted Rand Index")
     abline(h = (1:K.len) * R.max, lty = 1, col = "black")
     abline(v = (1:K.len) * R.max, lty = 1, col = "black")
-    axis(1, at = ((0:(K.len - 1)) + 0.5) * R.max, label = K.vec)
-    axis(2, at = ((0:(K.len - 1)) + 0.5) * R.max, label = K.vec)
+    axis(1, at = ((0:(K.len - 1)) + 0.5) * R.max, labels = K.vec)
+    axis(2, at = ((0:(K.len - 1)) + 0.5) * R.max, labels = K.vec)
     box()
 
     par(bg = bg, fg = fg, col = fg, col.axis = fg,
