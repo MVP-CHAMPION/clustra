@@ -2,8 +2,7 @@
 % Please edit documentation in R/trajectories.R
 \name{trajectories}
 \alias{trajectories}
-\title{Cluster longitudinal trajectories of a response variable. Trajectory means
-are splines fit to all ids in a cluster.}
+\title{Cluster longitudinal trajectories of a response variable.}
 \usage{
 trajectories(data, k, group, iter = 15, maxdf = 50, plot = FALSE,
   cores = list(e_mc = 1, m_mc = 1, bam_nthreads = 1, blas = 1),
@@ -27,10 +26,11 @@ bam_nthreads (see bam documentation), blas (OpenBlas). Care should be taken
 that cores are not oversubscribed.}
 
 \item{datax}{Data frame with response measurements, one per observation. Column
-names are id, time, response, group. Note that id are already sequential
+names are \code{id}, \code{time}, \code{response}, \code{group}. Note that
+ id are already sequential.
 starting from 1. This affects expanding group numbers to ids.}
 }
 \description{
-Cluster longitudinal trajectories of a response variable. Trajectory means
-are splines fit to all ids in a cluster.
+Trajectory means are splines fit to all ids in a cluster. Typically, this
+function is called by \code{clustra()}.
 }

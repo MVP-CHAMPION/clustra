@@ -10,30 +10,20 @@ clustra(data, k, PL, group = NULL, verbose = FALSE, plot = FALSE)
 \item{data}{Data frame with response measurements, one per observation.
 Column names are id, time, response, group.}
 
-\item{k}{Number of clusters (groups)}
+\item{k}{Number of clusters (groups).}
+
+\item{PL}{A list of lists control structure created by \code{clustra_par}.}
 
 \item{group}{A vector of initial cluster assignments for unique id's in data.
-Normally, this is NULL and a best in a number of random starts is used. Note
-that the number of id's is not the highest id number if id's are not
-sequential starting from 1.}
+Normally, this is NULL and starts are provided by \code{start_groups()}.}
 
 \item{verbose}{Logical to turn on more output during fit iterations.}
 
 \item{plot}{Logical to indicate}
-
-\item{starts}{A list with two components: ns is the number of sampled starts
-to evaluate as starting cluster assignments, nid is the number of
-trajectories to sample for the starts.}
-
-\item{iter}{Maximum number of iterations.}
-
-\item{maxdf}{Basis dimension for bspline smooth.}
-
-\item{cores}{A list control structure to manage cores used for parallel 
-processing of various parts.}
-
-\item{maxdf}{Maximum spline order to use in tps fits.}
 }
 \description{
-Cluster trajectories
+Most users will run the \code{clustra()} function, which takes care of
+starting values and completes kmeans iteration according to parameters in
+\code{PL} supplied by \code{clustra_par()} (see \code{demo} directory for
+examples).
 }

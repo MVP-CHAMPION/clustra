@@ -4,8 +4,7 @@
 \alias{clustra_par}
 \title{Function to set and maintain clustra parameters and working directory.}
 \usage{
-clustra_par(parname = "clustra.par", playdir = "~/clustra_play",
-  PL = NULL)
+clustra_par(parname, playdir, PL = NULL)
 }
 \arguments{
 \item{parname}{Character string filename.}

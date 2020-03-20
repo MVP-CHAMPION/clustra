@@ -7,13 +7,16 @@
 #' @section Details:
 #'
 #' @param dat Data frame with variables *time*, *response*, *color*, *group*
-#' @param points If true, plot all the data points.
-plot_tps = function(dat, points = TRUE) {
-  p = ggplot(dat, aes(time, response, color = group, group = group))
-  if(points) p = p + geom_point(alpha = 0.1)
-  p = p + stat_smooth(method = "gam", formula = y ~ s(x, k = maxdf), size = 1)
-  p = p + theme_bw()
-  print(p)
+#' @param tps A list, where each element is an output from \code{mgcv::bam}.
+#' @param file Character string with the filename for pdf output.
+#' @param points If true, plot all the data points. Not implemented yet.
+plot_tps = function(dat, tps, file, points = FALSE) {
+  ## TODO figure out a way to make getViz plot the points. The function 
+  ##      plot.mgamViz seems to extract only the smooths, not the data. See
+  ##      values in tps[[1]]$model$time and tps[[1]]$model$response, same 2, 3.
+  pdf(file)
+    print(plot(mgcViz::getViz(tps)))
+  dev.off()
 }
 
 #' Use RandIndex to evaluate number of clusters
@@ -134,13 +137,14 @@ rand_plot = function(rand_pairs, name) {
 #' @param verbose Logical. When TRUE, information about each run of clustra is
 #' printed.
 #' @export
-rand_clustra = function(data, k, PL, save = FALSE, verbose = FALSE) {
+rand_clustra = function(data, PL, save = FALSE, verbose = FALSE) {
   set.seed(PL$traj_par$seed)
+  k = PL$traj_par$k_vec
   replicates = PL$traj_par$replicates
   
   a_rand = deltime()
-  results = vector("list", replicates*length(k_vec))
-  for(j in 1:length(k_vec)) {
+  results = vector("list", replicates*length(k))
+  for(j in 1:length(k)) {
     kj = k[j]
     for(i in 1:replicates) {
       a_0 = deltime()
