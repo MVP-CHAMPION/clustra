@@ -1,0 +1,3 @@
+demo_clustra	clustra	Example of running clustra on a single generated data set.
+demo_rand	 clustra	Example of running a clustra ensemble with Rand index to choose k.
+demo_scaling	clustra	Edits a Slurm submission script to exercise a number of scaling options.
