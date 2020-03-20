@@ -91,9 +91,11 @@ mpd_g = function(g, pred, data) {
 #' sequential starting from 1. This affects expanding group numbers to ids.
 #' @param k Number of clusters (groups).
 #' "bestrand" is implemented.
-#' @param starts The number of random start values to consider.
-#' @param snid The number of id's per cluster to sample in evaluating starts.
+#' @param nstart The number of random start values to consider.
+#' @param nid The number of id's per cluster to sample in evaluating starts.
+#' @param cores TODO
 #' @param maxdf Maximum degrees of freedom for trajectory spline smooths.
+#' @param verbose TODO
 #' @export
 start_groups = function(data, k, nstart, nid, cores, maxdf, verbose = FALSE) {
   if(verbose) cat("\nStarts : ")
@@ -149,7 +151,7 @@ start_groups = function(data, k, nstart, nid, cores, maxdf, verbose = FALSE) {
 #' Trajectory means are splines fit to all ids in a cluster. Typically, this
 #' function is called by \code{clustra()}.
 #' 
-#' @param datax Data frame with response measurements, one per observation. Column
+#' @param data Data frame with response measurements, one per observation. Column
 #' names are \code{id}, \code{time}, \code{response}, \code{group}. Note that
 #'  id are already sequential.
 #' starting from 1. This affects expanding group numbers to ids.
@@ -163,6 +165,7 @@ start_groups = function(data, k, nstart, nid, cores, maxdf, verbose = FALSE) {
 #' components e_mc (expectation across k), m_mc (maximization across k),
 #' bam_nthreads (see bam documentation), blas (OpenBlas). Care should be taken
 #' that cores are not oversubscribed.
+#' @param verbose TODO
 #' @export
 trajectories = function(data, k, group, iter = 15, maxdf = 50, plot = FALSE,
                         cores = list(e_mc = 1, m_mc = 1, bam_nthreads = 1, blas = 1),

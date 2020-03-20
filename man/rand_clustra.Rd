@@ -18,8 +18,6 @@ parameters for the clustra runs.}
 
 \item{verbose}{Logical. When TRUE, information about each run of clustra is
 printed.}
-
-\item{k}{Vector of k values to run.}
 }
 \description{
 Performs clustra runs for several k and several random start replicates per k.

@@ -54,6 +54,7 @@ allpair_RandIndex = function(results) {
 #' Author: Wei-Chen Chen (wcsnow@gmail.com)
 ## 
 #' @param rand_pairs A data frame with columns of cluster assignments
+#' @param name TODO
 rand_plot = function(rand_pairs, name) {
   K.vec = unique(unlist(rand_pairs[, c("i.K", "j.K")]))
   K.max = max(K.vec)
@@ -128,7 +129,6 @@ rand_plot = function(rand_pairs, name) {
 #' Then prepares a Rand index comparison between all pairs of clusterings, that
 #' are displayed in a matrix plot.
 #' @param data The data (see clustra description).
-#' @param k Vector of k values to run.
 #' @param PL A list data structure (a list of lists) giving all needed
 #' parameters for the clustra runs.
 #' @param save Logical. When TRUE, save all results as file results.Rdata

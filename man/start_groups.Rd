@@ -14,11 +14,15 @@ sequential starting from 1. This affects expanding group numbers to ids.}
 \item{k}{Number of clusters (groups).
 "bestrand" is implemented.}
 
+\item{nstart}{The number of random start values to consider.}
+
+\item{nid}{The number of id's per cluster to sample in evaluating starts.}
+
+\item{cores}{TODO}
+
 \item{maxdf}{Maximum degrees of freedom for trajectory spline smooths.}
 
-\item{starts}{The number of random start values to consider.}
-
-\item{snid}{The number of id's per cluster to sample in evaluating starts.}
+\item{verbose}{TODO}
 }
 \description{
 Function to assign starting groups.

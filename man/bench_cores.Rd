@@ -9,6 +9,8 @@ bench_cores(FUN, ..., max2 = 5, reps = 4)
 \arguments{
 \item{FUN}{Function to benchmark.}
 
+\item{...}{Additional arguments passed to `FUN`.}
+
 \item{max2}{Largest power of 2 in cores (e.g. max2 = 3 implies 1, 2, 4, and 8
 cores will be tested. Core control is via openblasctl package)}
 

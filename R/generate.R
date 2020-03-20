@@ -24,6 +24,7 @@
 #' is near 100, which is the default)
 #' @param noise Vector of length 2 giving the mean and standard deviation, 
 #' c(mean, sd), of added N(mean, sd) noise.
+#' @param k TODO
 #' @param plots Number of plots of randomly selected trajectories to check
 #' generated data
 #' @param wfile If not NULL, the generated data is also written in CSV format

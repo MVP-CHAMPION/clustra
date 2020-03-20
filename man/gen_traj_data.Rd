@@ -34,6 +34,8 @@ is near 100, which is the default)}
 \item{noise}{Vector of length 2 giving the mean and standard deviation, 
 c(mean, sd), of added N(mean, sd) noise.}
 
+\item{k}{TODO}
+
 \item{plots}{Number of plots of randomly selected trajectories to check
 generated data}
 
