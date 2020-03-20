@@ -4,8 +4,6 @@
 #' Plots spline fit (modify to use acutal bam results), possibly with data
 #' TODO use actual tps fit rather than redo it with stat_smooth
 #' 
-#' @section Details:
-#'
 #' @param dat Data frame with variables *time*, *response*, *color*, *group*
 #' @param tps A list, where each element is an output from \code{mgcv::bam}.
 #' @param file Character string with the filename for pdf output.
