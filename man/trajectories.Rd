@@ -4,9 +4,16 @@
 \alias{trajectories}
 \title{Cluster longitudinal trajectories of a response variable.}
 \usage{
-trajectories(data, k, group, iter = 15, maxdf = 50, plot = FALSE,
+trajectories(
+  data,
+  k,
+  group,
+  iter = 15,
+  maxdf = 50,
+  plot = FALSE,
   cores = list(e_mc = 1, m_mc = 1, bam_nthreads = 1, blas = 1),
-  verbose = FALSE)
+  verbose = FALSE
+)
 }
 \arguments{
 \item{k}{Number of clusters (groups)}

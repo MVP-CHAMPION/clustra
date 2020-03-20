@@ -1,3 +1,9 @@
+utils::globalVariables(c(
+  "user", "elapsed", "seconds", "type", "id"
+))
+
+
+
 #' Function to benchmark various core combinations for components of clustra
 #'
 #' @param FUN Function to benchmark.

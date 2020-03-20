@@ -17,10 +17,13 @@ Imports:
     jsonlite,
     magrittr,
     mgcv,
+    mgcViz,
     openblasctl,
     parallel,
+    RColorBrewer,
     stats,
-    tidyr
+    tidyr,
+    utils
 Description: Performs k-means clustering, where each mean is a thin plate spline
         fit to all points of trajectories in cluster. 
 LazyLoad: yes
