@@ -22,7 +22,6 @@ plot_tps = function(dat, points = TRUE) {
 #' Note all pairs means lower triangle plus diagonal of an all-pairs symmetric
 #' matrix.
 allpair_RandIndex = function(results) {
-  library(MixSim)
   nr = length(results)
   rand_pairs = vector("list", nr*(nr - 1)/2 + nr)
   irm = 0
@@ -55,8 +54,6 @@ allpair_RandIndex = function(results) {
 ## 
 #' @param rand_pairs A data frame with columns of cluster assignments
 rand_plot = function(rand_pairs, name) {
-  library(RColorBrewer)
-
   K.vec = unique(unlist(rand_pairs[, c("i.K", "j.K")]))
   K.max = max(K.vec)
   K.len = length(K.vec)
@@ -170,4 +167,3 @@ rand_clustra = function(data, k, PL, save = FALSE, verbose = FALSE) {
   rand_plot(RandIndex_pairs, name = "adjRand_mat.pdf")
   if(verbose) a = deltime(a_rand, "\nTotal rand_cluster time")
 }
-

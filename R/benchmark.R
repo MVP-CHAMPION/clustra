@@ -6,10 +6,6 @@
 #' @param reps Number of replicates for each core setting
 #' @export
 bench_cores = function(FUN, ..., max2 = 5, reps = 4) {
-  require(openblasctl)
-  require(dplyr)
-  require(tidyr)
-  require(ggplot2)
   FUNname = substitute(FUN)
   FUN = match.fun(FUN)
   
@@ -40,4 +36,3 @@ bench_cores = function(FUN, ..., max2 = 5, reps = 4) {
   print(p)
   dev.off()
 }
-

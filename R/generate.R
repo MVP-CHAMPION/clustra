@@ -75,7 +75,6 @@ gen_traj_data = function(n_id, lambda_obs, first = c(-50, -10), last = c(50,100)
 
   ## plot to check result
   if(plots > 0) {
-    require(ggplot2)
     iplot = sample(unique(id_df$id), plots)
     print(ggplot(dplyr::filter(id_df, id %in% iplot), aes(x = time, y = response)) +
             facet_wrap(~ id) + geom_point())

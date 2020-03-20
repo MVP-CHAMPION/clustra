@@ -52,8 +52,6 @@ clustra_par = function(parname = "clustra.par", playdir = "~/clustra_play",
   PL
 }
 
-library(gratia)
-library(mgcv)
 ## TODO add controls to use one core if OpenBLAS is not available
 
 ## Function to fit thin plate spline (tps) to a group with gam from the mgcv
@@ -168,13 +166,11 @@ trajectories = function(data, k, group, iter = 15, maxdf = 50, plot = FALSE,
                         cores = list(e_mc = 1, m_mc = 1, bam_nthreads = 1, blas = 1),
                         verbose = FALSE) {
   if(verbose) a = a_0 = deltime(a)
-  library(parallel)
   openblasctl::openblas_set_num_threads(cores$blas)
   if(max(data$id) != length(group))
     cat("\ntrajectories: imput id's NOT sequential!\n")
 
   ## get number of unique id
-  if(plot) require(ggplot2)
   n_id = length(unique(data$id))
 
   ## EM algorithm to cluster ids into k groups
@@ -268,4 +264,3 @@ clustra = function(data, k, PL, group = NULL, verbose = FALSE, plot = FALSE) {
   trajectories(data, k, group, PL$traj_par$iter, PL$traj_par$maxdf, plot,
                PL$cores)
 }
-
