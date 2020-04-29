@@ -1,6 +1,9 @@
 ## Example of running clustra on a single generated data set
 ## 
 library(clustra)
+
+## Set working directory and parameter file name
+## Set or get clustra parameters
 PL = clustra_par(parname = "clustra.par", playdir = "~/clustra_play")
 
 ## Set seed for reproducibility

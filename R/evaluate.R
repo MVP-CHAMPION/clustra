@@ -25,7 +25,6 @@ plot_tps = function(dat, tps, file, points = FALSE) {
 #' Note all pairs means lower triangle plus diagonal of an all-pairs symmetric
 #' matrix.
 allpair_RandIndex = function(results) {
-  library(MixSim)
   nr = length(results)
   rand_pairs = vector("list", nr*(nr - 1)/2 + nr)
   irm = 0
@@ -38,7 +37,7 @@ allpair_RandIndex = function(results) {
       i.R = as.integer(irow$rep)
       j.K = as.integer(jrow$k)
       j.R = as.integer(jrow$rep)
-      ri = RandIndex(irow$group, jrow$group)
+      ri = MixSim::RandIndex(irow$group, jrow$group)
       Rand = ri$R
       adjRand = ri$AR
       Fow = ri$F
