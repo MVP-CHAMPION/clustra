@@ -4,11 +4,23 @@
 \alias{trajectories}
 \title{Cluster longitudinal trajectories of a response variable.}
 \usage{
-trajectories(data, k, group, iter = 15, maxdf = 50, plot = FALSE,
+trajectories(
+  data,
+  k,
+  group,
+  iter = 15,
+  maxdf = 50,
+  plot = FALSE,
   cores = list(e_mc = 1, m_mc = 1, bam_nthreads = 1, blas = 1),
-  verbose = FALSE)
+  verbose = FALSE
+)
 }
 \arguments{
+\item{data}{Data frame with response measurements, one per observation. Column
+names are \code{id}, \code{time}, \code{response}, \code{group}. Note that
+ id are already sequential.
+starting from 1. This affects expanding group numbers to ids.}
+
 \item{k}{Number of clusters (groups)}
 
 \item{group}{Group numbers corresponding to sequential ids.}
@@ -25,10 +37,7 @@ components e_mc (expectation across k), m_mc (maximization across k),
 bam_nthreads (see bam documentation), blas (OpenBlas). Care should be taken
 that cores are not oversubscribed.}
 
-\item{datax}{Data frame with response measurements, one per observation. Column
-names are \code{id}, \code{time}, \code{response}, \code{group}. Note that
- id are already sequential.
-starting from 1. This affects expanding group numbers to ids.}
+\item{verbose}{TODO}
 }
 \description{
 Trajectory means are splines fit to all ids in a cluster. Typically, this

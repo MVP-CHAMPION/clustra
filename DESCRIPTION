@@ -6,12 +6,26 @@ Authors@R: c(person("George", "Ostrouchov", role = c("aut", "cre"), email =
         "ostrouchovg@ornl.gov"),
         person("David", "Gagnon", role = "aut"),
         person("Hanna", "Gerlovin", role = "aut"))
-Depends: R (>= 3.5.0), methods
-Imports: parallel, mgcv, mgcViz
+Depends:
+    R (>= 3.5.0)
+Imports:
+    dplyr,
+    ggplot2,
+    graphics,
+    gratia,
+    grDevices,
+    jsonlite,
+    magrittr,
+    mgcv,
+    mgcViz,
+    openblasctl,
+    parallel,
+    RColorBrewer,
+    stats,
+    tidyr,
+    utils
 Description: Performs k-means clustering, where each mean is a thin plate spline
         fit to all points of trajectories in cluster. 
 LazyLoad: yes
 License: Mozilla Public License 2.0
-NeedsCompilation: no
-Encoding: UTF-8
-RoxygenNote: 6.1.1
+RoxygenNote: 7.0.2

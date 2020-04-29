@@ -11,6 +11,8 @@ rand_plot(rand_pairs, name)
 }
 \arguments{
 \item{rand_pairs}{A data frame with columns of cluster assignments}
+
+\item{name}{TODO}
 }
 \description{
 Rand index matrix plot from Technometrics paper

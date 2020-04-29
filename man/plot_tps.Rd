@@ -20,7 +20,3 @@ plot_tps(dat, tps, file, points = FALSE)
 Plots spline fit (modify to use acutal bam results), possibly with data
 TODO use actual tps fit rather than redo it with stat_smooth
 }
-\section{Details}{
-
-}
-

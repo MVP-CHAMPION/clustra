@@ -1,15 +1,18 @@
+utils::globalVariables(c(
+  "user", "elapsed", "seconds", "type", "id"
+))
+
+
+
 #' Function to benchmark various core combinations for components of clustra
 #'
 #' @param FUN Function to benchmark.
+#' @param ... Additional arguments passed to `FUN`.
 #' @param max2 Largest power of 2 in cores (e.g. max2 = 3 implies 1, 2, 4, and 8
 #'  cores will be tested. Core control is via openblasctl package)
 #' @param reps Number of replicates for each core setting
 #' @export
 bench_cores = function(FUN, ..., max2 = 5, reps = 4) {
-  require(openblasctl)
-  require(dplyr)
-  require(tidyr)
-  require(ggplot2)
   FUNname = substitute(FUN)
   FUN = match.fun(FUN)
   
@@ -40,4 +43,3 @@ bench_cores = function(FUN, ..., max2 = 5, reps = 4) {
   print(p)
   dev.off()
 }
-

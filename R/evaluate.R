@@ -4,8 +4,6 @@
 #' Plots spline fit (modify to use acutal bam results), possibly with data
 #' TODO use actual tps fit rather than redo it with stat_smooth
 #' 
-#' @section Details:
-#'
 #' @param dat Data frame with variables *time*, *response*, *color*, *group*
 #' @param tps A list, where each element is an output from \code{mgcv::bam}.
 #' @param file Character string with the filename for pdf output.
@@ -56,9 +54,8 @@ allpair_RandIndex = function(results) {
 #' Author: Wei-Chen Chen (wcsnow@gmail.com)
 ## 
 #' @param rand_pairs A data frame with columns of cluster assignments
+#' @param name TODO
 rand_plot = function(rand_pairs, name) {
-  library(RColorBrewer)
-
   K.vec = unique(unlist(rand_pairs[, c("i.K", "j.K")]))
   K.max = max(K.vec)
   K.len = length(K.vec)
@@ -112,8 +109,8 @@ rand_plot = function(rand_pairs, name) {
           main = "Adjusted Rand Index")
     abline(h = (1:K.len) * R.max, lty = 1, col = "black")
     abline(v = (1:K.len) * R.max, lty = 1, col = "black")
-    axis(1, at = ((0:(K.len - 1)) + 0.5) * R.max, label = K.vec)
-    axis(2, at = ((0:(K.len - 1)) + 0.5) * R.max, label = K.vec)
+    axis(1, at = ((0:(K.len - 1)) + 0.5) * R.max, labels = K.vec)
+    axis(2, at = ((0:(K.len - 1)) + 0.5) * R.max, labels = K.vec)
     box()
 
     par(bg = bg, fg = fg, col = fg, col.axis = fg,
@@ -132,7 +129,6 @@ rand_plot = function(rand_pairs, name) {
 #' Then prepares a Rand index comparison between all pairs of clusterings, that
 #' are displayed in a matrix plot.
 #' @param data The data (see clustra description).
-#' @param k Vector of k values to run.
 #' @param PL A list data structure (a list of lists) giving all needed
 #' parameters for the clustra runs.
 #' @param save Logical. When TRUE, save all results as file results.Rdata
@@ -173,4 +169,3 @@ rand_clustra = function(data, PL, save = FALSE, verbose = FALSE) {
   rand_plot(RandIndex_pairs, name = "adjRand_mat.pdf")
   if(verbose) a = deltime(a_rand, "\nTotal rand_cluster time")
 }
-

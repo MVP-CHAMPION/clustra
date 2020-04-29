@@ -4,9 +4,17 @@
 \alias{gen_traj_data}
 \title{Data Generators}
 \usage{
-gen_traj_data(n_id, lambda_obs, first = c(-50, -10), last = c(50, 100),
-  reference = 100, noise = c(0, abs(reference/20)), k = 3,
-  plots = 0, wfile = NULL)
+gen_traj_data(
+  n_id,
+  lambda_obs,
+  first = c(-50, -10),
+  last = c(50, 100),
+  reference = 100,
+  noise = c(0, abs(reference/20)),
+  k = 3,
+  plots = 0,
+  wfile = NULL
+)
 }
 \arguments{
 \item{n_id}{Number of trajectories}
@@ -25,6 +33,8 @@ is near 100, which is the default)}
 
 \item{noise}{Vector of length 2 giving the mean and standard deviation, 
 c(mean, sd), of added N(mean, sd) noise.}
+
+\item{k}{TODO}
 
 \item{plots}{Number of plots of randomly selected trajectories to check
 generated data}
