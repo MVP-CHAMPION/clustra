@@ -1,5 +1,2 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
-^.*\.pbs
-^.*\.slurm
-^.*\.par
