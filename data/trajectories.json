@@ -7,8 +7,8 @@
     "plots": [false]
   },
   "cores": {
-    "e_mc": [4],
-    "m_mc": [4],
+    "e_mc": [1],
+    "m_mc": [1],
     "bam_nthreads": [1],
     "blas": [1]
   },
