@@ -76,7 +76,7 @@ pred_g = function(g, tps, data)
 ## Loss functions for each id to a group tps center
 mse_g = function(g, pred, data) # mean squared error
   as.numeric(tapply((data$response - pred[[g]]$fit)^2, data$id, mean))
-mxe_g = function(g, tps, data) # maximum error
+mxe_g = function(g, pred, data) # maximum error
   as.numeric(tapply(abs(data$response - pred[[g]]$fit), data$id, max))
 ## Fn to compute points outside CI
 ## Mean distance in probability (a multi-Mahalanobis distance)
@@ -171,7 +171,7 @@ trajectories = function(data, k, group, iter = 15, maxdf = 50, plot = FALSE,
                         cores = list(e_mc = 1, m_mc = 1, bam_nthreads = 1, blas = 1),
                         verbose = FALSE) {
   if(verbose) a = a_0 = deltime(a)
-  # openblasctl::openblas_set_num_threads(cores$blas)
+  openblasctl::openblas_set_num_threads(cores$blas)
   if(max(data$id) != length(group))
     cat("\ntrajectories: imput id's NOT sequential!\n")
 

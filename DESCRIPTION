@@ -5,7 +5,8 @@ Title: Clustering trajectories anchored at intervention time
 Authors@R: c(person("George", "Ostrouchov", role = c("aut", "cre"), email = 
         "ostrouchovg@ornl.gov"),
         person("David", "Gagnon", role = "aut"),
-        person("Hanna", "Gerlovin", role = "aut"))
+        person("Hanna", "Gerlovin", role = "aut"),
+        person("Chen", "Wei-Chen", role = "ctb"))
 Depends:
     R (>= 3.5.0)
 Imports:
@@ -18,6 +19,7 @@ Imports:
     magrittr,
     mgcv,
     mgcViz,
+    MixSim,
     openblasctl,
     parallel,
     RColorBrewer,
@@ -28,4 +30,5 @@ Description: Performs k-means clustering, where each mean is a thin plate spline
         fit to all points of trajectories in cluster. 
 LazyLoad: yes
 License: Mozilla Public License 2.0
-RoxygenNote: 7.0.2
+Encoding: UTF-8
+RoxygenNote: 7.1.0

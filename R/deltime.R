@@ -9,8 +9,8 @@
 #' "elapsed" component of current proc.time().
 #' 
 #' @export
-deltime <- function(ltime=proc.time()["elapsed"], text=NULL) {
-  time <- proc.time()["elapsed"]
+deltime = function(ltime = proc.time()["elapsed"], text = NULL) {
+  time = proc.time()["elapsed"]
   if(!is.null(text))
     cat(text, time - ltime)
   invisible(time)

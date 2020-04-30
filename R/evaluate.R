@@ -161,8 +161,7 @@ rand_clustra = function(data, PL, save = FALSE, verbose = FALSE) {
   }
   
   ## save object results and parameters
-  if(save) save(results, k, maxdf, starts, iter, replicates,
-                file = "results.Rdata")
+  if(save) save(results, k, replicates, file = "results.Rdata")
   
   ## plot Rand Index evaluation
   RandIndex_pairs = allpair_RandIndex(results)
