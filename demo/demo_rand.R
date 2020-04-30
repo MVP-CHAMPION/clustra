@@ -2,7 +2,7 @@
 ## 
 
 library(clustra)
-PL = clustra_par(parname = "clustra.par", playdir = "~/clustra_play")
+PL = clustra_par(playdir = "~/clustra_play")
 
 ## Set seed for reproducibility
 ## TODO Check if reproducible when running parallel

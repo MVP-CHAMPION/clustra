@@ -4,7 +4,7 @@ library(clustra)
 
 ## Set working directory and parameter file name
 ## Set or get clustra parameters
-PL = clustra_par(parname = "clustra.json", playdir = "~/clustra_play")
+PL = clustra_par(playdir = "~/clustra_play")
 
 ## Set seed for reproducibility
 ## TODO Check if reproducible when running parallel

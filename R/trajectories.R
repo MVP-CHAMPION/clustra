@@ -22,7 +22,7 @@
 #' @param PL 
 #' A list of lists parameter data structure.
 #' @export
-clustra_par = function(parname, playdir, PL = NULL) {
+clustra_par = function(playdir, parname = "clustra_par.json", PL = NULL) {
   setwd(playdir)
   if(!is.null(PL)) { # have new PL so write it out and use it
     jsonlite::write_json(PL, parname, pretty = TRUE)
@@ -30,7 +30,7 @@ clustra_par = function(parname, playdir, PL = NULL) {
     if(file.exists(parname)) {
       PL = jsonlite::read_json(parname, simplifyVector = TRUE)
     } else {
-      PL = jsonlite::read_json("data/trajectories.json", simplifyVector = TRUE)
+      PL = jsonlite::read_json("json/clustra_par.json", simplifyVector = TRUE)
       jsonlite::write_json(PL, parname, pretty = TRUE)
     }
   } 

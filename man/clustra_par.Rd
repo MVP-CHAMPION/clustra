@@ -4,12 +4,12 @@
 \alias{clustra_par}
 \title{Function to set and maintain clustra parameters and working directory.}
 \usage{
-clustra_par(parname, playdir, PL = NULL)
+clustra_par(playdir, parname = "clustra_par.json", PL = NULL)
 }
 \arguments{
-\item{parname}{Character string filename.}
-
 \item{playdir}{Character string directory where filename is expected and written.}
+
+\item{parname}{Character string filename.}
 
 \item{PL}{A list of lists parameter data structure.}
 }

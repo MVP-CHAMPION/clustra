@@ -51,8 +51,8 @@ allpair_RandIndex = function(results) {
 #' Rand index matrix plot from Technometrics paper
 #' Sorts replicates within cluster K
 #' Assumes K starts from 2
-#' Author: Wei-Chen Chen
-## 
+#' Author: Wei-Chen Chen (modified by George Ostrouchov)
+#' 
 #' @param rand_pairs A data frame with columns of cluster assignments
 #' @param name TODO
 rand_plot = function(rand_pairs, name) {
@@ -161,7 +161,7 @@ rand_clustra = function(data, PL, save = FALSE, verbose = FALSE) {
   }
   
   ## save object results and parameters
-  if(save) save(results, k, replicates, file = "results.Rdata")
+  if(save) save(results, k, replicates, file = "rand_clustra.Rdata")
   
   ## plot Rand Index evaluation
   RandIndex_pairs = allpair_RandIndex(results)
