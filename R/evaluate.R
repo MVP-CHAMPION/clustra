@@ -51,7 +51,7 @@ allpair_RandIndex = function(results) {
 #' Rand index matrix plot from Technometrics paper
 #' Sorts replicates within cluster K
 #' Assumes K starts from 2
-#' Author: Wei-Chen Chen (wcsnow@gmail.com)
+#' Author: Wei-Chen Chen
 ## 
 #' @param rand_pairs A data frame with columns of cluster assignments
 #' @param name TODO

@@ -30,22 +30,23 @@ clustra_par = function(parname, playdir, PL = NULL) {
     if(file.exists(parname)) {
       PL = jsonlite::read_json(parname, simplifyVector = TRUE)
     } else {
-      PL = list(
-        gen_par = list(seed = 90, 
-                       n_id = 10000, 
-                       lambda_obs = 25,
-                       first = c(-365, -10),
-                       last = c(365*3, 365*10), 
-                       plots = FALSE),
-        cores = list(e_mc = 4, m_mc = 4, bam_nthreads = 1, blas = 1),
-        traj_par = list(seed = 79,
-                        maxdf = 30,
-                        iter = 8, 
-                        starts = list(ns = 5, nid = 10),
-                        k_vec = c(2, 3, 4),
-                        replicates = 4)
-      )
-      jsonlite::write_json(PL, parname, pretty = TRUE)
+      PL = jsonlite::read_json("data/trajectories.json", simplifyVector = TRUE)
+      #      PL = list(
+#        gen_par = list(seed = 90, 
+#                       n_id = 10000, 
+#                       lambda_obs = 25,
+#                       first = c(-365, -10),
+#                       last = c(365*3, 365*10), 
+#                       plots = FALSE),
+#        cores = list(e_mc = 4, m_mc = 4, bam_nthreads = 1, blas = 1),
+#        traj_par = list(seed = 79,
+#                        maxdf = 30,
+#                        iter = 8, 
+#                        starts = list(ns = 5, nid = 10),
+#                        k_vec = c(2, 3, 4),
+#                        replicates = 4)
+#      )
+#      jsonlite::write_json(PL, parname, pretty = TRUE)
     }
   } 
   PL
