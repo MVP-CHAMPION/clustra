@@ -15,10 +15,10 @@
 #' playdir and use that; if PL is NULL and parname file is not present, PL is
 #' set to defaults.
 #' 
-#' @param parname
-#' Character string filename.
 #' @param playdir 
 #' Character string directory where filename is expected and written. 
+#' @param parname
+#' Character string filename.
 #' @param PL 
 #' A list of lists parameter data structure.
 #' @export
@@ -30,8 +30,10 @@ clustra_par = function(playdir, parname = "clustra_par.json", PL = NULL) {
     if(file.exists(parname)) {
       PL = jsonlite::read_json(parname, simplifyVector = TRUE)
     } else {
-      PL = jsonlite::read_json("json/clustra_par.json", simplifyVector = TRUE)
-      jsonlite::write_json(PL, parname, pretty = TRUE)
+      ## read default from json dir of clustra
+      jsonfile = paste0(path.package("clustra"), "/json/clustra_par.json")
+      PL = jsonlite::read_json(jsonfile, simplifyVector = TRUE)
+      jsonlite::write_json(PL, parname, pretty = TRUE) # write to playdir
     }
   } 
   PL
@@ -77,14 +79,17 @@ mpd_g = function(g, pred, data) {
 #' sequential starting from 1. This affects expanding group numbers to ids.
 #' @param k Number of clusters (groups).
 #' "bestrand" is implemented.
-#' @param nstart The number of random start values to consider.
-#' @param nid The number of id's per cluster to sample in evaluating starts.
-#' @param cores TODO
-#' @param maxdf Maximum degrees of freedom for trajectory spline smooths.
-#' @param verbose TODO
+#' @param PL The number of random start values to consider.
+#' @param verbose Turn on more output for debugging.
 #' @export
-start_groups = function(data, k, nstart, nid, cores, maxdf, verbose = FALSE) {
+start_groups = function(data, k, PL, verbose = FALSE) {
   if(verbose) cat("\nStarts : ")
+  
+  nstart = PL$traj_par$starts
+  nid = PL$traj_par$idperstart
+  maxdf = PL$traj_par$maxdf
+  cores = PL$cores
+  
   ## test data for diversity criterion
   test_data = data.frame(id = rep(0, k*2*maxdf),
                 time = rep(seq(min(data$time), max(data$time),
@@ -98,14 +103,14 @@ start_groups = function(data, k, nstart, nid, cores, maxdf, verbose = FALSE) {
   ## Then classifies all ids based on fit from best sample
   max_div = 0
   start_id = sort(sample(unique(data$id), k*nid)) # for speed and diversity!
-  data_start = data[data$id %in% start_id, ]
+  data_start = data[match(data$id, start_id, nomatch = 0) > 0, ]
   data_start$id = as.numeric(factor(data_start$id)) # since id are not sequential (Am I losing correspondence to ids? No, because spline modesl do not know about ids. The classification process only needs who has same id, not what is the id.)
+  PL$traj_par$iter = 1  # Local number of iterations for starts (local PL)
   for(i in 1:nstart) {
     group = sample(k, k*nid, replace = TRUE) # random groups
     data_start$group = group[data_start$id] # expand group to all responses
 
-    f = trajectories(data_start, k, group, iter = 1, maxdf = maxdf,
-                     plot = FALSE, cores = cores)
+    f = trajectories(data_start, k, group, PL, plot = FALSE)
     if(any(lapply(f$tps, class) == "try-error")) next
 
     diversity = sum(dist(
@@ -143,19 +148,14 @@ start_groups = function(data, k, nstart, nid, cores, maxdf, verbose = FALSE) {
 #' starting from 1. This affects expanding group numbers to ids.
 #' @param k Number of clusters (groups)
 #' @param group Group numbers corresponding to sequential ids.
-#' @param iter Maximum number of iterations. Note if iter <= 2, only deviance is
-#' displayed for minimal output during start values exploration.
-#' @param maxdf Maximum degrees of freedom for trajectory spline smooths.
 #' @param plot Plot clustered data with superimposed trajectory spline smooths.
-#' @param cores A list specifying multicore parallelism with
-#' components e_mc (expectation across k), m_mc (maximization across k),
-#' bam_nthreads (see bam documentation), blas (OpenBlas). Care should be taken
-#' that cores are not oversubscribed.
-#' @param verbose TODO
+#' @param verbose Produce debug output (FALSE).
 #' @export
-trajectories = function(data, k, group, iter = 15, maxdf = 50, plot = FALSE,
-                        cores = list(e_mc = 1, m_mc = 1, bam_nthreads = 1, blas = 1),
-                        verbose = FALSE) {
+trajectories = function(data, k, group, PL, plot = FALSE, verbose = FALSE) {
+  iter = PL$traj_par$iter
+  maxdf = PL$traj_par$maxdf
+  cores = PL$cores
+  
   if(verbose) a = a_0 = deltime(a)
   openblasctl::openblas_set_num_threads(cores$blas)
   if(max(data$id) != length(group))
@@ -240,15 +240,12 @@ trajectories = function(data, k, group, iter = 15, maxdf = 50, plot = FALSE,
 clustra = function(data, k, PL, group = NULL, verbose = FALSE, plot = FALSE) {
   ## get initial group assignments
   if(is.null(group))
-    group = start_groups(data, k, nstart = PL$traj_par$starts$ns,
-                         nid = PL$traj_par$starts$nid, cores = PL$cores,
-                         maxdf = PL$traj_par$maxdf)
+    group = start_groups(data, k, PL)
 
   ## provide sequential id's and add initial group assignments to data
   data$id = as.numeric(factor(data$id))
   data$group = group[data$id] # expand to all observations
 
   ## kmeans iteration to assign id's to groups
-  trajectories(data, k, group, PL$traj_par$iter, PL$traj_par$maxdf, plot,
-               PL$cores, verbose)
+  trajectories(data, k, group, PL, plot, verbose)
 }

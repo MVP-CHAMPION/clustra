@@ -10,21 +10,16 @@ Authors@R: c(person("George", "Ostrouchov", role = c("aut", "cre"), email =
 Depends:
     R (>= 3.5.0)
 Imports:
-    dplyr,
     ggplot2,
     graphics,
-    gratia,
     grDevices,
     jsonlite,
-    magrittr,
     mgcv,
     mgcViz,
     MixSim,
     openblasctl,
     parallel,
-    RColorBrewer,
     stats,
-    tidyr,
     utils
 Description: Performs k-means clustering, where each mean is a thin plate spline
         fit to all points of trajectories in cluster. 

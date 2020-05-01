@@ -80,8 +80,11 @@ rand_plot = function(rand_pairs, name) {
   }
   lim = range(x)
   zlim = range(c(rand_pairs$adjRand, 1))
-  var.col = colorRampPalette(brewer.pal(9, "YlOrRd"))(n.col)
-
+  ## made by colors = brewer.pal(9, "YlOrRd") # removed dependency
+  colors = c("#FFFFCC", "#FFEDA0", "#FED976", "#FEB24C", "#FD8D3C", "#FC4E2A",
+             "#E31A1C", "#BD0026", "#800026")
+  var.col = colorRampPalette(colors)(n.col)
+  
   ## Reorder within K for vis effect
   for(i in 1:K.len) { 
     iv = (i - 1) * R.max + (1:R.max)
@@ -137,7 +140,7 @@ rand_plot = function(rand_pairs, name) {
 #' @export
 rand_clustra = function(data, PL, save = FALSE, verbose = FALSE) {
   set.seed(PL$traj_par$seed)
-  k = PL$traj_par$k_vec
+  k = PL$traj_par$ng_vec
   replicates = PL$traj_par$replicates
   
   a_rand = deltime()
