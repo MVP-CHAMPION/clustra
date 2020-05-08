@@ -2,7 +2,7 @@
 % Please edit documentation in R/zzz.R
 \name{clustra_env}
 \alias{clustra_env}
-\title{Function to get or set clustra environment variables.}
+\title{Get or set clustra environment variables.}
 \usage{
 clustra_env(...)
 }
@@ -13,11 +13,12 @@ return the cor$e_mc parameter and "cor$e_mc = 8" will assign 8 to that
 parameter.}
 }
 \description{
-Function to get or set clustra environment variables.
+Several parameters can be set with one call but only one parameter can
+be returned. All parameters after the first returned parameter are ignored.
+An empty parameter list will print all parameters in the environment.
+Note that limited checking for syntax is performed so be careful!
 }
-\details{
-Several parameters can be set but only one parameter returned. All
- parameters after the first returned parameter are ignored. An empty
- parameter list will print all parameters in the environment.
- Note that limited checking for syntax is performed so be careful!
+\seealso{
+[clustra_env_gen()], [clustra_env_cor()], [clustra_env_clu()], 
+  [clustra_env_ran()].
 }

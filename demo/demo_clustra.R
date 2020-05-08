@@ -24,4 +24,4 @@ a = a_fit = deltime(a, paste0("\nData (", paste(dim(data), collapse = ","), ") g
 head(data)
 
 ## cluster the trajectories
-cl = clustra(data, 3, PL, verbose = TRUE, plot = TRUE)
+cl = clustra(data, 3, verbose = TRUE, plot = TRUE)

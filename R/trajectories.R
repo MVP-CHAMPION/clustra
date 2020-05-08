@@ -7,8 +7,8 @@
 
 ## Function to fit thin plate spline (tps) to a group with gam from the mgcv
 ## package. Crossvalidation does not know about zero weights, resulting in
-## different smoothing parameters, so subset parameter is used to ensure correct
-## crossvalidation sampling.
+## different smoothing parameters, so subset parameter is used to ensure 
+## correct crossvalidation sampling.
 ## TODO Add write generated data to a csv file
 ## TODO Add Ward's hierarchical clustering of the cluster means (evaluated on a
 ##      grid) for a converged high-K trajectories result.
@@ -72,14 +72,18 @@ start_groups = function(data, k,
   max_div = 0
   start_id = sort(sample(unique(data$id), k*nid)) # for speed and diversity!
   data_start = data[match(data$id, start_id, nomatch = 0) > 0, ]
-  data_start$id = as.numeric(factor(data_start$id)) # since id are not sequential (Am I losing correspondence to ids? No, because spline modesl do not know about ids. The classification process only needs who has same id, not what is the id.)
-  iter_save = clustra_env("tra$iter")
-  clustra_env("tra$iter = 1") # Local number of iterations for starts
+
+  data_start$id = as.numeric(factor(data_start$id)) 
+  ## Note: since id are not sequential (Am I losing correspondence to ids? No,
+  ##  because spline modesl do not know about ids. The classification process 
+  ##  only needs who has same id, not what is the id.)
+
   for(i in 1:nstart) {
     group = sample(k, k*nid, replace = TRUE) # random groups
     data_start$group = group[data_start$id] # expand group to all responses
 
-    f = trajectories(data_start, k, group, plot = FALSE, verbose = verbose)
+    f = trajectories(data_start, k, group, iter = 1,  # single iter for starts!
+                     plot = FALSE, verbose = verbose)
     if(any(lapply(f$tps, class) == "try-error")) next
 
     diversity = sum(dist(
@@ -93,7 +97,7 @@ start_groups = function(data, k,
     }
     if(verbose) cat(round(diversity, 2), "")
   }
-  clustra_env(paste("tra$iter =", iter_save))
+
   if(verbose) cat("->", max_div, "")
   ## predict for all observations of all ids
   pred = mclapply(1:k, pred_g, tps = best_tps_cov, data = data,
@@ -224,5 +228,5 @@ clustra = function(data, k, group = NULL, verbose = FALSE, plot = FALSE) {
   data$group = group[data$id] # expand to all observations
 
   ## kmeans iteration to assign id's to groups
-  trajectories(data, k, group, plot, verbose)
+  trajectories(data, k, group, plot = plot, verbose = verbose)
 }

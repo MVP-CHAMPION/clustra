@@ -1,5 +1,5 @@
 
-#' Components of `gen` list in .clustra_env environment
+#' Function to initialize components of `gen` list in .clustra_env environment
 #' 
 #' @param seed Seed to use in data generation.
 #' @param n_id Number of id to generate.
@@ -10,8 +10,7 @@
 #'   uniformly generated end observation time.
 #' @param plots Logical to indicate if a sample of `id`s trajectories are
 #'   plotted.
-#' @rdname env_gen
-clustra_gen = function(
+.clustra_env_gen = function(
   seed = 90,
   n_id = 20000,
   m_obs = 25,
@@ -29,14 +28,13 @@ clustra_gen = function(
   )
 }
 
-#' Components of `cor` list in .clustra_env environment
+#' Function to initialize components of `cor` list in .clustra_env environment
 #' 
 #' @param e_mc Cores to use by mclapply of e_mc (expectation over k)
 #' @param m_mc Cores to use by mclapply of m_mc (maximization across k)
 #' @param bam_nthreads Threads to use by mgcv::bam()
 #' @param blas Cores to use by OpenBLAS
-#' @rdname env_cor
-clustra_cor = function(
+.clustra_env_cor = function(
   e_mc = 1, 
   m_mc = 1,
   bam_nthreads = 1,
@@ -50,16 +48,14 @@ clustra_cor = function(
   )
 }
 
-#' Components of `clu` list in .clustra_env environment
+#' Function to initialize components of `clu` list in .clustra_env environment
 #' 
 #' @param seed Cores to use by mclapply of e_mc (expectation over k)
 #' @param maxdf Basis dimension of smooth term (mgcv::s(), parameter k).
 #' @param iter Maximum number of iterations.
 #' @param starts Number of random starts.
 #' @param idperstart Number of `id`s to sample for random starts.
-#' @rdname env_cor
-#' @seealso [mgcv::s()]
-clustra_clu = function(
+.clustra_env_clu = function(
   seed = 79, # starting seed for cluster starts
   maxdf = 50, # 
   iter = 8, # mgcv::bam maximum iterations
@@ -75,7 +71,11 @@ clustra_clu = function(
   )
 }
 
-clustra_ran = function(
+#' Function to initialize components of `ran` list in .clustra_env environment
+#' 
+#' @param ng_vec Vector of `k` values to simulate.
+#' @param replicates Number of replicates for each `k`.
+.clustra_env_ran = function(
   ng_vec = c(2, 3, 4, 5),
   replicates = 10
 )
@@ -86,17 +86,20 @@ clustra_ran = function(
   )  
 }
 
-#' Function to get or set clustra environment variables.
+#' Get or set clustra environment variables.
 #' 
+#' Several parameters can be set with one call but only one parameter can
+#' be returned. All parameters after the first returned parameter are ignored.
+#' An empty parameter list will print all parameters in the environment.
+#' Note that limited checking for syntax is performed so be careful!
+#'  
 #' @param ... Any number of string constants that ask for or assign various
 #' parameters in .clustra_env environment. For example, "cor$e_mc" will
 #' return the cor$e_mc parameter and "cor$e_mc = 8" will assign 8 to that
 #' parameter.
-#' @details 
-#' Several parameters can be set but only one parameter returned. All
-#'  parameters after the first returned parameter are ignored. An empty
-#'  parameter list will print all parameters in the environment.
-#'  Note that limited checking for syntax is performed so be careful!
+#' 
+#' @seealso [clustra_env_gen()], [clustra_env_cor()], [clustra_env_clu()], 
+#'   [clustra_env_ran()].
 #' @export
 clustra_env = function(...) {
   fun = "clustra_env"
@@ -132,31 +135,33 @@ clustra_env = function(...) {
     if(length(alr) == 1) {
       ## return requested parameter and ignore rest of parameters, if any
       return(eval(parse(text = a), envir = env))
-      } else if(length(alr) == 2) {
-        ## silently modify environment parameter
-        eval(parse(text = a), env)
-      } else {
-        cat(fun, ": something went wrong with parameter", a, "\n")
-        return(invisible())
-      }
+    } else if(length(alr) == 2) {
+      ## silently modify environment parameter
+      eval(parse(text = a), env)
+    } else {
+      cat(fun, ": something went wrong with parameter", a, "\n")
+      return(invisible())
+    }
   }
   
   ## an empty parameter list prints all parameters in environment
   if(length(a) == 0)
     print(sapply(ls(env), function(x) get(x, envir = env)))
-    
+  
   invisible()
 }
 
-### Initialize clustra options
+#' Function to create and initialize .clustra_env
+#' 
+#' @param envir Environment where to create .clustra_env
 .clustra_init = function(envir = .GlobalEnv){
   if(!exists(".clustra_env", envir = envir)){
     envir$.clustra_env = new.env()
   } 
-  envir$.clustra_env$gen = clustra_gen()
-  envir$.clustra_env$cor = clustra_cor()
-  envir$.clustra_env$clu = clustra_clu()
-  envir$.clustra_env$ran = clustra_ran()
+  envir$.clustra_env$gen = .clustra_env_gen()
+  envir$.clustra_env$cor = .clustra_env_cor()
+  envir$.clustra_env$clu = .clustra_env_clu()
+  envir$.clustra_env$ran = .clustra_env_ran()
   
   invisible()
 }
