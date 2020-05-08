@@ -4,38 +4,58 @@
 \alias{gen_traj_data}
 \title{Data Generators}
 \usage{
-gen_traj_data(PL, reference = 100, noise = c(0, abs(reference/20)), k = 3)
+gen_traj_data(
+  n_id = clustra_env("gen$n_id"),
+  lambda_obs = clustra_env("gen$m_obs"),
+  st = clustra_env("gen$s_range"),
+  en = clustra_env("gen$e_range"),
+  plots = clustra_env("gen$plots"),
+  reference = 100,
+  noise = c(0, abs(reference/20)),
+  k = 3,
+  min_obs = 3
+)
 }
 \arguments{
-\item{PL}{Data structure giving generation parameters}
+\item{n_id}{See .clustra_env}
+
+\item{lambda_obs}{See .clustra_env}
+
+\item{st}{See .clustra_env}
+
+\item{en}{See .clustra_env}
+
+\item{plots}{See .clustra_env}
 
 \item{reference}{A nominal response reference (for example, blood pressure
 is near 100, which is the default)}
 
-\item{noise}{Vector of length 2 giving the mean and standard deviation, 
-c(mean, sd), of added N(mean, sd) noise.}
+\item{noise}{Vector of length 2 giving the mean and sd of added N(mean, sd)
+noise.}
 
 \item{k}{Number of response types (TODO works only for k = 2 and 3)}
+
+\item{min_obs}{Minimum number of observations in addition to zero time
+observation.}
+}
+\value{
+A data frame with one response per row and three columns:
+  `id` (an integer in 1:(3*n_id), `time` (an iteger in `st[1]` to `en[2]`
+  observation time), and `response`.
 }
 \description{
 Collection of longitudinal responses with possibly varying lengths and 
-varying numbers of observations. Support is [start . . . 0 . . . end] so that
-all trajectories are aligned at 0. Usually, zero is the intervention date.
+varying numbers of observations. Support is [st . . . 0 . . . en] so that
+all trajectories are aligned at 0. Zero is the intervention time.
 }
 \section{Details}{
 
 Generate longitudinal data for a response variable. Trajectories start
-at time uniformly distributed in first and end at time uniformly 
-distributed in last. Number of observations in a trajectory is 
+at time uniformly distributed in st and end at time uniformly 
+distributed in en. Number of observations in a trajectory is 
 Poisson(lambda_obs). The result is a number of trajectories, all starting at 
 time 0, with different time spans, and with independently different numbers 
 of observations within the time spans. Each trajectory follows a randomly 
 selected response function with added N(mean, sd) error.
-}
-
-\section{Value}{
-
-A data frame with one response per row and three columns: id (an integer in 
-1:(3*n_id), time (an iteger in 0 to last observation time), and response.
 }
 

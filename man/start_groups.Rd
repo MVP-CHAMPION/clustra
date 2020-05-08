@@ -4,7 +4,15 @@
 \alias{start_groups}
 \title{Function to assign starting groups.}
 \usage{
-start_groups(data, k, nstart, nid, cores, maxdf, verbose = FALSE)
+start_groups(
+  data,
+  k,
+  nstart = clustra_env("clu$starts"),
+  nid = clustra_env("clu$idperstart"),
+  maxdf = clustra_env("clu$maxdf"),
+  cores = clustra_env("cor"),
+  verbose = FALSE
+)
 }
 \arguments{
 \item{data}{Data frame with response measurements, one per observation.
@@ -14,15 +22,15 @@ sequential starting from 1. This affects expanding group numbers to ids.}
 \item{k}{Number of clusters (groups).
 "bestrand" is implemented.}
 
-\item{nstart}{The number of random start values to consider.}
+\item{nstart}{(see clu component of .clustra_env)}
 
-\item{nid}{The number of id's per cluster to sample in evaluating starts.}
+\item{nid}{(see clu component of .clustra_env)}
 
-\item{cores}{TODO}
+\item{maxdf}{(see clu component of .clustra_env)}
 
-\item{maxdf}{Maximum degrees of freedom for trajectory spline smooths.}
+\item{cores}{(see cor component of .clustra_env)}
 
-\item{verbose}{TODO}
+\item{verbose}{Turn on more output for debugging.}
 }
 \description{
 Function to assign starting groups.

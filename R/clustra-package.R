@@ -5,7 +5,6 @@
 #' 
 #' @import ggplot2
 #' @importFrom graphics abline axis box image layout par plot
-#' @importFrom jsonlite read_json write_json
 #' @importFrom openblasctl openblas_set_num_threads
 #' @importFrom parallel mclapply
 #' @importFrom grDevices dev.off pdf colorRampPalette

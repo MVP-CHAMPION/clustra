@@ -6,20 +6,13 @@ library(clustra)
 playdir = "~/clustra_play"
 if(!dir.exists(playdir)) dir.create(playdir)
 
-## Set or get clustra parameters
-## TODO document full PL.  cores A list specifying multicore parallelism with
-## components e_mc (expectation across k), m_mc (maximization across k),
-## bam_nthreads (see bam documentation), blas (OpenBlas). Care should be taken
-## that cores are not oversubscribed.
-PL = clustra_par(playdir)
-
 ## Set seed for reproducibility
 ## TODO Check if reproducible when running parallel
-set.seed(PL$gen_par$seed)
+set.seed(clustra_env("gen$seed"))
 a0 = a = deltime()
 
 ## Generate a data set
-data = gen_traj_data(PL)
+data = gen_traj_data()
 write.table(data, file = "clustra_gen_data.csv")
 ## plot to check result
 iplot = sample(unique(data$id), 8)

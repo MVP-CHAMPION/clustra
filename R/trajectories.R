@@ -5,52 +5,17 @@
 ##
 ##
 
-#' Function to set and maintain clustra parameters and working directory.
-#' 
-#' @details
-#' Objective is to simplify clustra function invocation and manage sets of
-#' clustra runs using a \code{jsonlite} file. Sets working directory to playdir.
-#' Parameters PL set in the following order: if PL is supplied, it is written to
-#' a json file and returned; if PL is NULL, attempts to find parname file in
-#' playdir and use that; if PL is NULL and parname file is not present, PL is
-#' set to defaults.
-#' 
-#' @param playdir 
-#' Character string directory where filename is expected and written. 
-#' @param parname
-#' Character string filename.
-#' @param PL 
-#' A list of lists parameter data structure.
-#' @export
-clustra_par = function(playdir, parname = "clustra_par.json", PL = NULL) {
-  setwd(playdir)
-  if(!is.null(PL)) { # have new PL so write it out and use it
-    jsonlite::write_json(PL, parname, pretty = TRUE)
-  } else { # use PL from file or set default and write it
-    if(file.exists(parname)) {
-      PL = jsonlite::read_json(parname, simplifyVector = TRUE)
-    } else {
-      ## read default from json dir of clustra
-      jsonfile = paste0(path.package("clustra"), "/json/clustra_par.json")
-      PL = jsonlite::read_json(jsonfile, simplifyVector = TRUE)
-      jsonlite::write_json(PL, parname, pretty = TRUE) # write to playdir
-    }
-  } 
-  PL
-}
-
-## TODO add controls to use one core if OpenBLAS is not available
-
 ## Function to fit thin plate spline (tps) to a group with gam from the mgcv
 ## package. Crossvalidation does not know about zero weights, resulting in
-## different smoothing parameters, so subset is used and a separate prediction
-## function.
+## different smoothing parameters, so subset parameter is used to ensure correct
+## crossvalidation sampling.
 ## TODO Add write generated data to a csv file
 ## TODO Add Ward's hierarchical clustering of the cluster means (evaluated on a
 ##      grid) for a converged high-K trajectories result.
 ##      Profile plots can help determine K.
 ## TODO Add uncertainty moderated outlier detection. Do we need to use credible
 ##      regions or is se.fit enough??
+## TODO add controls to use one core if OpenBLAS is not available
 tps_g = function(g, data, maxdf, nthreads) {
   tps = mgcv::bam(response ~ s(time, k = maxdf), data = data,
                   subset = data$group == g, discrete = TRUE, nthreads = nthreads)
@@ -79,16 +44,19 @@ mpd_g = function(g, pred, data) {
 #' sequential starting from 1. This affects expanding group numbers to ids.
 #' @param k Number of clusters (groups).
 #' "bestrand" is implemented.
-#' @param PL The number of random start values to consider.
+#' @param nstart (see clu component of .clustra_env)
+#' @param nid (see clu component of .clustra_env)
+#' @param maxdf (see clu component of .clustra_env)
+#' @param cores (see cor component of .clustra_env)
 #' @param verbose Turn on more output for debugging.
 #' @export
-start_groups = function(data, k, PL, verbose = FALSE) {
+start_groups = function(data, k,
+                        nstart = clustra_env("clu$starts"),
+                        nid = clustra_env("clu$idperstart"),
+                        maxdf = clustra_env("clu$maxdf"),
+                        cores = clustra_env("cor"),
+                        verbose = FALSE) {
   if(verbose) cat("\nStarts : ")
-  
-  nstart = PL$traj_par$starts
-  nid = PL$traj_par$idperstart
-  maxdf = PL$traj_par$maxdf
-  cores = PL$cores
   
   ## test data for diversity criterion
   test_data = data.frame(id = rep(0, k*2*maxdf),
@@ -105,12 +73,13 @@ start_groups = function(data, k, PL, verbose = FALSE) {
   start_id = sort(sample(unique(data$id), k*nid)) # for speed and diversity!
   data_start = data[match(data$id, start_id, nomatch = 0) > 0, ]
   data_start$id = as.numeric(factor(data_start$id)) # since id are not sequential (Am I losing correspondence to ids? No, because spline modesl do not know about ids. The classification process only needs who has same id, not what is the id.)
-  PL$traj_par$iter = 1  # Local number of iterations for starts (local PL)
+  iter_save = clustra_env("tra$iter")
+  clustra_env("tra$iter = 1") # Local number of iterations for starts
   for(i in 1:nstart) {
     group = sample(k, k*nid, replace = TRUE) # random groups
     data_start$group = group[data_start$id] # expand group to all responses
 
-    f = trajectories(data_start, k, group, PL, plot = FALSE)
+    f = trajectories(data_start, k, group, plot = FALSE, verbose = verbose)
     if(any(lapply(f$tps, class) == "try-error")) next
 
     diversity = sum(dist(
@@ -124,6 +93,7 @@ start_groups = function(data, k, PL, verbose = FALSE) {
     }
     if(verbose) cat(round(diversity, 2), "")
   }
+  clustra_env(paste("tra$iter =", iter_save))
   if(verbose) cat("->", max_div, "")
   ## predict for all observations of all ids
   pred = mclapply(1:k, pred_g, tps = best_tps_cov, data = data,
@@ -148,13 +118,17 @@ start_groups = function(data, k, PL, verbose = FALSE) {
 #' starting from 1. This affects expanding group numbers to ids.
 #' @param k Number of clusters (groups)
 #' @param group Group numbers corresponding to sequential ids.
+#' @param iter Maximum iterations in mgcv::bam (see .clustra_env)
+#' @param maxdf Maximum degrees of freedom for tps in mgcv::bam (see .clustra_env)
+#' @param cores List with cores allocation to various sections (see .clustra_env)
 #' @param plot Plot clustered data with superimposed trajectory spline smooths.
 #' @param verbose Produce debug output (FALSE).
 #' @export
-trajectories = function(data, k, group, PL, plot = FALSE, verbose = FALSE) {
-  iter = PL$traj_par$iter
-  maxdf = PL$traj_par$maxdf
-  cores = PL$cores
+trajectories = function(data, k, group,
+                        iter = clustra_env("clu$iter"),
+                        maxdf = clustra_env("clu$maxdf"),
+                        cores = clustra_env("cor"),
+                        plot = FALSE, verbose = FALSE) {
   
   if(verbose) a = a_0 = deltime(a)
   openblasctl::openblas_set_num_threads(cores$blas)
@@ -225,27 +199,30 @@ trajectories = function(data, k, group, PL, plot = FALSE, verbose = FALSE) {
 #' 
 #' Most users will run the \code{clustra()} function, which takes care of
 #' starting values and completes kmeans iteration according to parameters in
-#' \code{PL} supplied by \code{clustra_par()} (see \code{demo} directory for
-#' examples).
+#' \code{.clustra_env} environment (see \code{demo} directory for examples).
 #' 
 #' @param data Data frame with response measurements, one per observation.
 #' Column names are id, time, response, group.
 #' @param k Number of clusters (groups).
-#' @param PL A list of lists control structure created by \code{clustra_par}.
 #' @param group A vector of initial cluster assignments for unique id's in data.
 #' Normally, this is NULL and starts are provided by \code{start_groups()}. 
 #' @param verbose Logical to turn on more output during fit iterations.
 #' @param plot Logical to indicate 
+#' 
+#' @details In addition to the shown parameters, detailed clustering and core
+#' allocation parameters are in .clustra_env environment that can be controlled
+#' with \code{clustra_env} function.
+#' 
 #' @export
-clustra = function(data, k, PL, group = NULL, verbose = FALSE, plot = FALSE) {
+clustra = function(data, k, group = NULL, verbose = FALSE, plot = FALSE) {
   ## get initial group assignments
   if(is.null(group))
-    group = start_groups(data, k, PL)
+    group = start_groups(data, k, verbose = verbose)
 
   ## provide sequential id's and add initial group assignments to data
   data$id = as.numeric(factor(data$id))
   data$group = group[data$id] # expand to all observations
 
   ## kmeans iteration to assign id's to groups
-  trajectories(data, k, group, PL, plot, verbose)
+  trajectories(data, k, group, plot, verbose)
 }

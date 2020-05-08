@@ -6,13 +6,20 @@
 Then prepares a Rand index comparison between all pairs of clusterings, that
 are displayed in a matrix plot.}
 \usage{
-rand_clustra(data, PL, save = FALSE, verbose = FALSE)
+rand_clustra(
+  data,
+  k = clustra_env("ran$ng_vec"),
+  replicates = clustra_env("ran$replicates"),
+  save = FALSE,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{data}{The data (see clustra description).}
 
-\item{PL}{A list data structure (a list of lists) giving all needed
-parameters for the clustra runs.}
+\item{k}{Vector of k values to try (see .clustra_env)}
+
+\item{replicates}{Number of replicates for each k (see .clustra_env)}
 
 \item{save}{Logical. When TRUE, save all results as file results.Rdata}
 

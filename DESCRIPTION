@@ -6,21 +6,19 @@ Authors@R: c(person("George", "Ostrouchov", role = c("aut", "cre"), email =
         "ostrouchovg@ornl.gov"),
         person("David", "Gagnon", role = "aut"),
         person("Hanna", "Gerlovin", role = "aut"),
-        person("Chen", "Wei-Chen", role = "ctb"))
+        person("Chen", "Wei-Chen", role = "ctb"),
+        person("Schmidt", "Drew", role = "ctb"))
 Depends:
     R (>= 3.5.0)
 Imports:
     ggplot2,
     graphics,
     grDevices,
-    jsonlite,
     mgcv,
     mgcViz,
     MixSim,
     openblasctl,
-    parallel,
-    stats,
-    utils
+    parallel
 Description: Performs k-means clustering, where each mean is a thin plate spline
         fit to all points of trajectories in cluster. 
 LazyLoad: yes

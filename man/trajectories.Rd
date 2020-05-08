@@ -8,10 +8,10 @@ trajectories(
   data,
   k,
   group,
-  iter = 15,
-  maxdf = 50,
+  iter = clustra_env("clu$iter"),
+  maxdf = clustra_env("clu$maxdf"),
+  cores = clustra_env("cor"),
   plot = FALSE,
-  cores = list(e_mc = 1, m_mc = 1, bam_nthreads = 1, blas = 1),
   verbose = FALSE
 )
 }
@@ -25,19 +25,15 @@ starting from 1. This affects expanding group numbers to ids.}
 
 \item{group}{Group numbers corresponding to sequential ids.}
 
-\item{iter}{Maximum number of iterations. Note if iter <= 2, only deviance is
-displayed for minimal output during start values exploration.}
+\item{iter}{Maximum iterations in mgcv::bam (see .clustra_env)}
 
-\item{maxdf}{Maximum degrees of freedom for trajectory spline smooths.}
+\item{maxdf}{Maximum degrees of freedom for tps in mgcv::bam (see .clustra_env)}
+
+\item{cores}{List with cores allocation to various sections (see .clustra_env)}
 
 \item{plot}{Plot clustered data with superimposed trajectory spline smooths.}
 
-\item{cores}{A list specifying multicore parallelism with
-components e_mc (expectation across k), m_mc (maximization across k),
-bam_nthreads (see bam documentation), blas (OpenBlas). Care should be taken
-that cores are not oversubscribed.}
-
-\item{verbose}{TODO}
+\item{verbose}{Produce debug output (FALSE).}
 }
 \description{
 Trajectory means are splines fit to all ids in a cluster. Typically, this

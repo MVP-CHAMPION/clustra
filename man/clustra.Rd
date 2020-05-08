@@ -4,15 +4,13 @@
 \alias{clustra}
 \title{Cluster trajectories}
 \usage{
-clustra(data, k, PL, group = NULL, verbose = FALSE, plot = FALSE)
+clustra(data, k, group = NULL, verbose = FALSE, plot = FALSE)
 }
 \arguments{
 \item{data}{Data frame with response measurements, one per observation.
 Column names are id, time, response, group.}
 
 \item{k}{Number of clusters (groups).}
-
-\item{PL}{A list of lists control structure created by \code{clustra_par}.}
 
 \item{group}{A vector of initial cluster assignments for unique id's in data.
 Normally, this is NULL and starts are provided by \code{start_groups()}.}
@@ -24,6 +22,10 @@ Normally, this is NULL and starts are provided by \code{start_groups()}.}
 \description{
 Most users will run the \code{clustra()} function, which takes care of
 starting values and completes kmeans iteration according to parameters in
-\code{PL} supplied by \code{clustra_par()} (see \code{demo} directory for
-examples).
+\code{.clustra_env} environment (see \code{demo} directory for examples).
+}
+\details{
+In addition to the shown parameters, detailed clustering and core
+allocation parameters are in .clustra_env environment that can be controlled
+with \code{clustra_env} function.
 }

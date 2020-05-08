@@ -132,16 +132,16 @@ rand_plot = function(rand_pairs, name) {
 #' Then prepares a Rand index comparison between all pairs of clusterings, that
 #' are displayed in a matrix plot.
 #' @param data The data (see clustra description).
-#' @param PL A list data structure (a list of lists) giving all needed
-#' parameters for the clustra runs.
+#' @param k Vector of k values to try (see .clustra_env)
+#' @param replicates Number of replicates for each k (see .clustra_env)
 #' @param save Logical. When TRUE, save all results as file results.Rdata
 #' @param verbose Logical. When TRUE, information about each run of clustra is
 #' printed.
 #' @export
-rand_clustra = function(data, PL, save = FALSE, verbose = FALSE) {
-  set.seed(PL$traj_par$seed)
-  k = PL$traj_par$ng_vec
-  replicates = PL$traj_par$replicates
+rand_clustra = function(data, k = clustra_env("ran$ng_vec"),
+                        replicates = clustra_env("ran$replicates"),
+                        save = FALSE, verbose = FALSE) {
+  set.seed(clustra_env("clu$seed"))
   
   a_rand = deltime()
   results = vector("list", replicates*length(k))
@@ -150,7 +150,7 @@ rand_clustra = function(data, PL, save = FALSE, verbose = FALSE) {
     for(i in 1:replicates) {
       a_0 = deltime()
       
-      f = clustra(data, kj, PL)
+      f = clustra(data, kj, verbose = verbose)
       results[[(j - 1)*replicates + i]] = list(k = as.integer(kj), 
                                                rep = as.integer(i),
                                                deviance = f$deviance,
