@@ -11,14 +11,15 @@ Authors@R: c(person("George", "Ostrouchov", role = c("aut", "cre"), email =
 Depends:
     R (>= 3.5.0)
 Imports:
-    ggplot2,
     graphics,
     grDevices,
     mgcv,
-    mgcViz,
     MixSim,
     openblasctl,
     parallel
+Suggests:
+    ggplot2,
+    mgcViz
 Description: Performs k-means clustering, where each mean is a thin plate spline
         fit to all points of trajectories in cluster. 
 LazyLoad: yes

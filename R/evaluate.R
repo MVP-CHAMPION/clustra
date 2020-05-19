@@ -1,21 +1,3 @@
-#' Various functions to evaluate results of clustering, like RandIndex
-#' computation and plots of spline fits.
-#'
-#' Plots spline fit (modify to use acutal bam results), possibly with data
-#' TODO use actual tps fit rather than redo it with stat_smooth
-#' 
-#' @param dat Data frame with variables *time*, *response*, *color*, *group*
-#' @param tps A list, where each element is an output from \code{mgcv::bam}.
-#' @param file Character string with the filename for pdf output.
-#' @param points If true, plot all the data points. Not implemented yet.
-plot_tps = function(dat, tps, file, points = FALSE) {
-  ## TODO figure out a way to make getViz plot the points. The function 
-  ##      plot.mgamViz seems to extract only the smooths, not the data. See
-  ##      values in tps[[1]]$model$time and tps[[1]]$model$response, same 2, 3.
-  pdf(file)
-    print(plot(mgcViz::getViz(tps)))
-  dev.off()
-}
 
 #' Use RandIndex to evaluate number of clusters
 #' @param results List with results from trajectories() function

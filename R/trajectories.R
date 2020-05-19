@@ -83,7 +83,7 @@ start_groups = function(data, k,
     data_start$group = group[data_start$id] # expand group to all responses
 
     f = trajectories(data_start, k, group, iter = 1,  # single iter for starts!
-                     plot = FALSE, verbose = verbose)
+                     verbose = verbose)
     if(any(lapply(f$tps, class) == "try-error")) next
 
     diversity = sum(dist(
@@ -125,14 +125,13 @@ start_groups = function(data, k,
 #' @param iter Maximum iterations in mgcv::bam (see .clustra_env)
 #' @param maxdf Maximum degrees of freedom for tps in mgcv::bam (see .clustra_env)
 #' @param cores List with cores allocation to various sections (see .clustra_env)
-#' @param plot Plot clustered data with superimposed trajectory spline smooths.
-#' @param verbose Produce debug output (FALSE).
+#' @param verbose Logical, whether to produce debug output.
 #' @export
 trajectories = function(data, k, group,
                         iter = clustra_env("clu$iter"),
                         maxdf = clustra_env("clu$maxdf"),
                         cores = clustra_env("cor"),
-                        plot = FALSE, verbose = FALSE) {
+                        verbose = FALSE) {
   
   if(verbose) a = a_0 = deltime(a)
   openblasctl::openblas_set_num_threads(cores$blas)
@@ -190,10 +189,6 @@ trajectories = function(data, k, group,
     ## use predict.gam(), probably for each group separately? weights??
   }
 
-  if(plot) {
-    plot_tps(data, tps, "plot_tps.pdf")
-    if(verbose) a = deltime(a, "\nDone plots")
-  }
   if(verbose) deltime(a_0, " trajectories time =")
   list(deviance = deviance, group = group, data_group = data$group, tps = tps,
        iterations = i, try_errors = try_errors, changes = changes)
@@ -211,14 +206,13 @@ trajectories = function(data, k, group,
 #' @param group A vector of initial cluster assignments for unique id's in data.
 #' Normally, this is NULL and starts are provided by \code{start_groups()}. 
 #' @param verbose Logical to turn on more output during fit iterations.
-#' @param plot Logical to indicate 
 #' 
 #' @details In addition to the shown parameters, detailed clustering and core
 #' allocation parameters are in .clustra_env environment that can be controlled
 #' with \code{clustra_env} function.
 #' 
 #' @export
-clustra = function(data, k, group = NULL, verbose = FALSE, plot = FALSE) {
+clustra = function(data, k, group = NULL, verbose = FALSE) {
   ## get initial group assignments
   if(is.null(group))
     group = start_groups(data, k, verbose = verbose)
@@ -228,5 +222,5 @@ clustra = function(data, k, group = NULL, verbose = FALSE, plot = FALSE) {
   data$group = group[data$id] # expand to all observations
 
   ## kmeans iteration to assign id's to groups
-  trajectories(data, k, group, plot = plot, verbose = verbose)
+  trajectories(data, k, group, verbose = verbose)
 }

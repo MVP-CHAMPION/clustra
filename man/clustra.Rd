@@ -4,7 +4,7 @@
 \alias{clustra}
 \title{Cluster trajectories}
 \usage{
-clustra(data, k, group = NULL, verbose = FALSE, plot = FALSE)
+clustra(data, k, group = NULL, verbose = FALSE)
 }
 \arguments{
 \item{data}{Data frame with response measurements, one per observation.
@@ -16,8 +16,6 @@ Column names are id, time, response, group.}
 Normally, this is NULL and starts are provided by \code{start_groups()}.}
 
 \item{verbose}{Logical to turn on more output during fit iterations.}
-
-\item{plot}{Logical to indicate}
 }
 \description{
 Most users will run the \code{clustra()} function, which takes care of

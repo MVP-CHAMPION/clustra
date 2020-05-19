@@ -11,7 +11,6 @@ trajectories(
   iter = clustra_env("clu$iter"),
   maxdf = clustra_env("clu$maxdf"),
   cores = clustra_env("cor"),
-  plot = FALSE,
   verbose = FALSE
 )
 }
@@ -31,9 +30,7 @@ starting from 1. This affects expanding group numbers to ids.}
 
 \item{cores}{List with cores allocation to various sections (see .clustra_env)}
 
-\item{plot}{Plot clustered data with superimposed trajectory spline smooths.}
-
-\item{verbose}{Produce debug output (FALSE).}
+\item{verbose}{Logical, whether to produce debug output.}
 }
 \description{
 Trajectory means are splines fit to all ids in a cluster. Typically, this

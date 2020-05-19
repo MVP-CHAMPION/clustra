@@ -24,4 +24,7 @@ a = a_fit = deltime(a, paste0("\nData (", paste(dim(data), collapse = ","), ") g
 head(data)
 
 ## cluster the trajectories
-cl = clustra(data, 3, verbose = TRUE, plot = TRUE)
+cl = clustra(data, 3, verbose = TRUE)
+
+plot(mgcViz::getViz(cl$tps))
+ggplot2::ggsave("plot_tps.pdf")

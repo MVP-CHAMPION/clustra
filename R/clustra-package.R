@@ -3,13 +3,11 @@
 #' Performs k-means clustering, where each mean is a thin plate spline
 #' fit to all points of trajectories in cluster. 
 #' 
-#' @import ggplot2
 #' @importFrom graphics abline axis box image layout par plot
 #' @importFrom openblasctl openblas_set_num_threads
 #' @importFrom parallel mclapply
 #' @importFrom grDevices dev.off pdf colorRampPalette
 #' @importFrom stats dist predict rnorm rpois runif time
-#' @importFrom utils write.table
 #' 
 #' @name clustra-package
 #' @docType package
