@@ -24,8 +24,12 @@ tps_g = function(g, data, maxdf, nthreads) {
 }
 
 ## Function to predict for new data based on fitted tps of a group
-pred_g = function(g, tps, data)
-  predict(object = tps[[g]], newdata = data, type = "response", se.fit = TRUE)
+pred_g = function(tps, data) {
+  cat("pred_g", Sys.getpid(),": start ...\n")
+  pred = predict(object = tps, newdata = data, type = "response", se.fit = TRUE)
+  cat("pred_g", Sys.getpid(), ": done ...\n")
+  pred
+}
 ## Loss functions for each id to a group tps center
 mse_g = function(g, pred, data) # mean squared error
   as.numeric(tapply((data$response - pred[[g]]$fit)^2, data$id, mean))
@@ -87,7 +91,7 @@ start_groups = function(data, k,
     if(any(lapply(f$tps, class) == "try-error")) next
 
     diversity = sum(dist(
-        do.call(rbind, lapply(mclapply(1:k, pred_g, tps = f$tps,
+        do.call(rbind, lapply(parallel::mclapply(f$tps, pred_g,
                                        data = test_data, mc.cores = cores$e_mc),
                               function(x) as.numeric(x$fit)))
     ))
@@ -98,15 +102,13 @@ start_groups = function(data, k,
     if(verbose) cat(round(diversity, 2), "")
   }
 
-  if(verbose) cat("->", max_div, "")
-  ## predict for all observations of all ids
-  pred = mclapply(1:k, pred_g, tps = best_tps_cov, data = data,
-                  mc.cores = cores$e_mc)
+  pred = parallel::mclapply(best_tps_cov, pred_g, data = data, mc.cores = cores$e_mc)
   ## compute mse for each id
-  loss = mclapply(1:k, mse_g, pred = pred, data = data,
+  loss = parallel::mclapply(1:k, mse_g, pred = pred, data = data,
                   mc.cores = cores$e_mc) # !!! loss is not data dimensioned!!!!
   ## classify id to group with min mse
   group = apply(do.call(cbind, loss), 1, which.min)
+  if(verbose) cat("\nStart counts", tabulate(group), "->", max_div, "")
   group ## report group for each id
 }
 
@@ -126,6 +128,7 @@ start_groups = function(data, k,
 #' @param maxdf Maximum degrees of freedom for tps in mgcv::bam (see .clustra_env)
 #' @param cores List with cores allocation to various sections (see .clustra_env)
 #' @param verbose Logical, whether to produce debug output.
+#' @importFrom stats predict
 #' @export
 trajectories = function(data, k, group,
                         iter = clustra_env("clu$iter"),
@@ -135,8 +138,10 @@ trajectories = function(data, k, group,
   
   if(verbose) a = a_0 = deltime(a)
   openblasctl::openblas_set_num_threads(cores$blas)
-  if(max(data$id) != length(group))
-    cat("\ntrajectories: imput id's NOT sequential!\n")
+  if(max(data$id) != length(group)){
+    cat("\ntrajectories: group id's may be corrupted or empty!\n")
+    browser()
+  }
 
   ## get number of unique id
   n_id = length(unique(data$id))
@@ -150,9 +155,11 @@ trajectories = function(data, k, group,
     ##
     ## M-step:
     ##   Estimate tps model parameters for each cluster from id's in that cluster
-    tps = mclapply(1:k, tps_g, data = data, maxdf = maxdf,
+cat("\n Groups:", tabulate(group), "\n")
+    tps = parallel::mclapply(1:k, tps_g, data = data, maxdf = maxdf,
                    mc.cores = cores$m_mc, nthreads = cores$bam_nthreads)
     if(verbose) a = deltime(a, "M-step")
+    cat(unlist(lapply(tps, class)), "\n")
 
     if(any(lapply(tps, class) == "try-error")) {
       try_errors = try_errors + 1
@@ -161,6 +168,8 @@ trajectories = function(data, k, group,
         for(g in 1:k) if(class(tps[[g]])[1] == "try-error")
           print(paste0("Group ", g, " :", attr(tps[[g]], "condition")$message))
         cat("Random reshuffle for next iteration.\n")
+      } else if(any(is.null(lapply(tps, class)))) {
+        cat("trajectories::Returned nulls from mclapply!! ...")
       }
       new_group = sample(k, n_id, replace = TRUE)
       changes = sum(new_group != group)
@@ -169,9 +178,12 @@ trajectories = function(data, k, group,
       ##
       ## E-step:
       ##   predict each id trajectory from each tps model
-      pred = mclapply(1:k, pred_g, tps = tps, data = data, mc.cores = cores$e_mc)
+      cat("\nWarnings:\n")
+      warnings()
+      pred = parallel::mclapply(tps, pred_g, data = data, mc.cores = cores$e_mc)
       ##   compute loss of each id to each to spline
-      loss = mclapply(1:k, mse_g, pred = pred, data = data, mc.cores = cores$e_mc)
+      loss = parallel::mclapply(1:k, mse_g, pred = pred, data = data, mc.cores = cores$e_mc)
+      
       ## classify each id to mse-nearest tps model
       new_group = apply(do.call(cbind, loss), 1, which.min)
       if(verbose) a = deltime(a, " E-step")
@@ -214,9 +226,14 @@ trajectories = function(data, k, group,
 #' @export
 clustra = function(data, k, group = NULL, verbose = FALSE) {
   ## get initial group assignments
-  if(is.null(group))
+  while(is.null(group)) {
     group = start_groups(data, k, verbose = verbose)
-
+    if(any(tabulate(group) == 0)) {
+      group = NULL
+      cat("\nRepeating starts due to zero count ...")
+    }
+  }
+  
   ## provide sequential id's and add initial group assignments to data
   data$id = as.numeric(factor(data$id))
   data$group = group[data$id] # expand to all observations

@@ -14,9 +14,10 @@ parameter.}
 }
 \description{
 Several parameters can be set with one call but only one parameter can
-be returned. All parameters after the first returned parameter are ignored.
-An empty parameter list will print all parameters in the environment.
-Note that limited checking for syntax is performed so be careful!
+be returned. Consequently all parameters after the first returned 
+parameter are ignored. An empty parameter list will print all
+parameters in the environment. Note that limited checking for syntax
+ is performed so be careful!
 }
 \seealso{
 [clustra_env_gen()], [clustra_env_cor()], [clustra_env_clu()], 

@@ -30,6 +30,8 @@ allpair_RandIndex = function(results) {
   do.call(rbind, rand_pairs)
 }
 
+#' Produce a matrix plot of Rand Index comparison of replicated clusters
+#'
 #' Rand index matrix plot from Technometrics paper
 #' Sorts replicates within cluster K
 #' Assumes K starts from 2
@@ -37,6 +39,9 @@ allpair_RandIndex = function(results) {
 #' 
 #' @param rand_pairs A data frame with columns of cluster assignments
 #' @param name TODO
+#' @importFrom grDevices colorRampPalette dev.off pdf
+#' @importFrom graphics abline axis box image layout par
+#' @export
 rand_plot = function(rand_pairs, name) {
   K.vec = unique(unlist(rand_pairs[, c("i.K", "j.K")]))
   K.max = max(K.vec)
@@ -111,8 +116,8 @@ rand_plot = function(rand_pairs, name) {
 }
 
 #' Performs clustra runs for several k and several random start replicates per k.
-#' Then prepares a Rand index comparison between all pairs of clusterings, that
-#' are displayed in a matrix plot.
+#' Then prepares a Rand index comparison between all pairs of clusterings.
+#' 
 #' @param data The data (see clustra description).
 #' @param k Vector of k values to try (see .clustra_env)
 #' @param replicates Number of replicates for each k (see .clustra_env)
@@ -148,8 +153,6 @@ rand_clustra = function(data, k = clustra_env("ran$ng_vec"),
   ## save object results and parameters
   if(save) save(results, k, replicates, file = "rand_clustra.Rdata")
   
-  ## plot Rand Index evaluation
-  RandIndex_pairs = allpair_RandIndex(results)
-  rand_plot(RandIndex_pairs, name = "adjRand_mat.pdf")
-  if(verbose) a = deltime(a_rand, "\nTotal rand_cluster time")
+  ## compute and return Rand Index evaluation
+  allpair_RandIndex(results)
 }

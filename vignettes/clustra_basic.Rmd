@@ -1,0 +1,76 @@
+---
+title: "clustra_basic"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{clustra_basic}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+The \pkg{clustra} package was built to cluster medical trajectories related by an intervention. For example, a number of individuals are started on a specific drug regimen and their blood pressure data is collected for a varying amount of time before and after the start of the medication. Time measurements are assumed to be negative before the start and positive after the start, meaning that the trajectories are aligned at zero, irrespective of any reference to calendar time.
+
+First, we load the package and set up a separate directory where we want to have any output from this vignette.
+```{r setup}
+library(clustra)
+
+## Set working directory
+playdir = "~/clustra_play"
+if(!dir.exists(playdir)) dir.create(playdir)
+```
+In this vignette, we generate a data set. The parameters used in the data generation can be examined by looking at `clustra_env("gen")` function return.
+```{r}
+clustra_env("gen")
+```
+The above default parameters generate 20,000 *id*s and for each *id*, a random number of observations based on the Poisson($\lambda =$ *m_obs*) distribution plus 3. The 3 additional observations are to guarantee one before intervention at time *start*, one at the intervention time 0, and one after the intervention at time *end*. The *start* time is Uniform(*s_range*) and the *end* time is Uniform(*e_range*). The remaining times are at times Uniform(*start*, *end*). In our blood pressure example, the units are days.
+
+We also set a seed for reproducibility.
+```{r}
+## TODO Check if reproducible when running parallel
+set.seed(clustra_env("gen$seed"))
+## Generate a data set
+data = gen_traj_data()
+head(data)
+write.table(data, file = "clustra_gen_data.csv")
+```
+Select a few random *id*s and print their scatterplots.
+```{r fig.width = 7, fig.height = 9}
+library(ggplot2)
+iplot = sample(unique(data$id), 9)
+sampobs = match(data$id, iplot, nomatch = 0) > 0
+ggplot(data[sampobs, ], aes(x = time, y = response)) +
+  facet_wrap(~ id) + geom_point()
+```
+
+```{r}
+clustra_env("clu$iter = 10", "clu$seed = 123473",
+            "cor$e_mc = 1", "cor$m_mc = 1")
+set.seed(clustra_env("clu$seed"))
+cl = clustra(data, 6, verbose = TRUE)
+```
+
+```{r fig.width = 7, fig.height = 7}
+#plot(mgcViz::getViz(cl$tps))
+#ggsave("plot_tps.pdf")
+```
+
+```{r}
+#clustra_env("ran")
+```
+To find a good number of clusters, we use Rand Index to compare pairs of different cluster results. When replicate clusterings are done with different random seeds, their "replicability" is an indicator of how stable are results for a given k, the number of clusters. For this demonstration, we look at on k = 2, 3, 4, and only five replications for each k. We use the clustra_env() function to set these parameters before running RandIndex_pairs().
+```{r}
+#clustra_env("ran$ng_vec = c(2, 3, 4, 5)", "ran$replicates = 5", "clu$iter = 4")
+```
+
+```{r}
+#RandIndex_pairs = rand_clustra(data, verbose = TRUE)
+```
+Finally, we plot the resulting matrix of Rand Indices.
+```{r}
+#rand_plot(RandIndex_pairs, name = "adjRand_mat.pdf")
+```

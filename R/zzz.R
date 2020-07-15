@@ -89,9 +89,10 @@
 #' Get or set clustra environment variables.
 #' 
 #' Several parameters can be set with one call but only one parameter can
-#' be returned. All parameters after the first returned parameter are ignored.
-#' An empty parameter list will print all parameters in the environment.
-#' Note that limited checking for syntax is performed so be careful!
+#' be returned. Consequently all parameters after the first returned 
+#' parameter are ignored. An empty parameter list will print all
+#' parameters in the environment. Note that limited checking for syntax
+#'  is performed so be careful!
 #'  
 #' @param ... Any number of string constants that ask for or assign various
 #' parameters in .clustra_env environment. For example, "cor$e_mc" will
@@ -110,26 +111,26 @@ clustra_env = function(...) {
     if(!is.character(a)) {
       cat(fun, ": expecting character string, but got:\n")
       print(a)
-      return(invisible())
+      return(invisible(NULL))
     }
     ax = gsub(" ", "", a, fixed = TRUE)
     alr = unlist(strsplit(ax, split = "=", fixed = TRUE)) # separate assignment
     if(length(alr) > 2) {
       cat(fun, ": too many = in", a, "\n")
-      return(invisible())
+      return(invisible(NULL))
     }
     al = unlist(strsplit(alr[1], split = "$", fixed = TRUE)) # separate reference
     if(length(al) > 2) {
       cat(fun, ": too many $ in", a, "\n")
-      return(invisible())
+      return(invisible(NULL))
     }
     if(!exists(al[1], envir = env)) { # object in env?
       cat(fun, ": did not find object", al[1], "in", enc, "\n")
-      return(invisible())
+      return(invisible(NULL))
     }
     if(length(al) > 1 & is.null(env[[al[1]]][[al[2]]])) { # component in object?
       cat(fun, ": component", al[2], "not in", al[1], "of", enc, "\n")
-      return(invisible())
+      return(invisible(NULL))
     }
     
     if(length(alr) == 1) {
@@ -140,15 +141,15 @@ clustra_env = function(...) {
       eval(parse(text = a), env)
     } else {
       cat(fun, ": something went wrong with parameter", a, "\n")
-      return(invisible())
+      return(invisible(NULL))
     }
   }
   
   ## an empty parameter list prints all parameters in environment
   if(length(a) == 0)
-    print(sapply(ls(env), function(x) get(x, envir = env)))
+    return(sapply(ls(env), function(x) get(x, envir = env)))
   
-  invisible()
+  invisible(NULL)
 }
 
 #' Function to create and initialize .clustra_env
@@ -163,7 +164,7 @@ clustra_env = function(...) {
   envir$.clustra_env$clu = .clustra_env_clu()
   envir$.clustra_env$ran = .clustra_env_ran()
   
-  invisible()
+  invisible(NULL)
 }
 
 .onLoad = function(libname, pkgname) {

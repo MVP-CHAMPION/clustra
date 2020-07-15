@@ -2,10 +2,7 @@
 % Please edit documentation in R/evaluate.R
 \name{rand_plot}
 \alias{rand_plot}
-\title{Rand index matrix plot from Technometrics paper
-Sorts replicates within cluster K
-Assumes K starts from 2
-Author: Wei-Chen Chen (modified by George Ostrouchov)}
+\title{Produce a matrix plot of Rand Index comparison of replicated clusters}
 \usage{
 rand_plot(rand_pairs, name)
 }

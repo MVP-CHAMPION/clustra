@@ -5,8 +5,9 @@
 \alias{clustra-package}
 \title{clustra-package}
 \description{
-Performs k-means clustering, where each mean is a thin plate spline
-fit to all points of trajectories in cluster.
+Performs k-means clustering, where each mean is a thin plate spline fit to
+all points from trajectories in cluster. Distance is the mean squared error
+or maximum error of spline to trajectory points.
 }
 \author{
 George Ostrouchov, David Gagnon, Hanna Gerlovin

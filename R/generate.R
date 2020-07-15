@@ -30,6 +30,7 @@
 #'   `id` (an integer in 1:(3*n_id), `time` (an iteger in `st[1]` to `en[2]`
 #'   observation time), and `response`.
 #' 
+#' @importFrom stats dist rnorm rpois runif
 #' @export
 gen_traj_data = function(n_id = clustra_env("gen$n_id"),
                          lambda_obs = clustra_env("gen$m_obs"),

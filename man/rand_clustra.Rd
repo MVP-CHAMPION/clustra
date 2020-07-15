@@ -3,8 +3,7 @@
 \name{rand_clustra}
 \alias{rand_clustra}
 \title{Performs clustra runs for several k and several random start replicates per k.
-Then prepares a Rand index comparison between all pairs of clusterings, that
-are displayed in a matrix plot.}
+Then prepares a Rand index comparison between all pairs of clusterings.}
 \usage{
 rand_clustra(
   data,
@@ -28,6 +27,5 @@ printed.}
 }
 \description{
 Performs clustra runs for several k and several random start replicates per k.
-Then prepares a Rand index comparison between all pairs of clusterings, that
-are displayed in a matrix plot.
+Then prepares a Rand index comparison between all pairs of clusterings.
 }

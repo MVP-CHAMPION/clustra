@@ -19,10 +19,13 @@ Imports:
     parallel
 Suggests:
     ggplot2,
-    mgcViz
+    mgcViz,
+    knitr,
+    rmarkdown
 Description: Performs k-means clustering, where each mean is a thin plate spline
         fit to all points of trajectories in cluster. 
 LazyLoad: yes
 License: Mozilla Public License 2.0
 Encoding: UTF-8
 RoxygenNote: 7.1.0
+VignetteBuilder: knitr
