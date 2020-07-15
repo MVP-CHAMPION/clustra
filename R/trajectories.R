@@ -24,12 +24,8 @@ tps_g = function(g, data, maxdf, nthreads) {
 }
 
 ## Function to predict for new data based on fitted tps of a group
-pred_g = function(tps, data) {
-  cat("pred_g", Sys.getpid(),": start ...\n")
-  pred = predict(object = tps, newdata = data, type = "response", se.fit = TRUE)
-  cat("pred_g", Sys.getpid(), ": done ...\n")
-  pred
-}
+pred_g = function(tps, data)
+  predict(object = tps, newdata = data, type = "response", se.fit = TRUE)
 ## Loss functions for each id to a group tps center
 mse_g = function(g, pred, data) # mean squared error
   as.numeric(tapply((data$response - pred[[g]]$fit)^2, data$id, mean))
@@ -155,11 +151,9 @@ trajectories = function(data, k, group,
     ##
     ## M-step:
     ##   Estimate tps model parameters for each cluster from id's in that cluster
-cat("\n Groups:", tabulate(group), "\n")
     tps = parallel::mclapply(1:k, tps_g, data = data, maxdf = maxdf,
                    mc.cores = cores$m_mc, nthreads = cores$bam_nthreads)
     if(verbose) a = deltime(a, "M-step")
-    cat(unlist(lapply(tps, class)), "\n")
 
     if(any(lapply(tps, class) == "try-error")) {
       try_errors = try_errors + 1
@@ -178,8 +172,6 @@ cat("\n Groups:", tabulate(group), "\n")
       ##
       ## E-step:
       ##   predict each id trajectory from each tps model
-      cat("\nWarnings:\n")
-      warnings()
       pred = parallel::mclapply(tps, pred_g, data = data, mc.cores = cores$e_mc)
       ##   compute loss of each id to each to spline
       loss = parallel::mclapply(1:k, mse_g, pred = pred, data = data, mc.cores = cores$e_mc)
