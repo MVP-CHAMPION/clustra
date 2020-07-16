@@ -197,7 +197,7 @@ trajectories = function(data, k, group,
     ## use predict.gam(), probably for each group separately? weights??
   }
 
-  if(verbose) deltime(a_0, " trajectories time =")
+  if(verbose) deltime(a_0, "\n trajectories time =")
   list(deviance = deviance, group = group, data_group = data$group, tps = tps,
        iterations = i, try_errors = try_errors, changes = changes)
 }
