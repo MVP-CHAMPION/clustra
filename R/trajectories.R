@@ -124,7 +124,11 @@ start_groups = function(data, k,
 #' @param maxdf Maximum degrees of freedom for tps in mgcv::bam (see .clustra_env)
 #' @param cores List with cores allocation to various sections (see .clustra_env)
 #' @param verbose Logical, whether to produce debug output.
+#' 
 #' @importFrom stats predict
+#' 
+#' @author George Ostrouchov and David Gagnon
+#' 
 #' @export
 trajectories = function(data, k, group,
                         iter = clustra_env("clu$iter"),

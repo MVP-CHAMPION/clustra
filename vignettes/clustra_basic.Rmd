@@ -15,7 +15,7 @@ knitr::opts_chunk$set(
 ```
 The \pkg{clustra} package was built to cluster medical trajectories related by an intervention. For example, a number of individuals are started on a specific drug regimen and their blood pressure data is collected for a varying amount of time before and after the start of the medication. Time measurements are assumed to be negative before the start and positive after the start, meaning that the trajectories are aligned at zero, irrespective of any reference to calendar time.
 
-First, we load the package and set up a separate directory where we want to have any output from this vignette.
+First, we load the package and set up a directory where we want to have any output from this vignette.
 ```{r setup}
 library(clustra)
 
@@ -46,7 +46,7 @@ sampobs = match(data$id, iplot, nomatch = 0) > 0
 ggplot(data[sampobs, ], aes(x = time, y = response)) +
   facet_wrap(~ id) + geom_point()
 ```
-
+Now cluster the trajectories. Set maximum iterations to 10, set cluster seed for reproducibility. \code{cor} parameters set the number of cores to use in \code{mclapply} components of the code to do model fits for different clusters in parallel on different cores. Note that this does not work on Windows platforms, where it should be left at 1.
 ```{r}
 clustra_env("clu$iter = 10", "clu$seed = 123473",
             "cor$e_mc = 1", "cor$m_mc = 1")

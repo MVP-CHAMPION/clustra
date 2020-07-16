@@ -1,9 +1,13 @@
 
 #' Use RandIndex to evaluate number of clusters
-#' @param results List with results from trajectories() function
+#' 
+#' @param results List with results from [trajectories()] function
+#' 
 #' @return A data frame with RandIndex for all pairs from trajectories results.
 #' Note all pairs means lower triangle plus diagonal of an all-pairs symmetric
 #' matrix.
+#' 
+#' @export
 allpair_RandIndex = function(results) {
   nr = length(results)
   rand_pairs = vector("list", nr*(nr - 1)/2 + nr)
@@ -30,15 +34,24 @@ allpair_RandIndex = function(results) {
   do.call(rbind, rand_pairs)
 }
 
-#' Produce a matrix plot of Rand Index comparison of replicated clusters
+#' Matrix plot of Rand Index comparison of replicated clusters
+#' 
+#' @param rand_pairs
+#' A data frame result of [allpair_RandIndex()]
+#' @param name Character string file name for pdf plot.
 #'
-#' Rand index matrix plot from Technometrics paper
+#' @return Invisible. Full path name of file with plot.
+#'
+#' @references
+#' Wei-chen Chen, George Ostrouchov, David Pugmire, Prabhat, and Michael Wehner.
+#' 2013. A Parallel EM Algorithm for Model-Based Clustering Applied to the
+#' Exploration of Large Spatio-Temporal Data. Technometrics, 55:4, 513-523.
+#'
 #' Sorts replicates within cluster K
 #' Assumes K starts from 2
-#' Author: Wei-Chen Chen (modified by George Ostrouchov)
 #' 
-#' @param rand_pairs A data frame with columns of cluster assignments
-#' @param name TODO
+#' @author Wei-Chen Chen and George Ostrouchov
+#' 
 #' @importFrom grDevices colorRampPalette dev.off pdf
 #' @importFrom graphics abline axis box image layout par
 #' @export
@@ -113,6 +126,7 @@ rand_plot = function(rand_pairs, name) {
     box()
   dev.off()
   layout(1)
+  invisible(path.expand(name))
 }
 
 #' Performs clustra runs for several k and several random start replicates per k.

@@ -7,7 +7,8 @@ Authors@R: c(person("George", "Ostrouchov", role = c("aut", "cre"), email =
         person("David", "Gagnon", role = "aut"),
         person("Hanna", "Gerlovin", role = "aut"),
         person("Chen", "Wei-Chen", role = "ctb"),
-        person("Schmidt", "Drew", role = "ctb"))
+        person("Schmidt", "Drew", role = "ctb"),
+        person("Chen", "Wei-Chen", role = "ctb"))
 Depends:
     R (>= 3.5.0)
 Imports:
@@ -27,5 +28,6 @@ Description: Performs k-means clustering, where each mean is a thin plate spline
 LazyLoad: yes
 License: Mozilla Public License 2.0
 Encoding: UTF-8
+Mintainer: George Ostrouchov <ostrouchovg@ornl.gov>
 RoxygenNote: 7.1.0
 VignetteBuilder: knitr
