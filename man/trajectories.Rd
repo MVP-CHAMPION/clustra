@@ -17,8 +17,8 @@ trajectories(
 \arguments{
 \item{data}{Data frame with response measurements, one per observation. Column
 names are \code{id}, \code{time}, \code{response}, \code{group}. Note that
- id are already sequential.
-starting from 1. This affects expanding group numbers to ids.}
+id must be already sequential starting from 1. This affects expanding group 
+numbers to ids.}
 
 \item{k}{Number of clusters (groups)}
 
@@ -35,4 +35,7 @@ starting from 1. This affects expanding group numbers to ids.}
 \description{
 Trajectory means are splines fit to all ids in a cluster. Typically, this
 function is called by \code{clustra()}.
+}
+\author{
+George Ostrouchov and David Gagnon
 }

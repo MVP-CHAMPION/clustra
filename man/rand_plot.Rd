@@ -2,18 +2,30 @@
 % Please edit documentation in R/evaluate.R
 \name{rand_plot}
 \alias{rand_plot}
-\title{Produce a matrix plot of Rand Index comparison of replicated clusters}
+\title{Matrix plot of Rand Index comparison of replicated clusters}
 \usage{
-rand_plot(rand_pairs, name)
+rand_plot(rand_pairs, name = NULL)
 }
 \arguments{
-\item{rand_pairs}{A data frame with columns of cluster assignments}
+\item{rand_pairs}{A data frame result of [allpair_RandIndex()]}
 
-\item{name}{TODO}
+\item{name}{Character string file name for pdf plot. If omitted or NULL, plot will 
+render to current graphics device.}
+}
+\value{
+Invisible. Full path name of file with plot.
 }
 \description{
-Rand index matrix plot from Technometrics paper
+Matrix plot of Rand Index comparison of replicated clusters
+}
+\references{
+Wei-chen Chen, George Ostrouchov, David Pugmire, Prabhat, and Michael Wehner.
+2013. A Parallel EM Algorithm for Model-Based Clustering Applied to the
+Exploration of Large Spatio-Temporal Data. Technometrics, 55:4, 513-523.
+
 Sorts replicates within cluster K
 Assumes K starts from 2
-Author: Wei-Chen Chen (modified by George Ostrouchov)
+}
+\author{
+Wei-Chen Chen and George Ostrouchov
 }

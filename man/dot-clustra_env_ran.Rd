@@ -4,7 +4,7 @@
 \alias{.clustra_env_ran}
 \title{Function to initialize components of `ran` list in .clustra_env environment}
 \usage{
-.clustra_env_ran(ng_vec = c(2, 3, 4, 5), replicates = 10)
+.clustra_env_ran(ng_vec = c(2, 3, 4), replicates = 10)
 }
 \arguments{
 \item{ng_vec}{Vector of `k` values to simulate.}

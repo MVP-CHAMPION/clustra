@@ -38,9 +38,12 @@ allpair_RandIndex = function(results) {
 #' 
 #' @param rand_pairs
 #' A data frame result of [allpair_RandIndex()]
-#' @param name Character string file name for pdf plot.
+#' @param name 
+#' Character string file name for pdf plot. If omitted or NULL, plot will 
+#' render to current graphics device.
 #'
-#' @return Invisible. Full path name of file with plot.
+#' @return
+#' Invisible. Full path name of file with plot.
 #'
 #' @references
 #' Wei-chen Chen, George Ostrouchov, David Pugmire, Prabhat, and Michael Wehner.
@@ -50,12 +53,15 @@ allpair_RandIndex = function(results) {
 #' Sorts replicates within cluster K
 #' Assumes K starts from 2
 #' 
-#' @author Wei-Chen Chen and George Ostrouchov
+#' @author
+#' Wei-Chen Chen and George Ostrouchov
 #' 
-#' @importFrom grDevices colorRampPalette dev.off pdf
-#' @importFrom graphics abline axis box image layout par
+#' @importFrom 
+#' grDevices colorRampPalette dev.off pdf
+#' @importFrom 
+#' graphics abline axis box image layout par
 #' @export
-rand_plot = function(rand_pairs, name) {
+rand_plot = function(rand_pairs, name = NULL) {
   K.vec = unique(unlist(rand_pairs[, c("i.K", "j.K")]))
   K.max = max(K.vec)
   K.len = length(K.vec)
@@ -102,7 +108,7 @@ rand_plot = function(rand_pairs, name) {
   fg = "black"
   wd = 6.5
   ht = 6
-  pdf(name, width = wd, height = ht, bg = bg)
+  if(is.character(name)) pdf(name, width = wd, height = ht, bg = bg)
     par(bg = bg, fg = fg, col = fg, col.axis = fg,
         col.lab = fg, col.main = fg, col.sub = fg,
         fig = c(0, ht/wd, 0, 1),
@@ -124,9 +130,9 @@ rand_plot = function(rand_pairs, name) {
           col = var.col, axes = FALSE, xlab = "", ylab = "")
     axis(4)
     box()
-  dev.off()
+  if(is.character(name)) dev.off()
   layout(1)
-  invisible(path.expand(name))
+  invisible(name)
 }
 
 #' Performs clustra runs for several k and several random start replicates per k.

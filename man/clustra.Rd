@@ -4,7 +4,14 @@
 \alias{clustra}
 \title{Cluster trajectories}
 \usage{
-clustra(data, k, group = NULL, verbose = FALSE)
+clustra(
+  data,
+  k,
+  group = NULL,
+  verbose = FALSE,
+  rngkind = clustra_env("clu$rngkind"),
+  seed = clustra_env("clu$seed")
+)
 }
 \arguments{
 \item{data}{Data frame with response measurements, one per observation.
@@ -16,11 +23,16 @@ Column names are id, time, response, group.}
 Normally, this is NULL and starts are provided by \code{start_groups()}.}
 
 \item{verbose}{Logical to turn on more output during fit iterations.}
+
+\item{rngkind}{Character string giving random number generator type (see [RNGkind()]).}
+
+\item{seed}{Seed for generating random starting initial cluster assignments.}
 }
 \description{
 Most users will run the \code{clustra()} function, which takes care of
 starting values and completes kmeans iteration according to parameters in
-\code{.clustra_env} environment (see \code{demo} directory for examples).
+\code{.clustra_env} environment (See vignette("clustra_basic.Rmd") for
+more details).
 }
 \details{
 In addition to the shown parameters, detailed clustering and core

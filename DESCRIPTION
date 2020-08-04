@@ -1,5 +1,5 @@
 Package: clustra
-Version: 0.1-1
+Version: 0.1.1
 Date: 2020-02-17
 Title: Clustering trajectories anchored at intervention time
 Authors@R: c(person("George", "Ostrouchov", role = c("aut", "cre"), email = 
@@ -7,17 +7,18 @@ Authors@R: c(person("George", "Ostrouchov", role = c("aut", "cre"), email =
         person("David", "Gagnon", role = "aut"),
         person("Hanna", "Gerlovin", role = "aut"),
         person("Chen", "Wei-Chen", role = "ctb"),
-        person("Schmidt", "Drew", role = "ctb"),
-        person("Chen", "Wei-Chen", role = "ctb"))
+        person("Schmidt", "Drew", role = "ctb"))
 Depends:
     R (>= 3.5.0)
 Imports:
     graphics,
     grDevices,
+    methods,
     mgcv,
     MixSim,
     openblasctl,
-    parallel
+    parallel,
+    stats
 Suggests:
     ggplot2,
     mgcViz,
@@ -29,5 +30,5 @@ LazyLoad: yes
 License: Mozilla Public License 2.0
 Encoding: UTF-8
 Mintainer: George Ostrouchov <ostrouchovg@ornl.gov>
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.1
 VignetteBuilder: knitr

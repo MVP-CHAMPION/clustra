@@ -6,7 +6,7 @@
 \usage{
 .clustra_env_gen(
   seed = 90,
-  n_id = 20000,
+  n_id = 1000,
   m_obs = 25,
   s_range = c(-50, -10),
   e_range = c(1095, 3650),

@@ -12,7 +12,7 @@
 #'   plotted.
 .clustra_env_gen = function(
   seed = 90,
-  n_id = 20000,
+  n_id = 1000,
   m_obs = 25,
   s_range = c(-50, -10),
   e_range = c(1095, 3650),
@@ -44,30 +44,37 @@
     e_mc = e_mc,
     m_mc = m_mc,
     bam_nthreads = bam_nthreads,
-    blas = blas
-  )
+    blas = blas)
 }
 
 #' Function to initialize components of `clu` list in .clustra_env environment
 #' 
-#' @param seed Cores to use by mclapply of e_mc (expectation over k)
-#' @param maxdf Basis dimension of smooth term (mgcv::s(), parameter k).
+#' @param rngkind Random number generator kind to use. See 
+#' [parallel::mcparallel()] for details.
+#' @param seed Random starts generation seed for reproducibility.
+#' @param maxdf Basis dimension of smooth term ( see [mgcv::s()], parameter k).
 #' @param iter Maximum number of iterations.
 #' @param starts Number of random starts.
 #' @param idperstart Number of `id`s to sample for random starts.
+#' @param retry_max Number of restarts if iteration encounters a cluster too
+#' small for [mgcv::bam()] fitting with the given \code{maxdf}.
 .clustra_env_clu = function(
+  rngkind = "L'Ecuyer-CMRG",
   seed = 79, # starting seed for cluster starts
-  maxdf = 50, # 
+  maxdf = 30, # 
   iter = 8, # mgcv::bam maximum iterations
   starts = 4,
-  idperstart = 20
+  idperstart = 20,
+  retry_max = 3
 ) {
   list(
+    rngkind = rngkind,
     seed = seed,
     maxdf = maxdf,
     iter =iter,
     starts = starts,
-    idperstart = idperstart
+    idperstart = idperstart,
+    retry_max = retry_max
   )
 }
 
@@ -76,7 +83,7 @@
 #' @param ng_vec Vector of `k` values to simulate.
 #' @param replicates Number of replicates for each `k`.
 .clustra_env_ran = function(
-  ng_vec = c(2, 3, 4, 5),
+  ng_vec = c(2, 3, 4),
   replicates = 10
 )
 {

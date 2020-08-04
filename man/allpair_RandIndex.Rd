@@ -7,7 +7,7 @@
 allpair_RandIndex(results)
 }
 \arguments{
-\item{results}{List with results from trajectories() function}
+\item{results}{List with results from [trajectories()] function}
 }
 \value{
 A data frame with RandIndex for all pairs from trajectories results.

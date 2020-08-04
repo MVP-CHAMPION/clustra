@@ -4,18 +4,32 @@
 \alias{.clustra_env_clu}
 \title{Function to initialize components of `clu` list in .clustra_env environment}
 \usage{
-.clustra_env_clu(seed = 79, maxdf = 50, iter = 8, starts = 4, idperstart = 20)
+.clustra_env_clu(
+  rngkind = "L'Ecuyer-CMRG",
+  seed = 79,
+  maxdf = 30,
+  iter = 8,
+  starts = 4,
+  idperstart = 20,
+  retry_max = 3
+)
 }
 \arguments{
-\item{seed}{Cores to use by mclapply of e_mc (expectation over k)}
+\item{rngkind}{Random number generator kind to use. See 
+[parallel::mcparallel()] for details.}
 
-\item{maxdf}{Basis dimension of smooth term (mgcv::s(), parameter k).}
+\item{seed}{Random starts generation seed for reproducibility.}
+
+\item{maxdf}{Basis dimension of smooth term ( see [mgcv::s()], parameter k).}
 
 \item{iter}{Maximum number of iterations.}
 
 \item{starts}{Number of random starts.}
 
 \item{idperstart}{Number of `id`s to sample for random starts.}
+
+\item{retry_max}{Number of restarts if iteration encounters a cluster too
+small for [mgcv::bam()] fitting with the given \code{maxdf}.}
 }
 \description{
 Function to initialize components of `clu` list in .clustra_env environment

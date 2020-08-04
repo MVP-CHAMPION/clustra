@@ -1,21 +1,11 @@
+##
 ## This is the R translation of trajectories v2.sas code
-##
-## This is multithreaded code that expects a Unix OS with fork (and
-## multithreaded OpenBLAS matrix support - soon). Do not run on Mac or Win!
-##
 ##
 
 ## Function to fit thin plate spline (tps) to a group with gam from the mgcv
 ## package. Crossvalidation does not know about zero weights, resulting in
 ## different smoothing parameters, so subset parameter is used to ensure 
 ## correct crossvalidation sampling.
-## TODO Add write generated data to a csv file
-## TODO Add Ward's hierarchical clustering of the cluster means (evaluated on a
-##      grid) for a converged high-K trajectories result.
-##      Profile plots can help determine K.
-## TODO Add uncertainty moderated outlier detection. Do we need to use credible
-##      regions or is se.fit enough??
-## TODO add controls to use one core if OpenBLAS is not available
 tps_g = function(g, data, maxdf, nthreads) {
   tps = mgcv::bam(response ~ s(time, k = maxdf), data = data,
                   subset = data$group == g, discrete = TRUE, nthreads = nthreads)
@@ -23,7 +13,13 @@ tps_g = function(g, data, maxdf, nthreads) {
   tps
 }
 
-## Function to predict for new data based on fitted tps of a group
+#' Function to predict for new data based on fitted tps of a group
+#' 
+#' @param tps
+#' Output structure of [mgcv::bam()]
+#' @param data 
+#' See [clustra()] description.
+#' 
 pred_g = function(tps, data)
   predict(object = tps, newdata = data, type = "response", se.fit = TRUE)
 ## Loss functions for each id to a group tps center
@@ -31,11 +27,6 @@ mse_g = function(g, pred, data) # mean squared error
   as.numeric(tapply((data$response - pred[[g]]$fit)^2, data$id, mean))
 mxe_g = function(g, pred, data) # maximum error
   as.numeric(tapply(abs(data$response - pred[[g]]$fit), data$id, max))
-## Fn to compute points outside CI
-## Mean distance in probability (a multi-Mahalanobis distance)
-mpd_g = function(g, pred, data) {
-  ## TODO
-}
 
 #' Function to assign starting groups.
 #' 
@@ -49,6 +40,8 @@ mpd_g = function(g, pred, data) {
 #' @param maxdf (see clu component of .clustra_env)
 #' @param cores (see cor component of .clustra_env)
 #' @param verbose Turn on more output for debugging.
+#' 
+#' @importFrom methods is
 #' @export
 start_groups = function(data, k,
                         nstart = clustra_env("clu$starts"),
@@ -78,13 +71,14 @@ start_groups = function(data, k,
   ##  because spline modesl do not know about ids. The classification process 
   ##  only needs who has same id, not what is the id.)
 
+  ## evaluate starts on id sample
   for(i in 1:nstart) {
     group = sample(k, k*nid, replace = TRUE) # random groups
     data_start$group = group[data_start$id] # expand group to all responses
 
     f = trajectories(data_start, k, group, iter = 1,  # single iter for starts!
                      verbose = verbose)
-    if(any(lapply(f$tps, class) == "try-error")) next
+    if(!all(sapply(f$tps, is, class = "bam"))) next
 
     diversity = sum(dist(
         do.call(rbind, lapply(parallel::mclapply(f$tps, pred_g,
@@ -98,13 +92,16 @@ start_groups = function(data, k,
     if(verbose) cat(round(diversity, 2), "")
   }
 
+  if(max_div == 0) return(NULL) # all starts failed!
+    
+  ## expand best start sample fit to full set of id's
   pred = parallel::mclapply(best_tps_cov, pred_g, data = data, mc.cores = cores$e_mc)
   ## compute mse for each id
   loss = parallel::mclapply(1:k, mse_g, pred = pred, data = data,
                   mc.cores = cores$e_mc) # !!! loss is not data dimensioned!!!!
   ## classify id to group with min mse
   group = apply(do.call(cbind, loss), 1, which.min)
-  if(verbose) cat("\nStart counts", tabulate(group), "->", max_div, "")
+  if(verbose) cat("\nStart counts", tabulate(group, k), "->", max_div, "")
   group ## report group for each id
 }
 
@@ -114,18 +111,26 @@ start_groups = function(data, k,
 #' Trajectory means are splines fit to all ids in a cluster. Typically, this
 #' function is called by \code{clustra()}.
 #' 
-#' @param data Data frame with response measurements, one per observation. Column
+#' @param data 
+#' Data frame with response measurements, one per observation. Column
 #' names are \code{id}, \code{time}, \code{response}, \code{group}. Note that
-#'  id are already sequential.
-#' starting from 1. This affects expanding group numbers to ids.
-#' @param k Number of clusters (groups)
-#' @param group Group numbers corresponding to sequential ids.
-#' @param iter Maximum iterations in mgcv::bam (see .clustra_env)
-#' @param maxdf Maximum degrees of freedom for tps in mgcv::bam (see .clustra_env)
-#' @param cores List with cores allocation to various sections (see .clustra_env)
-#' @param verbose Logical, whether to produce debug output.
+#' id must be already sequential starting from 1. This affects expanding group 
+#' numbers to ids.
+#' @param k 
+#' Number of clusters (groups)
+#' @param group 
+#' Group numbers corresponding to sequential ids.
+#' @param iter 
+#' Maximum iterations in mgcv::bam (see .clustra_env)
+#' @param maxdf 
+#' Maximum degrees of freedom for tps in mgcv::bam (see .clustra_env)
+#' @param cores 
+#' List with cores allocation to various sections (see .clustra_env)
+#' @param verbose 
+#' Logical, whether to produce debug output.
 #' 
 #' @importFrom stats predict
+#' @importFrom methods is
 #' 
 #' @author George Ostrouchov and David Gagnon
 #' 
@@ -149,7 +154,7 @@ trajectories = function(data, k, group,
   ## EM algorithm to cluster ids into k groups
   ## iterate fitting a thin plate spline center to each group (M-step)
   ##         regroup each id to nearest tps center (E-step)
-  try_errors = 0
+    exit = "max iter"
   for(i in 1:iter) {
     if(verbose) cat("\n", i, "")
     ##
@@ -159,81 +164,102 @@ trajectories = function(data, k, group,
                    mc.cores = cores$m_mc, nthreads = cores$bam_nthreads)
     if(verbose) a = deltime(a, "M-step")
 
-    if(any(lapply(tps, class) == "try-error")) {
-      try_errors = try_errors + 1
-      if(verbose) {
-        cat("\n")
-        for(g in 1:k) if(class(tps[[g]])[1] == "try-error")
-          print(paste0("Group ", g, " :", attr(tps[[g]], "condition")$message))
-        cat("Random reshuffle for next iteration.\n")
-      } else if(any(is.null(lapply(tps, class)))) {
-        cat("trajectories::Returned nulls from mclapply!! ...")
-      }
-      new_group = sample(k, n_id, replace = TRUE)
-      changes = sum(new_group != group)
-      counts = tabulate(new_group)
+    if(!all(sapply(tps, is, class = "bam"))) {
+      exit = "try-error"
+      changes = -1
+      break
     } else {
       ##
       ## E-step:
       ##   predict each id trajectory from each tps model
       pred = parallel::mclapply(tps, pred_g, data = data, mc.cores = cores$e_mc)
       ##   compute loss of each id to each to spline
-      loss = parallel::mclapply(1:k, mse_g, pred = pred, data = data, mc.cores = cores$e_mc)
+      loss = parallel::mclapply(1:k, mse_g, pred = pred, data = data,
+                                mc.cores = cores$e_mc)
       
       ## classify each id to mse-nearest tps model
       new_group = apply(do.call(cbind, loss), 1, which.min)
       if(verbose) a = deltime(a, " E-step")
       changes = sum(new_group != group)
-      counts = tabulate(new_group)
+      counts = tabulate(new_group, k)
       deviance = sum(unlist(lapply(1:k, function(g) deviance(tps[[g]]))))
       if(verbose)
          cat(" Changes:", changes, "Counts:", counts, "Deviance:", deviance)
+      group = new_group
+      data$group = as.factor(group[data$id]) # expand group to data frame
     }
-    group = new_group
-    data$group = as.factor(group[data$id]) # expand group to data frame
-    if(changes == 0) break
-
-    ## add outlier treatment as probability of belonging?
-    ## use predict.gam(), probably for each group separately? weights??
+    if(changes == 0) {
+      exit = "converged"
+      break
+    }
+    if(any(tabulate(data$group, k) < maxdf)) {
+      exit = "failed: not enough points in cluster"
+      break
+    }
   }
 
   if(verbose) deltime(a_0, "\n trajectories time =")
+  if(verbose) cat("\n exit:", exit, "\n")
   list(deviance = deviance, group = group, data_group = data$group, tps = tps,
-       iterations = i, try_errors = try_errors, changes = changes)
+       iterations = i, changes = changes, exit = exit)
 }
 
 #' Cluster trajectories 
 #' 
 #' Most users will run the \code{clustra()} function, which takes care of
 #' starting values and completes kmeans iteration according to parameters in
-#' \code{.clustra_env} environment (see \code{demo} directory for examples).
+#' \code{.clustra_env} environment (See vignette("clustra_basic.Rmd") for
+#' more details).
 #' 
-#' @param data Data frame with response measurements, one per observation.
+#' @param data 
+#' Data frame with response measurements, one per observation.
 #' Column names are id, time, response, group.
-#' @param k Number of clusters (groups).
-#' @param group A vector of initial cluster assignments for unique id's in data.
+#' @param k 
+#' Number of clusters (groups).
+#' @param group 
+#' A vector of initial cluster assignments for unique id's in data.
 #' Normally, this is NULL and starts are provided by \code{start_groups()}. 
-#' @param verbose Logical to turn on more output during fit iterations.
+#' @param verbose 
+#' Logical to turn on more output during fit iterations.
+#' @param rngkind
+#' Character string giving random number generator type (see [RNGkind()]).
+#' @param seed
+#' Seed for generating random starting initial cluster assignments.
 #' 
 #' @details In addition to the shown parameters, detailed clustering and core
 #' allocation parameters are in .clustra_env environment that can be controlled
 #' with \code{clustra_env} function.
 #' 
 #' @export
-clustra = function(data, k, group = NULL, verbose = FALSE) {
-  ## get initial group assignments
-  while(is.null(group)) {
-    group = start_groups(data, k, verbose = verbose)
-    if(any(tabulate(group) == 0)) {
-      group = NULL
-      cat("\nRepeating starts due to zero count ...")
-    }
-  }
-  
-  ## provide sequential id's and add initial group assignments to data
-  data$id = as.numeric(factor(data$id))
-  data$group = group[data$id] # expand to all observations
+clustra = function(data, k, group = NULL, verbose = FALSE,
+                   rngkind = clustra_env("clu$rngkind"),
+                   seed = clustra_env("clu$seed")) {
+  ## set RNG and its seed
+  rng_prev = RNGkind(rngkind)
+  set.seed(seed)
 
-  ## kmeans iteration to assign id's to groups
-  trajectories(data, k, group, verbose = verbose)
+  for(retry in 1:clustra_env("clu$retry_max")) {
+    ## get initial group assignments
+    while(is.null(group)) {
+      group = start_groups(data, k, verbose = verbose)
+      ## provide sequential id's and add initial group assignments to data
+      data$id = as.numeric(factor(data$id))
+      data$group = group[data$id] # expand to all observations
+      if(any(tabulate(data$group, k) < clustra_env("clu$maxdf"))) {
+        group = NULL
+        cat("\nRepeating starts due to cluster observations under clu$maxdf ...")
+      }
+    }
+    
+    ## kmeans iteration to assign id's to groups
+    cl = trajectories(data, k, group, verbose = verbose)
+    if(cl$exit == "converged" | cl$exit == "max iter") break
+    cat("\n Restarting clustra due to", cl$exit, ".\n")
+  }
+  cl$retry = retry
+  
+  ## restore RNG
+  RNGkind(rng_prev[1])
+  
+  cl
 }
