@@ -1,11 +1,17 @@
-
-#' Use RandIndex to evaluate number of clusters
+#' allpair_RandIndex is used internally by \code{\link{rand_clustra}} and
+#' provides its return value.
 #' 
-#' @param results List with results from [trajectories()] function
+#' Runs \code{\link[MixSim]{RandIndex}} for all pairs of cluster results in its
+#' list input and produces a matrix for use by \code{\link{rand_plot}}.
 #' 
-#' @return A data frame with RandIndex for all pairs from trajectories results.
-#' Note all pairs means lower triangle plus diagonal of an all-pairs symmetric
-#' matrix.
+#' @param results
+#' A list with each element packed internally by the
+#' \code{\link{rand_clustra}} function.
+#' 
+#' @return A data frame with \code{\link[MixSim]{RandIndex}} for all pairs from
+#' trajectories results. The data frame names and format is intended to be the
+#' input for \code{\link{rand_plot}}. Note that all pairs means lower triangle
+#' plus diagonal of an all-pairs symmetric matrix.
 #' 
 #' @export
 allpair_RandIndex = function(results) {
@@ -37,7 +43,7 @@ allpair_RandIndex = function(results) {
 #' Matrix plot of Rand Index comparison of replicated clusters
 #' 
 #' @param rand_pairs
-#' A data frame result of [allpair_RandIndex()]
+#' A data frame result of \code{\link{allpair_RandIndex}}
 #' @param name 
 #' Character string file name for pdf plot. If omitted or NULL, plot will 
 #' render to current graphics device.
@@ -135,15 +141,23 @@ rand_plot = function(rand_pairs, name = NULL) {
   invisible(name)
 }
 
-#' Performs clustra runs for several k and several random start replicates per k.
-#' Then prepares a Rand index comparison between all pairs of clusterings.
+#' Performs \code{\link{clustra}} runs for several k and several random start
+#' replicates per k. Then prepares a Rand index comparison between all pairs of
+#' clusterings.
 #' 
-#' @param data The data (see clustra description).
-#' @param k Vector of k values to try (see .clustra_env)
-#' @param replicates Number of replicates for each k (see .clustra_env)
-#' @param save Logical. When TRUE, save all results as file results.Rdata
-#' @param verbose Logical. When TRUE, information about each run of clustra is
-#' printed.
+#' @param data
+#' The data (see \code{\link{clustra}} description).
+#' @param k
+#' Vector of k values to try (see \code{.clustra_env}).
+#' @param replicates
+#' Number of replicates for each k (see \code{.clustra_env}).
+#' @param save
+#' Logical. When TRUE, save all results as file \code{results.Rdata}.
+#' @param verbose
+#' Logical. When TRUE, information about each run of clustra is printed.
+#' 
+#' @return See \code{\link{allpair_RandIndex}}
+#' 
 #' @export
 rand_clustra = function(data, k = clustra_env("ran$ng_vec"),
                         replicates = clustra_env("ran$replicates"),

@@ -12,7 +12,7 @@ deltime(ltime = proc.time()["elapsed"], text = NULL)
 \item{text}{Text to display along with elapsed time.}
 }
 \value{
-"elapsed" component of current proc.time().
+"elapsed" component of current \code{\link{proc.time}}.
 }
 \description{
 Timing function

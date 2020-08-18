@@ -2,24 +2,26 @@
 % Please edit documentation in R/zzz.R
 \name{clustra_env}
 \alias{clustra_env}
-\title{Get or set clustra environment variables.}
+\title{Get or set \code{\link{clustra}} environment variables.}
 \usage{
 clustra_env(...)
 }
 \arguments{
 \item{...}{Any number of string constants that ask for or assign various
-parameters in .clustra_env environment. For example, "cor$e_mc" will
-return the cor$e_mc parameter and "cor$e_mc = 8" will assign 8 to that
-parameter.}
+parameters in \code{.clustra_env} environment. For example, \code{"cor$e_mc"}
+will return the current \code{cor$e_mc} parameter and \code{"cor$e_mc = 8"}
+will change it to 8.}
 }
 \description{
 Several parameters can be set with one call but only one parameter can
 be returned. Consequently all parameters after the first returned 
-parameter are ignored. An empty parameter list will print all
-parameters in the environment. Note that limited checking for syntax
- is performed so be careful!
+parameter are ignored. Note that limited checking for syntax
+is performed so be careful!
+}
+\details{
+An empty parameter list will print all parameters in the environment.
 }
 \seealso{
-[clustra_env_gen()], [clustra_env_cor()], [clustra_env_clu()], 
-  [clustra_env_ran()].
+\code{\link{.clustra_env_gen}}, \code{\link{.clustra_env_cor}},
+ \code{\link{.clustra_env_clu}}, \code{\link{.clustra_env_ran}}.
 }

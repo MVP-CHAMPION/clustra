@@ -1,11 +1,23 @@
 ##
-## This is the R translation of trajectories v2.sas code
+## This is the R translation of trajectories v2.sas code. Possibly, some
+## differences exist, which we hope to reconcile in the near future.
 ##
 
-## Function to fit thin plate spline (tps) to a group with gam from the mgcv
-## package. Crossvalidation does not know about zero weights, resulting in
-## different smoothing parameters, so subset parameter is used to ensure 
-## correct crossvalidation sampling.
+#' Function to fit thin plate spline (tps) to a group with 
+#' \code{\link[mgcv]{bam}} from the \code{mgcv} package. Crossvalidation does
+#' not know about zero weights, resulting in different smoothing parameters, so
+#' subset parameter (rather than zero weights) is used to ensure correct
+#' crossvalidation sampling.
+#' 
+#' @param g
+#' Integer group number.
+#' @param data 
+#' See \code{\link{clustra}} description.
+#' @param maxdf
+#' See \code{\link{trajectories}} description.
+#' @param nthreads
+#' Controls \code{\link[mgcv]{bam}} threads.
+#' 
 tps_g = function(g, data, maxdf, nthreads) {
   tps = mgcv::bam(response ~ s(time, k = maxdf), data = data,
                   subset = data$group == g, discrete = TRUE, nthreads = nthreads)
@@ -16,15 +28,28 @@ tps_g = function(g, data, maxdf, nthreads) {
 #' Function to predict for new data based on fitted tps of a group
 #' 
 #' @param tps
-#' Output structure of [mgcv::bam()]
-#' @param data 
-#' See [clustra()] description.
-#' 
+#' Output structure of \code{\link[mgcv]{bam}}.
+#' @param data
+#' See \code{\link{clustra}} description.
+#'
 pred_g = function(tps, data)
   predict(object = tps, newdata = data, type = "response", se.fit = TRUE)
-## Loss functions for each id to a group tps center
+
+#' Loss functions
+#' 
+#' \code{mse_g} Computes mean-squared loss for each group.
+#' \code{mxe_g} is maximum loss.
+#' 
+#' @param g
+#' Integer group number.
+#' @param pred
+#' List. Element g is output of \code{\link{pred_g}} for group g.
+#' @param data
+#' See \code{\link{trajectories}}
+#' 
 mse_g = function(g, pred, data) # mean squared error
   as.numeric(tapply((data$response - pred[[g]]$fit)^2, data$id, mean))
+#' @rdname mse_g
 mxe_g = function(g, pred, data) # maximum error
   as.numeric(tapply(abs(data$response - pred[[g]]$fit), data$id, max))
 
@@ -34,18 +59,17 @@ mxe_g = function(g, pred, data) # maximum error
 #' Column names are id, time, response, group. Note that id are already
 #' sequential starting from 1. This affects expanding group numbers to ids.
 #' @param k Number of clusters (groups).
-#' "bestrand" is implemented.
-#' @param nstart (see clu component of .clustra_env)
-#' @param nid (see clu component of .clustra_env)
-#' @param maxdf (see clu component of .clustra_env)
-#' @param cores (see cor component of .clustra_env)
+#' @param starts (see \code{\link{.clustra_env_clu}})
+#' @param idperstart (see \code{\link{.clustra_env_clu}})
+#' @param maxdf (see \code{\link{.clustra_env_clu}})
+#' @param cores (see \code{\link{.clustra_env_clu}})
 #' @param verbose Turn on more output for debugging.
 #' 
 #' @importFrom methods is
 #' @export
 start_groups = function(data, k,
-                        nstart = clustra_env("clu$starts"),
-                        nid = clustra_env("clu$idperstart"),
+                        starts = clustra_env("clu$starts"),
+                        idperstart = clustra_env("clu$idperstart"),
                         maxdf = clustra_env("clu$maxdf"),
                         cores = clustra_env("cor"),
                         verbose = FALSE) {
@@ -58,22 +82,22 @@ start_groups = function(data, k,
                 response = rep(NA, k*2*maxdf),
                 group = rep(1:k, each = 2*maxdf))
 
-  ## Samples k*nid id's. Picks tps fit with best deviance after one iteration among
-  ##   random starts. Choosing from samples increases diversity of
-  ##   fits (sum of distances between group fits).
+  ## Samples k*idperstart id's. Picks tps fit with best deviance after one
+  ##   iteration among random starts. Choosing from samples increases diversity
+  ##   of fits (sum of distances between group fits).
   ## Then classifies all ids based on fit from best sample
   max_div = 0
-  start_id = sort(sample(unique(data$id), k*nid)) # for speed and diversity!
+  start_id = sort(sample(unique(data$id), k*idperstart)) # for speed and diversity!
   data_start = data[match(data$id, start_id, nomatch = 0) > 0, ]
 
   data_start$id = as.numeric(factor(data_start$id)) 
   ## Note: since id are not sequential (Am I losing correspondence to ids? No,
-  ##  because spline modesl do not know about ids. The classification process 
+  ##  because spline models do not know about ids. The classification process 
   ##  only needs who has same id, not what is the id.)
 
   ## evaluate starts on id sample
-  for(i in 1:nstart) {
-    group = sample(k, k*nid, replace = TRUE) # random groups
+  for(i in 1:starts) {
+    group = sample(k, k*idperstart, replace = TRUE) # random groups
     data_start$group = group[data_start$id] # expand group to all responses
 
     f = trajectories(data_start, k, group, iter = 1,  # single iter for starts!
@@ -109,7 +133,7 @@ start_groups = function(data, k,
 #' Cluster longitudinal trajectories of a response variable.
 #' 
 #' Trajectory means are splines fit to all ids in a cluster. Typically, this
-#' function is called by \code{clustra()}.
+#' function is called by \code{\link{clustra}}.
 #' 
 #' @param data 
 #' Data frame with response measurements, one per observation. Column
@@ -121,11 +145,14 @@ start_groups = function(data, k,
 #' @param group 
 #' Group numbers corresponding to sequential ids.
 #' @param iter 
-#' Maximum iterations in mgcv::bam (see .clustra_env)
+#' Maximum iterations in \code{\link[mgcv]{bam}} (see
+#' \code{\link{.clustra_env_clu}})
 #' @param maxdf 
-#' Maximum degrees of freedom for tps in mgcv::bam (see .clustra_env)
+#' Maximum degrees of freedom for tps in \code{\link[mgcv]{bam}} (see
+#' \code{\link{.clustra_env_clu}})
 #' @param cores 
-#' List with cores allocation to various sections (see .clustra_env)
+#' List with cores allocation to various sections (see 
+#' \code{\link{.clustra_env_clu}})
 #' @param verbose 
 #' Logical, whether to produce debug output.
 #' 
@@ -142,7 +169,6 @@ trajectories = function(data, k, group,
                         verbose = FALSE) {
   
   if(verbose) a = a_0 = deltime(a)
-  openblasctl::openblas_set_num_threads(cores$blas)
   if(max(data$id) != length(group)){
     cat("\ntrajectories: group id's may be corrupted or empty!\n")
     browser()
@@ -206,7 +232,7 @@ trajectories = function(data, k, group,
 
 #' Cluster trajectories 
 #' 
-#' Most users will run the \code{clustra()} function, which takes care of
+#' Most users will run the \code{\link{clustra}} function, which takes care of
 #' starting values and completes kmeans iteration according to parameters in
 #' \code{.clustra_env} environment (See vignette("clustra_basic.Rmd") for
 #' more details).
@@ -218,17 +244,17 @@ trajectories = function(data, k, group,
 #' Number of clusters (groups).
 #' @param group 
 #' A vector of initial cluster assignments for unique id's in data.
-#' Normally, this is NULL and starts are provided by \code{start_groups()}. 
+#' Normally, this is NULL and starts are provided by \code{link{start_groups}}. 
 #' @param verbose 
 #' Logical to turn on more output during fit iterations.
 #' @param rngkind
-#' Character string giving random number generator type (see [RNGkind()]).
+#' Character string giving random number generator type (see \link{RNGkind}).
 #' @param seed
 #' Seed for generating random starting initial cluster assignments.
 #' 
 #' @details In addition to the shown parameters, detailed clustering and core
-#' allocation parameters are in .clustra_env environment that can be controlled
-#' with \code{clustra_env} function.
+#' allocation parameters are in \code{.clustra_env} environment that can be
+#' controlled with the \code{clustra_env} function.
 #' 
 #' @export
 clustra = function(data, k, group = NULL, verbose = FALSE,

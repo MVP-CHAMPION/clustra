@@ -2,13 +2,13 @@
 % Please edit documentation in R/zzz.R
 \name{.clustra_init}
 \alias{.clustra_init}
-\title{Function to create and initialize .clustra_env}
+\title{Function to create and initialize \code{.clustra_env}}
 \usage{
 .clustra_init(envir = .GlobalEnv)
 }
 \arguments{
-\item{envir}{Environment where to create .clustra_env}
+\item{envir}{Environment where to create \code{.clustra_env}}
 }
 \description{
-Function to create and initialize .clustra_env
+Function to create and initialize \code{.clustra_env}
 }

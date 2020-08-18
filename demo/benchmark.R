@@ -1,9 +1,3 @@
-utils::globalVariables(c(
-  "user", "elapsed", "seconds", "type", "id"
-))
-
-
-
 #' Function to benchmark various core combinations for components of clustra
 #'
 #' @param FUN Function to benchmark.
@@ -12,8 +6,7 @@ utils::globalVariables(c(
 #'  cores will be tested. Core control is via openblasctl package)
 #' @param reps Number of replicates for each core setting
 bench_cores = function(FUN, ..., max2 = 5, reps = 4) {
-  FUNname = substitute(FUN)
-  FUN = match.fun(FUN)
+  FUN = match.fun(FUN, .GlobalEnv)
   
   bench = vector("list", max2*reps)
   
@@ -44,6 +37,7 @@ bench_cores = function(FUN, ..., max2 = 5, reps = 4) {
 }
 
 ## TODO UNFINISHED!
+stop("Demo is incomplete: don not run.")
 ## Edits a Slurm submission script to exercise a number of scaling options
 ## 
 
@@ -55,6 +49,9 @@ if(!dir.exists(playdir)) dir.create(playdir)
 
 ## Set or get clustra parameters
 PL = clustra_par(playdir)
+
+## Set cores for OpenBlas if available
+if(cores$blas > 1) openblasctl::openblas_set_num_threads(cores$blas)
 
 max_cores = list(e_mc = 4, m_mc = 4, bam_nthreads = 1, blas = 1)
 cor_combo = do.call(expand.grid, lapply(max_cores, function(x) 1:x))

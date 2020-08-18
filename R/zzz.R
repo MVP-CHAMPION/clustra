@@ -28,12 +28,13 @@
   )
 }
 
-#' Function to initialize components of `cor` list in .clustra_env environment
+#' Function to initialize components of `cor` list in \code{.clustra_env}
+#' environment
 #' 
-#' @param e_mc Cores to use by mclapply of e_mc (expectation over k)
-#' @param m_mc Cores to use by mclapply of m_mc (maximization across k)
-#' @param bam_nthreads Threads to use by mgcv::bam()
-#' @param blas Cores to use by OpenBLAS
+#' @param e_mc Cores to use by \code{mclapply} of e_mc (expectation over k).
+#' @param m_mc Cores to use by \code{mclapply} of m_mc (maximization across k).
+#' @param bam_nthreads Threads to use by \code{\link[mgcv]{bam}}.
+#' @param blas Cores to use by OpenBLAS.
 .clustra_env_cor = function(
   e_mc = 1, 
   m_mc = 1,
@@ -47,17 +48,22 @@
     blas = blas)
 }
 
-#' Function to initialize components of `clu` list in .clustra_env environment
+#' Function to initialize components of `clu` list in \code{.clustra_env}
+#' environment
 #' 
-#' @param rngkind Random number generator kind to use. See 
-#' [parallel::mcparallel()] for details.
-#' @param seed Random starts generation seed for reproducibility.
-#' @param maxdf Basis dimension of smooth term ( see [mgcv::s()], parameter k).
+#' @param rngkind 
+#' Random number generator kind to use. See \code{\link[parallel]{mcparallel}}
+#' for details.
+#' @param seed 
+#' Random starts generation seed for reproducibility.
+#' @param maxdf
+#' Basis dimension of smooth term (see \code{\link[mgcv]{s}}, parameter k,
+#' in package \code{mgcv}).
 #' @param iter Maximum number of iterations.
 #' @param starts Number of random starts.
 #' @param idperstart Number of `id`s to sample for random starts.
 #' @param retry_max Number of restarts if iteration encounters a cluster too
-#' small for [mgcv::bam()] fitting with the given \code{maxdf}.
+#' small for \code{\link[mgcv]{bam}} fitting with the given \code{maxdf}.
 .clustra_env_clu = function(
   rngkind = "L'Ecuyer-CMRG",
   seed = 79, # starting seed for cluster starts
@@ -78,7 +84,8 @@
   )
 }
 
-#' Function to initialize components of `ran` list in .clustra_env environment
+#' Function to initialize components of `ran` list in \code{.clustra_env}
+#' environment
 #' 
 #' @param ng_vec Vector of `k` values to simulate.
 #' @param replicates Number of replicates for each `k`.
@@ -93,21 +100,22 @@
   )  
 }
 
-#' Get or set clustra environment variables.
+#' Get or set \code{\link{clustra}} environment variables.
 #' 
 #' Several parameters can be set with one call but only one parameter can
 #' be returned. Consequently all parameters after the first returned 
-#' parameter are ignored. An empty parameter list will print all
-#' parameters in the environment. Note that limited checking for syntax
-#'  is performed so be careful!
+#' parameter are ignored. Note that limited checking for syntax
+#' is performed so be careful!
+#' 
+#' An empty parameter list will print all parameters in the environment.
 #'  
 #' @param ... Any number of string constants that ask for or assign various
-#' parameters in .clustra_env environment. For example, "cor$e_mc" will
-#' return the cor$e_mc parameter and "cor$e_mc = 8" will assign 8 to that
-#' parameter.
+#' parameters in \code{.clustra_env} environment. For example, \code{"cor$e_mc"}
+#' will return the current \code{cor$e_mc} parameter and \code{"cor$e_mc = 8"}
+#' will change it to 8.
 #' 
-#' @seealso [clustra_env_gen()], [clustra_env_cor()], [clustra_env_clu()], 
-#'   [clustra_env_ran()].
+#' @seealso \code{\link{.clustra_env_gen}}, \code{\link{.clustra_env_cor}},
+#'  \code{\link{.clustra_env_clu}}, \code{\link{.clustra_env_ran}}.
 #' @export
 clustra_env = function(...) {
   fun = "clustra_env"
@@ -159,9 +167,9 @@ clustra_env = function(...) {
   invisible(NULL)
 }
 
-#' Function to create and initialize .clustra_env
+#' Function to create and initialize \code{.clustra_env}
 #' 
-#' @param envir Environment where to create .clustra_env
+#' @param envir Environment where to create \code{.clustra_env}
 .clustra_init = function(envir = .GlobalEnv){
   if(!exists(".clustra_env", envir = envir)){
     envir$.clustra_env = new.env()

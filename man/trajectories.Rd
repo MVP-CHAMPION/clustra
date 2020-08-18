@@ -24,17 +24,20 @@ numbers to ids.}
 
 \item{group}{Group numbers corresponding to sequential ids.}
 
-\item{iter}{Maximum iterations in mgcv::bam (see .clustra_env)}
+\item{iter}{Maximum iterations in \code{\link[mgcv]{bam}} (see
+\code{\link{.clustra_env_clu}})}
 
-\item{maxdf}{Maximum degrees of freedom for tps in mgcv::bam (see .clustra_env)}
+\item{maxdf}{Maximum degrees of freedom for tps in \code{\link[mgcv]{bam}} (see
+\code{\link{.clustra_env_clu}})}
 
-\item{cores}{List with cores allocation to various sections (see .clustra_env)}
+\item{cores}{List with cores allocation to various sections (see 
+\code{\link{.clustra_env_clu}})}
 
 \item{verbose}{Logical, whether to produce debug output.}
 }
 \description{
 Trajectory means are splines fit to all ids in a cluster. Typically, this
-function is called by \code{clustra()}.
+function is called by \code{\link{clustra}}.
 }
 \author{
 George Ostrouchov and David Gagnon

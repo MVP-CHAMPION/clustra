@@ -6,7 +6,7 @@
 #' Text to display along with elapsed time.
 #'
 #' @return
-#' "elapsed" component of current proc.time().
+#' "elapsed" component of current \code{\link{proc.time}}.
 #' 
 #' @export
 deltime = function(ltime = proc.time()["elapsed"], text = NULL) {

@@ -20,22 +20,22 @@ Column names are id, time, response, group.}
 \item{k}{Number of clusters (groups).}
 
 \item{group}{A vector of initial cluster assignments for unique id's in data.
-Normally, this is NULL and starts are provided by \code{start_groups()}.}
+Normally, this is NULL and starts are provided by \code{link{start_groups}}.}
 
 \item{verbose}{Logical to turn on more output during fit iterations.}
 
-\item{rngkind}{Character string giving random number generator type (see [RNGkind()]).}
+\item{rngkind}{Character string giving random number generator type (see \link{RNGkind}).}
 
 \item{seed}{Seed for generating random starting initial cluster assignments.}
 }
 \description{
-Most users will run the \code{clustra()} function, which takes care of
+Most users will run the \code{\link{clustra}} function, which takes care of
 starting values and completes kmeans iteration according to parameters in
 \code{.clustra_env} environment (See vignette("clustra_basic.Rmd") for
 more details).
 }
 \details{
 In addition to the shown parameters, detailed clustering and core
-allocation parameters are in .clustra_env environment that can be controlled
-with \code{clustra_env} function.
+allocation parameters are in \code{.clustra_env} environment that can be
+controlled with the \code{clustra_env} function.
 }

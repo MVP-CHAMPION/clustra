@@ -27,7 +27,7 @@ In this vignette, we generate a data set. The parameters used in the data genera
 ```{r}
 clustra_env("gen")
 ```
-The above default parameters generate `r clustra_env("gen$n_id")` *id*s and for each *id*, a random number of observations based on the Poisson($\lambda =$ `r clustra_env("gen$m_obs")`) distribution plus 3. The 3 additional observations are to guarantee one before intervention at time *start*, one at the intervention time 0, and one after the intervention at time *end*. The *start* time is Uniform(`r clustra_env("gen$s_range")`) and the *end* time is Uniform(`r clustra_env("gen$e_range")`). The remaining times are at times Uniform(*start*, *end*). In our blood pressure example, the units are days.
+The above default parameters generate `r clustra_env("gen$n_id")` *id*s and for each *id*, a random number of observations based on the Poisson($\lambda =$ `r clustra_env("gen$m_obs")`) distribution plus 3. The 3 additional observations are to guarantee one before intervention at time *start*, one at the intervention time 0, and one after the intervention at time *end*. The *start* time is Uniform(`r clustra_env("gen$s_range")`) and the *end* time is Uniform(`r clustra_env("gen$e_range")`). The remaining times are at times Uniform(*start*, *end*). The time units are arbitrary and depend on your application.
 
 We also set a seed for reproducibility.
 ```{r}

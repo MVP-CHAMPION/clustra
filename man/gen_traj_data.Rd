@@ -6,9 +6,9 @@
 \usage{
 gen_traj_data(
   n_id = clustra_env("gen$n_id"),
-  lambda_obs = clustra_env("gen$m_obs"),
-  st = clustra_env("gen$s_range"),
-  en = clustra_env("gen$e_range"),
+  m_obs = clustra_env("gen$m_obs"),
+  s_range = clustra_env("gen$s_range"),
+  e_range = clustra_env("gen$e_range"),
   plots = clustra_env("gen$plots"),
   reference = 100,
   noise = c(0, abs(reference/20)),
@@ -17,15 +17,15 @@ gen_traj_data(
 )
 }
 \arguments{
-\item{n_id}{See .clustra_env}
+\item{n_id}{See \code{\link{.clustra_env_gen}}}
 
-\item{lambda_obs}{See .clustra_env}
+\item{m_obs}{See \code{\link{.clustra_env_gen}}}
 
-\item{st}{See .clustra_env}
+\item{s_range}{See \code{\link{.clustra_env_gen}}}
 
-\item{en}{See .clustra_env}
+\item{e_range}{See \code{\link{.clustra_env_gen}}}
 
-\item{plots}{See .clustra_env}
+\item{plots}{See \code{\link{.clustra_env_gen}}}
 
 \item{reference}{A nominal response reference (for example, blood pressure
 is near 100, which is the default)}
@@ -33,27 +33,30 @@ is near 100, which is the default)}
 \item{noise}{Vector of length 2 giving the mean and sd of added N(mean, sd)
 noise.}
 
-\item{k}{Number of response types (TODO works only for k = 2 and 3)}
+\item{k}{Number of response types (So far works only for k = 2 and 3)}
 
 \item{min_obs}{Minimum number of observations in addition to zero time
 observation.}
 }
 \value{
 A data frame with one response per row and three columns:
-  `id` (an integer in 1:(3*n_id), `time` (an iteger in `st[1]` to `en[2]`
+  `id` (an integer in 1:(3*n_id), `time` (an iteger in `s_range[1]` to `e_range[2]`
   observation time), and `response`.
 }
 \description{
-Collection of longitudinal responses with possibly varying lengths and 
-varying numbers of observations. Support is [st . . . 0 . . . en] so that
-all trajectories are aligned at 0. Zero is the intervention time.
+Generates a collection of longitudinal responses with possibly varying
+lengths and varying numbers of observations. Support is
+[start . . . 0 . . . end], where
+start~uniform(s_range) and end~uniform(e_range), so that
+all trajectories are aligned at 0 but can start and end at different times.
+Zero is the intervention time.
 }
 \section{Details}{
 
 Generate longitudinal data for a response variable. Trajectories start
-at time uniformly distributed in st and end at time uniformly 
-distributed in en. Number of observations in a trajectory is 
-Poisson(lambda_obs). The result is a number of trajectories, all starting at 
+at time uniformly distributed in s_range and end at time uniformly 
+distributed in e_range. Number of observations in a trajectory is 
+Poisson(m_obs). The result is a number of trajectories, all starting at 
 time 0, with different time spans, and with independently different numbers 
 of observations within the time spans. Each trajectory follows a randomly 
 selected response function with added N(mean, sd) error.

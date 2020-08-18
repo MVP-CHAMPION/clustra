@@ -2,19 +2,21 @@
 % Please edit documentation in R/zzz.R
 \name{.clustra_env_cor}
 \alias{.clustra_env_cor}
-\title{Function to initialize components of `cor` list in .clustra_env environment}
+\title{Function to initialize components of `cor` list in \code{.clustra_env}
+environment}
 \usage{
 .clustra_env_cor(e_mc = 1, m_mc = 1, bam_nthreads = 1, blas = 1)
 }
 \arguments{
-\item{e_mc}{Cores to use by mclapply of e_mc (expectation over k)}
+\item{e_mc}{Cores to use by \code{mclapply} of e_mc (expectation over k).}
 
-\item{m_mc}{Cores to use by mclapply of m_mc (maximization across k)}
+\item{m_mc}{Cores to use by \code{mclapply} of m_mc (maximization across k).}
 
-\item{bam_nthreads}{Threads to use by mgcv::bam()}
+\item{bam_nthreads}{Threads to use by \code{\link[mgcv]{bam}}.}
 
-\item{blas}{Cores to use by OpenBLAS}
+\item{blas}{Cores to use by OpenBLAS.}
 }
 \description{
-Function to initialize components of `cor` list in .clustra_env environment
+Function to initialize components of `cor` list in \code{.clustra_env}
+environment
 }

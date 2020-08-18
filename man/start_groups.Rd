@@ -7,8 +7,8 @@
 start_groups(
   data,
   k,
-  nstart = clustra_env("clu$starts"),
-  nid = clustra_env("clu$idperstart"),
+  starts = clustra_env("clu$starts"),
+  idperstart = clustra_env("clu$idperstart"),
   maxdf = clustra_env("clu$maxdf"),
   cores = clustra_env("cor"),
   verbose = FALSE
@@ -19,16 +19,15 @@ start_groups(
 Column names are id, time, response, group. Note that id are already
 sequential starting from 1. This affects expanding group numbers to ids.}
 
-\item{k}{Number of clusters (groups).
-"bestrand" is implemented.}
+\item{k}{Number of clusters (groups).}
 
-\item{nstart}{(see clu component of .clustra_env)}
+\item{starts}{(see \code{\link{.clustra_env_clu}})}
 
-\item{nid}{(see clu component of .clustra_env)}
+\item{idperstart}{(see \code{\link{.clustra_env_clu}})}
 
-\item{maxdf}{(see clu component of .clustra_env)}
+\item{maxdf}{(see \code{\link{.clustra_env_clu}})}
 
-\item{cores}{(see cor component of .clustra_env)}
+\item{cores}{(see \code{\link{.clustra_env_clu}})}
 
 \item{verbose}{Turn on more output for debugging.}
 }

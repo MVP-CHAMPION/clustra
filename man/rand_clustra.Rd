@@ -2,8 +2,9 @@
 % Please edit documentation in R/evaluate.R
 \name{rand_clustra}
 \alias{rand_clustra}
-\title{Performs clustra runs for several k and several random start replicates per k.
-Then prepares a Rand index comparison between all pairs of clusterings.}
+\title{Performs \code{\link{clustra}} runs for several k and several random start
+replicates per k. Then prepares a Rand index comparison between all pairs of
+clusterings.}
 \usage{
 rand_clustra(
   data,
@@ -14,18 +15,21 @@ rand_clustra(
 )
 }
 \arguments{
-\item{data}{The data (see clustra description).}
+\item{data}{The data (see \code{\link{clustra}} description).}
 
-\item{k}{Vector of k values to try (see .clustra_env)}
+\item{k}{Vector of k values to try (see \code{.clustra_env}).}
 
-\item{replicates}{Number of replicates for each k (see .clustra_env)}
+\item{replicates}{Number of replicates for each k (see \code{.clustra_env}).}
 
-\item{save}{Logical. When TRUE, save all results as file results.Rdata}
+\item{save}{Logical. When TRUE, save all results as file \code{results.Rdata}.}
 
-\item{verbose}{Logical. When TRUE, information about each run of clustra is
-printed.}
+\item{verbose}{Logical. When TRUE, information about each run of clustra is printed.}
+}
+\value{
+See \code{\link{allpair_RandIndex}}
 }
 \description{
-Performs clustra runs for several k and several random start replicates per k.
-Then prepares a Rand index comparison between all pairs of clusterings.
+Performs \code{\link{clustra}} runs for several k and several random start
+replicates per k. Then prepares a Rand index comparison between all pairs of
+clusterings.
 }

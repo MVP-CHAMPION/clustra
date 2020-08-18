@@ -16,7 +16,6 @@ Imports:
     methods,
     mgcv,
     MixSim,
-    openblasctl,
     parallel,
     stats
 Suggests:

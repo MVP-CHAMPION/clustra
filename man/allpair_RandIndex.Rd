@@ -2,18 +2,22 @@
 % Please edit documentation in R/evaluate.R
 \name{allpair_RandIndex}
 \alias{allpair_RandIndex}
-\title{Use RandIndex to evaluate number of clusters}
+\title{allpair_RandIndex is used internally by \code{\link{rand_clustra}} and
+provides its return value.}
 \usage{
 allpair_RandIndex(results)
 }
 \arguments{
-\item{results}{List with results from [trajectories()] function}
+\item{results}{A list with each element packed internally by the
+\code{\link{rand_clustra}} function.}
 }
 \value{
-A data frame with RandIndex for all pairs from trajectories results.
-Note all pairs means lower triangle plus diagonal of an all-pairs symmetric
-matrix.
+A data frame with \code{\link[MixSim]{RandIndex}} for all pairs from
+trajectories results. The data frame names and format is intended to be the
+input for \code{\link{rand_plot}}. Note that all pairs means lower triangle
+plus diagonal of an all-pairs symmetric matrix.
 }
 \description{
-Use RandIndex to evaluate number of clusters
+Runs \code{\link[MixSim]{RandIndex}} for all pairs of cluster results in its
+list input and produces a matrix for use by \code{\link{rand_plot}}.
 }

@@ -2,7 +2,8 @@
 % Please edit documentation in R/zzz.R
 \name{.clustra_env_ran}
 \alias{.clustra_env_ran}
-\title{Function to initialize components of `ran` list in .clustra_env environment}
+\title{Function to initialize components of `ran` list in \code{.clustra_env}
+environment}
 \usage{
 .clustra_env_ran(ng_vec = c(2, 3, 4), replicates = 10)
 }
@@ -12,5 +13,6 @@
 \item{replicates}{Number of replicates for each `k`.}
 }
 \description{
-Function to initialize components of `ran` list in .clustra_env environment
+Function to initialize components of `ran` list in \code{.clustra_env}
+environment
 }

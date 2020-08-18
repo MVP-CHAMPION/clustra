@@ -2,7 +2,8 @@
 % Please edit documentation in R/zzz.R
 \name{.clustra_env_clu}
 \alias{.clustra_env_clu}
-\title{Function to initialize components of `clu` list in .clustra_env environment}
+\title{Function to initialize components of `clu` list in \code{.clustra_env}
+environment}
 \usage{
 .clustra_env_clu(
   rngkind = "L'Ecuyer-CMRG",
@@ -15,12 +16,13 @@
 )
 }
 \arguments{
-\item{rngkind}{Random number generator kind to use. See 
-[parallel::mcparallel()] for details.}
+\item{rngkind}{Random number generator kind to use. See \code{\link[parallel]{mcparallel}}
+for details.}
 
 \item{seed}{Random starts generation seed for reproducibility.}
 
-\item{maxdf}{Basis dimension of smooth term ( see [mgcv::s()], parameter k).}
+\item{maxdf}{Basis dimension of smooth term (see \code{\link[mgcv]{s}}, parameter k,
+in package \code{mgcv}).}
 
 \item{iter}{Maximum number of iterations.}
 
@@ -29,8 +31,9 @@
 \item{idperstart}{Number of `id`s to sample for random starts.}
 
 \item{retry_max}{Number of restarts if iteration encounters a cluster too
-small for [mgcv::bam()] fitting with the given \code{maxdf}.}
+small for \code{\link[mgcv]{bam}} fitting with the given \code{maxdf}.}
 }
 \description{
-Function to initialize components of `clu` list in .clustra_env environment
+Function to initialize components of `clu` list in \code{.clustra_env}
+environment
 }
