@@ -1,8 +1,10 @@
 ---
-title: "clustra_basic"
+title: "clustra-basic"
+author: "George Ostrouchov"
+date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{clustra_basic}
+  %\VignetteIndexEntry{clustra-basic}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -13,7 +15,7 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 ```
-The \pkg{clustra} package was built to cluster medical trajectories related by an intervention. For example, a number of individuals are started on a specific drug regimen and their blood pressure data is collected for a varying amount of time before and after the start of the medication. Time measurements are assumed to be negative before the start and positive after the start, meaning that the trajectories are aligned at zero, irrespective of any reference to calendar time.
+The \pkg{clustra} package was built to cluster medical trajectories related by an intervention. For example, a number of individuals are started on a specific drug regimen and their blood pressure data is collected for a varying amount of time before and after the start of the medication. Time is recorded as negative before the start and positive after the start, meaning that the trajectories are aligned at zero, irrespective of any reference to calendar time. Time units can be anything (days, weeks, hours, minutes, etc.) as long as they are the same across all patients. Observations do not have to be equally spaced.
 
 First, we load the package and set up a directory where we want to have any output from this vignette.
 ```{r setup}
