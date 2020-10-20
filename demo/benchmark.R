@@ -1,15 +1,11 @@
 #' Function to benchmark various core combinations for components of clustra
 #'
-#' @param FUN Function to benchmark.
-#' @param ... Additional arguments passed to `FUN`.
-#' @param max2 Largest power of 2 in cores (e.g. max2 = 3 implies 1, 2, 4, and 8
-#'  cores will be tested. Core control is via openblasctl package)
-#' @param reps Number of replicates for each core setting
-bench_cores = function(FUN, ..., max2 = 5, reps = 4) {
-  FUN = match.fun(FUN, .GlobalEnv)
+bench_clustra = function() {
+
+  ## start with single node optimization
   
-  bench = vector("list", max2*reps)
   
+  ## loop over things to vary    
   for(i in 0:max2) {
     ts = 0
     cores = 2^i

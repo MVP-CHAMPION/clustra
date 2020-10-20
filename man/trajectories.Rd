@@ -17,7 +17,7 @@ trajectories(
 \arguments{
 \item{data}{Data frame with response measurements, one per observation. Column
 names are \code{id}, \code{time}, \code{response}, \code{group}. Note that
-id must be already sequential starting from 1. This affects expanding group 
+id must be already sequential starting from 1. This affects expanding group
 numbers to ids.}
 
 \item{k}{Number of clusters (groups)}
@@ -30,7 +30,7 @@ numbers to ids.}
 \item{maxdf}{Maximum degrees of freedom for tps in \code{\link[mgcv]{bam}} (see
 \code{\link{.clustra_env_clu}})}
 
-\item{cores}{List with cores allocation to various sections (see 
+\item{cores}{List with cores allocation to various sections (see
 \code{\link{.clustra_env_clu}})}
 
 \item{verbose}{Logical, whether to produce debug output.}

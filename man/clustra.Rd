@@ -20,7 +20,8 @@ Column names are id, time, response, group.}
 \item{k}{Number of clusters (groups).}
 
 \item{group}{A vector of initial cluster assignments for unique id's in data.
-Normally, this is NULL and starts are provided by \code{link{start_groups}}.}
+Normally, this is NULL and good starts are provided by
+\code{link{start_groups}}.}
 
 \item{verbose}{Logical to turn on more output during fit iterations.}
 

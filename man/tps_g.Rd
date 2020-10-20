@@ -2,7 +2,7 @@
 % Please edit documentation in R/trajectories.R
 \name{tps_g}
 \alias{tps_g}
-\title{Function to fit thin plate spline (tps) to a group with 
+\title{Function to fit thin plate spline (tps) to a group with
 \code{\link[mgcv]{bam}} from the \code{mgcv} package. Crossvalidation does
 not know about zero weights, resulting in different smoothing parameters, so
 subset parameter (rather than zero weights) is used to ensure correct
@@ -20,7 +20,7 @@ tps_g(g, data, maxdf, nthreads)
 \item{nthreads}{Controls \code{\link[mgcv]{bam}} threads.}
 }
 \description{
-Function to fit thin plate spline (tps) to a group with 
+Function to fit thin plate spline (tps) to a group with
 \code{\link[mgcv]{bam}} from the \code{mgcv} package. Crossvalidation does
 not know about zero weights, resulting in different smoothing parameters, so
 subset parameter (rather than zero weights) is used to ensure correct

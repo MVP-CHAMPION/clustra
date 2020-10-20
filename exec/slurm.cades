@@ -1,19 +1,19 @@
 #!/bin/bash
-#SBATCH -J trajectories
-#SBATCH -A ccsd-burst
+#SBATCH -J clustra                    # Job name
+#SBATCH -A ccsd-burst                 # Account
 #SBATCH -D /home/ost
 #SBATCH -t 01:30:00
 #SBATCH -N 1
 #SBATCH -n 1
 #SBATCH -c 32
 #SBATCH --mem=4G
-#SBATCH -e trajectories.e
-#SBATCH -o trajectories.o
+#SBATCH -e clustra.e
+#SBATCH -o clustra.o
 #SBATCH --mail-user=ost@ornl.gov
 #SBATCH --mail-type=FAIL
 
 hostname
-cd ~/R/trajectories
+cd ~/R/clustra
 pwd
 
 ## modules can vary on platforms
@@ -25,4 +25,4 @@ module list
 ## prevent warning when fork is used with MPI
 export OMPI_MCA_mpi_warn_on_fork=0
 
-Rscript R/trajectories.R
+Rscript R/clustra.R

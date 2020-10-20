@@ -37,7 +37,9 @@ allpair_RandIndex = function(results) {
                    Rand = Rand, adjRand = adjRand, Fow = Fow, Mir = Mir)
     }
   }
-  do.call(rbind, rand_pairs)
+  ri_df = do.call(rbind, rand_pairs)
+  class(ri_df) = c("RandIndex", class(ri_df))
+  ri_df
 }
 
 #' Matrix plot of Rand Index comparison of replicated clusters
@@ -141,9 +143,18 @@ rand_plot = function(rand_pairs, name = NULL) {
   invisible(name)
 }
 
-#' Performs \code{\link{clustra}} runs for several k and several random start
-#' replicates per k. Then prepares a Rand index comparison between all pairs of
-#' clusterings.
+#' Performs \code{\link{clustra}} runs for several k and presents a k selection
+#' index.
+#' 
+#' Available selection indices are "silhouette" and "rand".
+#' Silhouette computes a proxy silhouette index based on distances to cluster
+#' centers rather than trajectory pairs. The cost is essentially that of
+#' running clustra for several k as this information is
+#' available directly from clustra.
+#'
+#' Rand runs several random start replicates per k, resulting in a much slower
+#' algorithm. Then prepares a Rand index comparison between
+#' all pairs of clusterings.
 #' 
 #' @param data
 #' The data (see \code{\link{clustra}} description).
@@ -159,24 +170,49 @@ rand_plot = function(rand_pairs, name = NULL) {
 #' @return See \code{\link{allpair_RandIndex}}
 #' 
 #' @export
-rand_clustra = function(data, k = clustra_env("ran$ng_vec"),
-                        replicates = clustra_env("ran$replicates"),
-                        save = FALSE, verbose = FALSE) {
+clustra_pic_k = function(data, type = c("silhouette", "rand"), 
+                         k = clustra_env("ran$ng_vec"),
+                         replicates = clustra_env("ran$replicates"),
+                         save = FALSE, verbose = FALSE) {
+  if(type == "silhouette") {
+    replicates = 1
+    sil = function(x) {
+      ord = order(x)
+      ck = ord[1]
+      nk = ord[2]
+      s = (x[nk] - x[ck])/max(x[ck], x[nk])
+      c(ck, nk, s)
+    }
+    results = vector("list", length(k))
+  } else if(type == "rand") {
+    results = vector("list", replicates*length(k))
+  }
   set.seed(clustra_env("clu$seed"))
   
   a_rand = deltime()
-  results = vector("list", replicates*length(k))
   for(j in 1:length(k)) {
     kj = k[j]
     for(i in 1:replicates) {
       a_0 = deltime()
       
-      f = clustra(data, kj, verbose = verbose)
-      results[[(j - 1)*replicates + i]] = list(k = as.integer(kj), 
-                                               rep = as.integer(i),
-                                               deviance = f$deviance,
-                                               group = f$group)
-      data$group = as.factor(f$group[data$id])
+      ## Random initial groups to assess stability (NULL gets good starts)
+      group = NULL
+      if(type == "rand") 
+        group = sample(kj, length(unique(data$id)), replace = TRUE)
+      f = clustra(data, kj, group, verbose = verbose)
+      
+      if(type == "silhouette") {
+        smat = t(apply(f$loss, 1, sil))
+        colnames(smat) = c("cluster", "neighbor", "sil_width")
+        class(smat) = "silhouette"
+        results[[j]] = smat
+      } else if(type == "rand") {
+        results[[(j - 1)*replicates + i]] = list(k = as.integer(kj), 
+                                                 rep = as.integer(i),
+                                                 deviance = f$deviance,
+                                                 group = f$group)
+      } else cat("clustra_pic_k: Don't know type", type, "\n")
+      
       a = deltime()
       if(verbose) cat(kj, i, "it =", f$iterations, "dev =", f$deviance,
                       "err =", f$try_errors, "ch =", f$changes, "time =",
@@ -185,8 +221,13 @@ rand_clustra = function(data, k = clustra_env("ran$ng_vec"),
   }
   
   ## save object results and parameters
-  if(save) save(results, k, replicates, file = "rand_clustra.Rdata")
+  if(save) save(results, k, replicates, file = "clustra_pic_k.Rdata")
   
   ## compute and return Rand Index evaluation
-  allpair_RandIndex(results)
+  if(type == "rand") {
+    ret = allpair_RandIndex(results)
+    } else if(type == "silhouette") {
+      ret = results
+    }
+  ret
 }
