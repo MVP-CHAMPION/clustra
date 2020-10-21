@@ -14,8 +14,8 @@ clustra(
 )
 }
 \arguments{
-\item{data}{Data frame with response measurements, one per observation.
-Column names are id, time, response, group.}
+\item{data}{Data frame with response measurements, one response per observation.
+Required variables are (id, time, response). Other variables are ignored.}
 
 \item{k}{Number of clusters (groups).}
 

@@ -245,8 +245,8 @@ exit_report = function(cl) {
 #' more details).
 #'
 #' @param data
-#' Data frame with response measurements, one per observation.
-#' Column names are id, time, response, group.
+#' Data frame with response measurements, one response per observation.
+#' Required variables are (id, time, response). Other variables are ignored.
 #' @param k
 #' Number of clusters (groups).
 #' @param group
@@ -268,11 +268,17 @@ exit_report = function(cl) {
 clustra = function(data, k, group = NULL, verbose = FALSE,
                    rngkind = clustra_env("clu$rngkind"),
                    seed = clustra_env("clu$seed")) {
+  ## check for required variables in data
+  vnames = c("id", "time", "response")
+  if(!is.data.frame(data)) stop("Expecting a data frame.")
+  if(!all(vnames %in% names(data))) 
+    stop(paste0("Expecting (", paste0(vnames, collapse = ","), ") in data."))
+
   ## set RNG and its seed
   rng_prev = RNGkind(rngkind)
   set.seed(seed)
-
-  ## ensure that id's are sequential
+  
+  ## Internally, force sequential ids by converting to a factor
   data$id = as.numeric(factor(data$id))
   if(!is.null(group)) data$group = group[data$id] # expand group to all data
 
