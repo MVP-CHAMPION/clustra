@@ -102,7 +102,7 @@ start_groups = function(data, k,
 
     f = trajectories(data_start, k, group, iter = 1,  # single iter for starts!
                      verbose = verbose)
-    print(exit_report(f))
+    if(!is.null((er = exit_report(f)))) print(er)
     if(f$changes == -1) next   # bam failed, just skip this start!
 
     diversity = sum(dist(
@@ -170,9 +170,8 @@ trajectories = function(data, k, group,
                         verbose = FALSE) {
 
   if(verbose) a = a_0 = deltime(a)
-  if(max(data$id) != length(group)){
-    cat("\ntrajectories: group id's may be corrupted or empty!\n")
-    browser()
+  if(min(data$id) != 1 | max(data$id) != length(group)){
+    cat("\ntrajectories: Expecting sequential id's starting from 1.\n")
   }
 
   ## get number of unique id
@@ -210,13 +209,13 @@ trajectories = function(data, k, group,
     ## evaluate results and update groups
     changes = sum(new_group != group)
     counts = tabulate(new_group, k)
-    counts_df = tabulate(data$group, k)
     deviance = sum(unlist(lapply(1:k, function(g) deviance(tps[[g]]))))
     if(verbose)
        cat(" Changes:", changes, "Counts:", counts, "Deviance:", deviance)
     group = new_group
     data$group = as.factor(group[data$id]) # expand group to data frame
-
+    counts_df = tabulate(data$group, k)
+    
     ## break if converged or if any cluster gets too small for maxdf
     if(changes == 0 | any(counts_df < maxdf)) break
   }
@@ -255,28 +254,18 @@ exit_report = function(cl) {
 #' \code{link{start_groups}}.
 #' @param verbose
 #' Logical to turn on more output during fit iterations.
-#' @param rngkind
-#' Character string giving random number generator type (see \link{RNGkind}).
-#' @param seed
-#' Seed for generating random starting initial cluster assignments.
 #'
 #' @details In addition to the shown parameters, detailed clustering and core
 #' allocation parameters are in \code{.clustra_env} environment that can be
 #' controlled with the \code{clustra_env} function.
 #'
 #' @export
-clustra = function(data, k, group = NULL, verbose = FALSE,
-                   rngkind = clustra_env("clu$rngkind"),
-                   seed = clustra_env("clu$seed")) {
+clustra = function(data, k, group = NULL, verbose = FALSE) {
   ## check for required variables in data
   vnames = c("id", "time", "response")
   if(!is.data.frame(data)) stop("Expecting a data frame.")
   if(!all(vnames %in% names(data))) 
     stop(paste0("Expecting (", paste0(vnames, collapse = ","), ") in data."))
-
-  ## set RNG and its seed
-  rng_prev = RNGkind(rngkind)
-  set.seed(seed)
   
   ## Internally, force sequential ids by converting to a factor
   data$id = as.numeric(factor(data$id))
@@ -295,16 +284,11 @@ clustra = function(data, k, group = NULL, verbose = FALSE,
 
     ## kmeans iteration to assign id's to groups
     cl = trajectories(data, k, group, verbose = verbose)
-    print(exit_report(cl))
-    if(any("converged", "max iter") %in% exit_report(cl)) break
-    ## TODO FIXIT when rand, don't restart but accept result! It's okay with zero cluster!!!!!!!!
-    ## TODO rand should use trajectories directly, without clustra!!!
+    if(!is.null( (er = exit_report(cl)) )) print(er)
+    if( any( c("converged", "max iter") %in% exit_report(cl) ) )break
     cat("\n Restarting clustra. Error exit. \n")
   }
   cl$retry = retry
-
-  ## restore RNG
-  RNGkind(rng_prev[1])
 
   cl
 }

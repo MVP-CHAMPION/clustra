@@ -143,6 +143,68 @@ rand_plot = function(rand_pairs, name = NULL) {
   invisible(name)
 }
 
+#' clustra_sil:
+#' Performs \code{\link{clustra}} runs for several k and makes silhouette plots.
+#' 
+#' Available selection indices are "silhouette" and "rand".
+#' Silhouette computes a proxy silhouette index based on distances to cluster
+#' centers rather than trajectory pairs. The cost is essentially that of
+#' running clustra for several k as this information is
+#' available directly from clustra.
+#'
+#' Rand runs several random start replicates per k, resulting in a much slower
+#' algorithm. Then prepares a Rand index comparison between
+#' all pairs of clusterings.
+#' 
+#' @param data
+#' The data (see \code{\link{clustra}} description).
+#' @param k
+#' Vector of k values to try (see \code{.clustra_env}).
+#' @param save
+#' Logical. When TRUE, save all results as file \code{results.Rdata}.
+#' @param verbose
+#' Logical. When TRUE, information about each run of clustra is printed.
+#' 
+#' @return See \code{\link{allpair_RandIndex}}
+#' 
+#' @export
+clustra_sil = function(data, k = clustra_env("ran$ng_vec"),
+                         save = FALSE, verbose = FALSE) {
+  sil = function(x) {
+    ord = order(x)
+    ck = ord[1]
+    nk = ord[2]
+    s = (x[nk] - x[ck])/max(x[ck], x[nk])
+    c(ck, nk, s)
+  }
+  results = vector("list", length(k))
+  
+  a_rand = deltime()
+  for(j in 1:length(k)) {
+    kj = k[j]
+    a_0 = deltime()
+      
+    ## Random initial groups to assess stability (NULL gets good starts)
+    group = sample(kj, length(unique(data$id)), replace = TRUE)
+    f = clustra(data, kj, group, verbose = verbose)
+      
+    smat = t(apply(f$loss, 1, sil))
+    colnames(smat) = c("cluster", "neighbor", "sil_width")
+    class(smat) = "silhouette"
+    results[[j]] = smat
+      
+    a = deltime()
+    if(verbose) cat(kj, "dev =", f$deviance, "err =", f$try_errors, "ch =",
+                    f$changes, "time =", a - a_0, "\n")
+  }
+  
+  ## save object results and parameters
+  if(save) save(results, k, file = "clustra_sil.Rdata")
+  
+  results
+}
+
+#' clustra_rand:
 #' Performs \code{\link{clustra}} runs for several k and presents a k selection
 #' index.
 #' 
@@ -170,24 +232,13 @@ rand_plot = function(rand_pairs, name = NULL) {
 #' @return See \code{\link{allpair_RandIndex}}
 #' 
 #' @export
-clustra_pic_k = function(data, type = c("silhouette", "rand"), 
-                         k = clustra_env("ran$ng_vec"),
+clustra_rand = function(data, k = clustra_env("ran$ng_vec"),
                          replicates = clustra_env("ran$replicates"),
                          save = FALSE, verbose = FALSE) {
-  if(type == "silhouette") {
-    replicates = 1
-    sil = function(x) {
-      ord = order(x)
-      ck = ord[1]
-      nk = ord[2]
-      s = (x[nk] - x[ck])/max(x[ck], x[nk])
-      c(ck, nk, s)
-    }
-    results = vector("list", length(k))
-  } else if(type == "rand") {
-    results = vector("list", replicates*length(k))
-  }
-  set.seed(clustra_env("clu$seed"))
+  results = vector("list", replicates*length(k))
+  
+  ## Internally, force sequential ids by converting to a factor
+  data$id = as.numeric(factor(data$id))
   
   a_rand = deltime()
   for(j in 1:length(k)) {
@@ -196,22 +247,15 @@ clustra_pic_k = function(data, type = c("silhouette", "rand"),
       a_0 = deltime()
       
       ## Random initial groups to assess stability (NULL gets good starts)
-      group = NULL
-      if(type == "rand") 
-        group = sample(kj, length(unique(data$id)), replace = TRUE)
-      f = clustra(data, kj, group, verbose = verbose)
+      group = sample(kj, length(unique(data$id)), replace = TRUE)
+      data$group = group[data$id] # expand group to all data
+      f = trajectories(data, kj, group, verbose = verbose)
+      if(!is.null( (er = exit_report(cl)) )) print(er)
       
-      if(type == "silhouette") {
-        smat = t(apply(f$loss, 1, sil))
-        colnames(smat) = c("cluster", "neighbor", "sil_width")
-        class(smat) = "silhouette"
-        results[[j]] = smat
-      } else if(type == "rand") {
-        results[[(j - 1)*replicates + i]] = list(k = as.integer(kj), 
-                                                 rep = as.integer(i),
-                                                 deviance = f$deviance,
-                                                 group = f$group)
-      } else cat("clustra_pic_k: Don't know type", type, "\n")
+      results[[(j - 1)*replicates + i]] = list(k = as.integer(kj), 
+                                               rep = as.integer(i),
+                                               deviance = f$deviance,
+                                               group = f$group)
       
       a = deltime()
       if(verbose) cat(kj, i, "it =", f$iterations, "dev =", f$deviance,
@@ -221,13 +265,10 @@ clustra_pic_k = function(data, type = c("silhouette", "rand"),
   }
   
   ## save object results and parameters
-  if(save) save(results, k, replicates, file = "clustra_pic_k.Rdata")
+  if(save) save(results, k, replicates, file = "clustra_rand.Rdata")
   
   ## compute and return Rand Index evaluation
-  if(type == "rand") {
-    ret = allpair_RandIndex(results)
-    } else if(type == "silhouette") {
-      ret = results
-    }
+  ret = allpair_RandIndex(results)
+
   ret
 }

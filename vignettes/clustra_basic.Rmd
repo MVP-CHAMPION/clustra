@@ -15,8 +15,6 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 ```
-**Notes: Next, finish the rand index refactoring with random starts. Make sure exit_report has what is needed.**
-
 The \pkg{clustra} package was built to cluster medical trajectories related by an intervention. For example, a number of individuals are started on a specific drug regimen and their blood pressure data is collected for a varying amount of time before and after the start of the medication. Time is recorded as negative before the start and positive after the start, meaning that the trajectories are aligned at zero, irrespective of any reference to calendar time. Time units can be anything (days, weeks, hours, minutes, etc.) as long as they are the same across all patients. Observations do not have to be equally spaced.
 
 First, we load the package and set up a directory where we want to have any output from this vignette.
@@ -53,6 +51,7 @@ Now cluster the trajectories. Set maximum iterations to 10, set cluster seed for
 ```{r}
 clustra_env("clu$iter = 10", "clu$seed = 123473",
             "cor$e_mc = 1", "cor$m_mc = 1")
+rng_prev = RNGkind(clustra_env("clu$rngkind"))
 set.seed(clustra_env("clu$seed"))
 cl = clustra(data, 3, verbose = TRUE)
 ```
@@ -62,7 +61,7 @@ plot(mgcViz::getViz(cl$tps))
 ```
 Average silhouette value is a way to select the number of clusters and a silhouette plot provides a way for a deeper evaluation (Rouseeuw 1986). As silhouette requires distances between trajectories, this is not possible due to unequal tranectory sampling without fitting a model. As a proxy for distance between points, we consider point distances to cluster means. The structure return from clustra contains the matrix *loss*, which has all the information to construct the proxy silhouette plot.
 ```{r fig.width = 7}
-sil = clustra_pic_k(data, type = "silhouette", verbose = TRUE)
+sil = clustra_sil(data, verbose = TRUE)
 ## TODO add sampling option if too many ids
 splots = lapply(sil, function(x) print(factoextra::fviz_silhouette(x)))
 ```
@@ -76,6 +75,9 @@ clustra_env("ran$ng_vec = c(2, 3, 4)", "ran$replicates = 5", "clu$iter = 4")
 ```
 Finally, we plot the resulting matrix of Rand Indices.
 ```{r fig.width = 8, fig.height=9}
-ran = clustra_pic_k(data, type = "rand", verbose = TRUE)
+ran = clustra_rand(data, verbose = TRUE)
 rand_plot(ran)
+
+## restore RNG
+RNGkind(rng_prev[1])
 ```
