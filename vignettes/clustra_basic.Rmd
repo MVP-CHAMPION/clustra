@@ -71,7 +71,7 @@ clustra_env("ran")
 ```
 Rand Index to compares pairs of random starts. When replicate clusterings are done with different random seeds, their "replicability" is an indicator of how stable are results for a given k, the number of clusters. For this demonstration, we look at k = 2, 3, 4, and only five replications for each k. We use the clustra_env() function to set these parameters before running RandIndex_pairs().
 ```{r}
-clustra_env("ran$ng_vec = c(2, 3, 4)", "ran$replicates = 5", "clu$iter = 4")
+clustra_env("ran$ng_vec = c(2, 3, 4)", "ran$replicates = 5", "clu$iter = 10")
 ```
 Finally, we plot the resulting matrix of Rand Indices.
 ```{r fig.width = 8, fig.height=9}
