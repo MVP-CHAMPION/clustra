@@ -8,8 +8,9 @@ index.}
 \usage{
 clustra_rand(
   data,
-  k = clustra_env("ran$ng_vec"),
-  replicates = clustra_env("ran$replicates"),
+  k,
+  replicates = 10,
+  fp = list(maxdf = 30, iter = 8, starts = 4, idperstart = 20, retry_max = 3),
   save = FALSE,
   verbose = FALSE
 )
@@ -17,9 +18,9 @@ clustra_rand(
 \arguments{
 \item{data}{The data (see \code{\link{clustra}} description).}
 
-\item{k}{Vector of k values to try (see \code{.clustra_env}).}
+\item{k}{Vector of k values to try.}
 
-\item{replicates}{Number of replicates for each k (see \code{.clustra_env}).}
+\item{replicates}{Number of replicates for each k.}
 
 \item{save}{Logical. When TRUE, save all results as file \code{results.Rdata}.}
 

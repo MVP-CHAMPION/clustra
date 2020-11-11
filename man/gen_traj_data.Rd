@@ -5,11 +5,10 @@
 \title{Data Generators}
 \usage{
 gen_traj_data(
-  n_id = clustra_env("gen$n_id"),
-  m_obs = clustra_env("gen$m_obs"),
-  s_range = clustra_env("gen$s_range"),
-  e_range = clustra_env("gen$e_range"),
-  plots = clustra_env("gen$plots"),
+  n_id,
+  m_obs,
+  s_range,
+  e_range,
   reference = 100,
   noise = c(0, abs(reference/20)),
   k = 3,
@@ -17,21 +16,21 @@ gen_traj_data(
 )
 }
 \arguments{
-\item{n_id}{See \code{\link{.clustra_env_gen}}}
+\item{n_id}{Number of id to generate.}
 
-\item{m_obs}{See \code{\link{.clustra_env_gen}}}
+\item{m_obs}{Mean number of observation per `id` using}
 
-\item{s_range}{See \code{\link{.clustra_env_gen}}}
+\item{s_range}{A vector of length 2, giving the min and max limits of
+uniformly generated start observation time.}
 
-\item{e_range}{See \code{\link{.clustra_env_gen}}}
-
-\item{plots}{See \code{\link{.clustra_env_gen}}}
+\item{e_range}{A vector of length 2, giving the min and max limits of
+uniformly generated end observation time.}
 
 \item{reference}{A nominal response reference (for example, blood pressure
 is near 100, which is the default)}
 
-\item{noise}{Vector of length 2 giving the mean and sd of added N(mean, sd)
-noise.}
+\item{noise}{Vector of length 2 giving the *mean* and *sd* of added
+N(mean, sd) noise.}
 
 \item{k}{Number of response types (So far works only for k = 2 and 3)}
 
@@ -40,8 +39,8 @@ observation.}
 }
 \value{
 A data frame with one response per row and three columns:
-  `id` (an integer in 1:(3*n_id), `time` (an iteger in `s_range[1]` to `e_range[2]`
-  observation time), and `response`.
+  `id` (an integer in 1:(3*n_id), `time` (an iteger in `s_range[1]` to
+   `e_range[2]` observation time), and `response`.
 }
 \description{
 Generates a collection of longitudinal responses with possibly varying

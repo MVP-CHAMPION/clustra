@@ -1,6 +1,30 @@
+library(clustra)
+bench_interactive = function(c1 = 4, c2 = 4, c3 =  4, c4 = 4) {
+  set.seed(12765)
+  data = gen_traj_data()
+  clustra_env("clu$iter = 10")
+  rng_prev = RNGkind("L'Ecuyer-CMRG")
+  results = data.frame(matrix(NA, nrow=c1*c2*c3*c4, ncol = 5))
+  names(results) = c("ec", "mc", "bc", "bl", "time")
+  for(ec in seq(1, c1)) {
+    for(mc in seq(1, c2)) {
+      for(bc in seq(1, c3)) {
+        for(bl in seq(1, c4)) { # VECLIB_MAXIMUM_THREADS
+
+          set.seed(123473)
+          time = system.time((cl = clustra(data, 3, verbose = TRUE)))
+          ir = (ec - 1)*c2*c3*c4 + (mc - 1)*c3*c4 + (bc - 1)*c4 + bl
+          print((results[ir, ] = c(ec, mc, bc, bl, time["elapsed"])))
+        }
+      }
+    }
+  }
+  results
+}
+
 #' Function to benchmark various core combinations for components of clustra
 #'
-bench_clustra = function() {
+bench_batch = function() {
 
   ## start with single node optimization
   

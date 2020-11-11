@@ -4,28 +4,31 @@
 \alias{clustra}
 \title{Cluster trajectories}
 \usage{
-clustra(data, k, group = NULL, verbose = FALSE)
+clustra(
+  data,
+  k,
+  group = NULL,
+  fp = list(maxdf = 30, iter = 8, starts = 4, idperstart = 20, retry_max = 3),
+  cores = c(e_mc = 1, m_mc = 1, nthreads = 1, blas = 1),
+  verbose = FALSE
+)
 }
 \arguments{
 \item{data}{Data frame with response measurements, one response per observation.
 Required variables are (id, time, response). Other variables are ignored.}
 
-\item{k}{Number of clusters (groups).}
+\item{k}{Number of clusters}
 
 \item{group}{A vector of initial cluster assignments for unique id's in data.
 Normally, this is NULL and good starts are provided by
 \code{link{start_groups}}.}
 
+\item{fp}{Fitting parameters. See \code{link{trajectories}}.}
+
 \item{verbose}{Logical to turn on more output during fit iterations.}
 }
 \description{
-Most users will run the \code{\link{clustra}} function, which takes care of
-starting values and completes kmeans iteration according to parameters in
-\code{.clustra_env} environment (See vignette("clustra_basic.Rmd") for
-more details).
-}
-\details{
-In addition to the shown parameters, detailed clustering and core
-allocation parameters are in \code{.clustra_env} environment that can be
-controlled with the \code{clustra_env} function.
+Most users will run the wrapper \code{\link{clustra}} function, which takes
+care of starting values. See vignette("clustra_basic.Rmd") for
+more details.
 }

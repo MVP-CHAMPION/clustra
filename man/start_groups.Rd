@@ -7,10 +7,8 @@
 start_groups(
   data,
   k,
-  starts = clustra_env("clu$starts"),
-  idperstart = clustra_env("clu$idperstart"),
-  maxdf = clustra_env("clu$maxdf"),
-  cores = clustra_env("cor"),
+  fp,
+  cores = c(e_mc = 1, m_mc = 1, nthreads = 1, blas = 1),
   verbose = FALSE
 )
 }
@@ -21,13 +19,9 @@ sequential starting from 1. This affects expanding group numbers to ids.}
 
 \item{k}{Number of clusters (groups).}
 
-\item{starts}{(see \code{\link{.clustra_env_clu}})}
+\item{fp}{Fitting parameters. See \code{link{trajectories}}.}
 
-\item{idperstart}{(see \code{\link{.clustra_env_clu}})}
-
-\item{maxdf}{(see \code{\link{.clustra_env_clu}})}
-
-\item{cores}{(see \code{\link{.clustra_env_clu}})}
+\item{cores}{}
 
 \item{verbose}{Turn on more output for debugging.}
 }

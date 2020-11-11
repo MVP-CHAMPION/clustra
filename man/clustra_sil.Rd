@@ -5,12 +5,12 @@
 \title{clustra_sil:
 Performs \code{\link{clustra}} runs for several k and makes silhouette plots.}
 \usage{
-clustra_sil(data, k = clustra_env("ran$ng_vec"), save = FALSE, verbose = FALSE)
+clustra_sil(data, k, save = FALSE, verbose = FALSE)
 }
 \arguments{
 \item{data}{The data (see \code{\link{clustra}} description).}
 
-\item{k}{Vector of k values to try (see \code{.clustra_env}).}
+\item{k}{Vector of k values to try.}
 
 \item{save}{Logical. When TRUE, save all results as file \code{results.Rdata}.}
 

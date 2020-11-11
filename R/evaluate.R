@@ -159,7 +159,7 @@ rand_plot = function(rand_pairs, name = NULL) {
 #' @param data
 #' The data (see \code{\link{clustra}} description).
 #' @param k
-#' Vector of k values to try (see \code{.clustra_env}).
+#' Vector of k values to try.
 #' @param save
 #' Logical. When TRUE, save all results as file \code{results.Rdata}.
 #' @param verbose
@@ -168,8 +168,7 @@ rand_plot = function(rand_pairs, name = NULL) {
 #' @return See \code{\link{allpair_RandIndex}}
 #' 
 #' @export
-clustra_sil = function(data, k = clustra_env("ran$ng_vec"),
-                         save = FALSE, verbose = FALSE) {
+clustra_sil = function(data, k, save = FALSE, verbose = FALSE) {
   sil = function(x) {
     ord = order(x)
     ck = ord[1]
@@ -187,7 +186,7 @@ clustra_sil = function(data, k = clustra_env("ran$ng_vec"),
     ## Random initial groups to assess stability (NULL gets good starts)
     group = sample(kj, length(unique(data$id)), replace = TRUE)
     f = clustra(data, kj, group, verbose = verbose)
-      
+
     smat = t(apply(f$loss, 1, sil))
     colnames(smat) = c("cluster", "neighbor", "sil_width")
     class(smat) = "silhouette"
@@ -221,9 +220,9 @@ clustra_sil = function(data, k = clustra_env("ran$ng_vec"),
 #' @param data
 #' The data (see \code{\link{clustra}} description).
 #' @param k
-#' Vector of k values to try (see \code{.clustra_env}).
+#' Vector of k values to try.
 #' @param replicates
-#' Number of replicates for each k (see \code{.clustra_env}).
+#' Number of replicates for each k.
 #' @param save
 #' Logical. When TRUE, save all results as file \code{results.Rdata}.
 #' @param verbose
@@ -232,9 +231,10 @@ clustra_sil = function(data, k = clustra_env("ran$ng_vec"),
 #' @return See \code{\link{allpair_RandIndex}}
 #' 
 #' @export
-clustra_rand = function(data, k = clustra_env("ran$ng_vec"),
-                         replicates = clustra_env("ran$replicates"),
-                         save = FALSE, verbose = FALSE) {
+clustra_rand = function(data, k, replicates = 10,
+                        fp = list(maxdf = 30, iter = 8, starts = 4,
+                                  idperstart = 20, retry_max = 3),
+                        save = FALSE, verbose = FALSE) {
   results = vector("list", replicates*length(k))
   
   ## Internally, force sequential ids by converting to a factor
@@ -246,11 +246,11 @@ clustra_rand = function(data, k = clustra_env("ran$ng_vec"),
     for(i in 1:replicates) {
       a_0 = deltime()
       
-      ## Random initial groups to assess stability (NULL gets good starts)
+      ## Random initial groups to assess stability
       group = sample(kj, length(unique(data$id)), replace = TRUE)
       data$group = group[data$id] # expand group to all data
-      f = trajectories(data, kj, group, verbose = verbose)
-      if(!is.null( (er = exit_report(f)) )) print(er)
+      f = trajectories(data, kj, group, fp, verbose = verbose)
+      if(!is.null( (er = exit_report(f, fp)) )) print(er)
       
       results[[(j - 1)*replicates + i]] = list(k = as.integer(kj), 
                                                rep = as.integer(i),

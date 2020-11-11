@@ -8,9 +8,8 @@ trajectories(
   data,
   k,
   group,
-  iter = clustra_env("clu$iter"),
-  maxdf = clustra_env("clu$maxdf"),
-  cores = clustra_env("cor"),
+  fp,
+  cores = c(e_mc = 1, m_mc = 1, nthreads = 1, blas = 1),
   verbose = FALSE
 )
 }
@@ -24,14 +23,18 @@ numbers to ids.}
 
 \item{group}{Group numbers corresponding to sequential ids.}
 
-\item{iter}{Maximum iterations in \code{\link[mgcv]{bam}} (see
-\code{\link{.clustra_env_clu}})}
+\item{fp}{List with addtional fitting parameters: *maxdf* basis dimension of smooth
+term (see \code{\link[mgcv]{s}}, parameter k, in package \code{mgcv}),
+*iter* maximum number of EM iterations, *starts* number of trial random starts
+from which the b  est is chosen, *idperstart* number of `id`s to sample for
+evaluating random starts, *retry_max* number of restarts if iteration
+encounters a cluster too small for \code{\link[mgcv]{bam}} fitting with the
+given *maxdf*.}
 
-\item{maxdf}{Maximum degrees of freedom for tps in \code{\link[mgcv]{bam}} (see
-\code{\link{.clustra_env_clu}})}
-
-\item{cores}{List with cores allocation to various sections (see
-\code{\link{.clustra_env_clu}})}
+\item{cores}{Vector of length 4. Core allocations to various sections of code: `e_mc` dores to use
+by `mclapply` of e_mc (expectation over k), `m_mc` cores to use by 
+`mclapply` of m_mc (maximization across k), `nthreads` threads to use by
+\link[mgcv]{bam}, `blas` cores to use by OpenBLAS.}
 
 \item{verbose}{Logical, whether to produce debug output.}
 }

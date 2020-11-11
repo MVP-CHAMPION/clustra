@@ -2,7 +2,6 @@
 
 export(allpair_RandIndex)
 export(clustra)
-export(clustra_env)
 export(clustra_rand)
 export(clustra_sil)
 export(deltime)

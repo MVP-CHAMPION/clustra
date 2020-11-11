@@ -16,40 +16,36 @@
 #' of observations within the time spans. Each trajectory follows a randomly 
 #' selected response function with added N(mean, sd) error.
 #' 
-#' @param n_id See \code{\link{.clustra_env_gen}}
-#' @param m_obs See \code{\link{.clustra_env_gen}}
-#' @param s_range See \code{\link{.clustra_env_gen}}
-#' @param e_range See \code{\link{.clustra_env_gen}}
-#' @param plots See \code{\link{.clustra_env_gen}}
+#' @param n_id Number of id to generate.
+#' @param m_obs Mean number of observation per `id` using
+#' @param s_range A vector of length 2, giving the min and max limits of
+#'   uniformly generated start observation time.
+#' @param e_range A vector of length 2, giving the min and max limits of
+#'   uniformly generated end observation time.
 #' @param reference A nominal response reference (for example, blood pressure
 #'   is near 100, which is the default)
-#' @param noise Vector of length 2 giving the mean and sd of added N(mean, sd)
-#'   noise.
+#' @param noise Vector of length 2 giving the *mean* and *sd* of added
+#'  N(mean, sd) noise.
 #' @param k Number of response types (So far works only for k = 2 and 3)
 #' @param min_obs Minimum number of observations in addition to zero time
 #'   observation.
 #' 
 #' @return A data frame with one response per row and three columns:
-#'   `id` (an integer in 1:(3*n_id), `time` (an iteger in `s_range[1]` to `e_range[2]`
-#'   observation time), and `response`.
+#'   `id` (an integer in 1:(3*n_id), `time` (an iteger in `s_range[1]` to
+#'    `e_range[2]` observation time), and `response`.
 #' 
 #' @importFrom stats dist rnorm rpois runif
 #' @export
-gen_traj_data = function(n_id = clustra_env("gen$n_id"),
-                         m_obs = clustra_env("gen$m_obs"),
-                         s_range = clustra_env("gen$s_range"),
-                         e_range = clustra_env("gen$e_range"),
-                         plots = clustra_env("gen$plots"),
-                         reference = 100, noise = c(0, abs(reference/20)),
-                         k = 3, min_obs = 3)
+gen_traj_data = function(n_id, m_obs, s_range, e_range, reference = 100,
+                         noise = c(0, abs(reference/20)), k = 3, min_obs = 3)
 {
   ## support
   ## s_range . . . 0 . . . . e_range
   gendata = function(n_id, m_obs, s_range, e_range, k) {
     idr = c(1, 3*n_id) # id range to pick (so non-consecutive)
     
-    start = round(runif(n_id, min = s_range[1], max = s_range[2])) # start observe time
-    end = floor(runif(n_id, min = e_range[1], max = e_range[2])) # end observe time
+    start = round(runif(n_id, min = s_range[1], max = s_range[2])) # start time
+    end = floor(runif(n_id, min = e_range[1], max = e_range[2])) # end time
     n_obs = min_obs + rpois(n_id, lambda = m_obs) # number of observations
     type = sample(k, n_id, replace = TRUE) # curve type
     id_vec = sample.int(idr[2], n_id, replace = FALSE) # non-consecutive
