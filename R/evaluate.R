@@ -250,7 +250,7 @@ clustra_rand = function(data, k, replicates = 10,
       group = sample(kj, length(unique(data$id)), replace = TRUE)
       data$group = group[data$id] # expand group to all data
       f = trajectories(data, kj, group, fp, verbose = verbose)
-      if(!is.null( (er = exit_report(f, fp)) )) print(er)
+      if(!is.null( (er = xit_report(f, fp)) )) print(er)
       
       results[[(j - 1)*replicates + i]] = list(k = as.integer(kj), 
                                                rep = as.integer(i),

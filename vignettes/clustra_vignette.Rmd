@@ -30,7 +30,7 @@ We begin by generating a data set. The parameters generate *id*s and for each *i
 We also set a seed for reproducibility, look at a few observations of the generated data, and write the data to a csv file.
 ```{r}
 set.seed(1234567)
-data = gen_traj_data(n_id = 1000, m_obs = 25, s_range = c(-50, -10),
+data = gen_traj_data(n_id = 2000, m_obs = 25, s_range = c(-50, -10),
                      e_range = c(3*365, 10*365), reference = 100)
 head(data)
 write.table(data, file = "clustra_gen_data.csv")

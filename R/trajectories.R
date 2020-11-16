@@ -18,10 +18,10 @@
 #' @param nthreads
 #' Controls \code{\link[mgcv]{bam}} threads.
 #'
-tps_g = function(g, data, maxdf, nthreads) {
+sub_g = function(g, data) data[data$group == g, ]
+tps_g = function(data, maxdf, nthreads) {
   tps = mgcv::bam(response ~ s(time, k = maxdf), data = data,
-                  subset = data$group == g, discrete = TRUE, nthreads = nthreads)
-  if(class(tps)[1] == "try-error") print(attr(tps, "condition")$message)
+                  discrete = TRUE, nthreads = nthreads)
   tps
 }
 
@@ -102,8 +102,7 @@ start_groups = function(data, k, fp,
 
     fp$iter = 1  # single iter for starts only here
     f = trajectories(data_start, k, group, fp, cores = cores, verbose = verbose)
-    if(!is.null((er = exit_report(f, fp)))) print(er)
-    if(f$changes == -1) next   # bam failed, just skip this start!
+    if(!is.null((er = xit_report(f, fp)))) cat(" ", er, "\n")
 
     diversity = sum(dist(
         do.call(rbind, lapply(parallel::mclapply(f$tps, pred_g,
@@ -114,7 +113,7 @@ start_groups = function(data, k, fp,
       max_div = diversity
       best_tps_cov = f$tps
     }
-    if(verbose) cat(round(diversity, 2), "")
+    if(verbose) cat("Diversity:", round(diversity, 2), "")
   }
 
   if(max_div == 0) return(NULL) # all starts failed!
@@ -183,18 +182,21 @@ trajectories = function(data, k, group, fp,
   ## EM algorithm to cluster ids into k groups
   ## iterates fitting a thin plate spline (tps) center to each group (M-step)
   ##      regroups each id to nearest tps center (E-step)
-  exit = "max iter"
   for(i in 1:fp$iter) {
     if(verbose) cat("\n", i, "")
     ##
     ## M-step:
     ##   Estimate tps model parameters for each cluster from id's in that cluster
-    tps = parallel::mclapply(1:k, tps_g, data = data, maxdf = fp$maxdf,
-                   mc.cores = cores["m_mc"], nthreads = cores["nthreads"])
+    datg = parallel::mclapply(1:k, sub_g, data, mc.cores = cores["m_mc"])
+    tps = parallel::mclapply(datg, tps_g, maxdf = fp$maxdf,
+                             mc.cores = cores["m_mc"], nthreads = cores["nthreads"])
     if(verbose) a = deltime(a, "M-step")
 
     ## break if any bam fit fails
-    if(!all(sapply(tps, is, class = "bam"))) break
+    if(!all(sapply(tps, is, class = "bam"))) {
+      changes = counts_df = counts = loss = NULL
+      break
+    }
 
     ##
     ## E-step:
@@ -220,7 +222,7 @@ trajectories = function(data, k, group, fp,
     counts_df = tabulate(data$group, k)
     
     ## break if converged or if any cluster gets too small for fp$maxdf
-    if(changes == 0 | any(counts_df < fp$maxdf)) break
+    if(changes == 0 || any(counts_df < fp$maxdf)) break
   }
 
   if(verbose) deltime(a_0, "\n trajectories time =")
@@ -229,14 +231,19 @@ trajectories = function(data, k, group, fp,
        changes = changes)
 }
 
-exit_report = function(cl, fp) {
-  exit = NULL
-  if(any(cl$counts_df < fp$maxdf)) exit = c(exit, "undermaxdf")
-  if(any(cl$counts == 0)) exit = c(exit, "zerocluster")
-  if(cl$changes == 0) exit = c(exit, "converged")
-  if(!all(sapply(cl$tps, is, class = "bam"))) exit = c(exit, "bamfail")
-  if(cl$iterations >= fp$iter) exit = c(exit, "max iter")
-  exit
+xit_report = function(cl, fp) {
+  xit = NULL
+  if(!is.null(cl$counts_df) && any(cl$counts_df < fp$maxdf))
+    xit = c(xit, "undermaxdf")
+  if(!is.null(cl$counts) && any(cl$counts == 0))
+    xit = c(xit, "zerocluster")
+  if(!is.null(cl$changes) && cl$changes == 0)
+    xit = c(xit, "converged")
+  if(!all(sapply(cl$tps, is, class = "bam")))
+    xit = c(xit, "bamfail")
+  if(cl$iterations >= fp$iter)
+    xit = c(xit, "max iter")
+  xit
 }
 
 #' Cluster trajectories
@@ -287,8 +294,8 @@ clustra = function(data, k, group = NULL,
 
     ## kmeans iteration to assign id's to groups
     cl = trajectories(data, k, group, fp, cores, verbose = verbose)
-    if(!is.null( (er = exit_report(cl, fp)) )) print(er)
-    if( any( c("converged", "max iter") %in% exit_report(cl, fp) ) )break
+    if(!is.null( (er = xit_report(cl, fp)) )) cat(" ", er, "\n")
+    if( any( c("converged", "max iter") %in% xit_report(cl, fp) ) )break
     cat("\n Restarting clustra. Error exit. \n")
   }
   cl$retry = retry
