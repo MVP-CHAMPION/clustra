@@ -37,7 +37,7 @@ bench_clustra = function(nid = c(10000, 20000),
             } else {
               agree = all.equal(compare, cl$group)
             }
-            cat(time["elapsed"], agtee, "\n")
+            cat(time["elapsed"], agree, "\n")
             
             ir = (ec - 1)*c2*c3*c4 + (mc - 1)*c3*c4 + (bc - 1)*c4 + bl
             results[ir, ] = data.frame(n_id = n_id,
