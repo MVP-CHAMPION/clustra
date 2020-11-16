@@ -1,4 +1,11 @@
 library(clustra)
+
+#' bench_clustra: Times several core use and data size configurations and
+#' reports the results.
+#' 
+#' @param nid
+#' Vector of data size configurations using number of id's
+#' 
 bench_clustra = function(nid = c(10000, 20000),
                          c1 = 4, c2 = 4, c3 =  4, c4 = 4, 
                          verbose = FALSE) {
