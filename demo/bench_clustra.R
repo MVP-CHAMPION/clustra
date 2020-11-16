@@ -23,6 +23,7 @@ bench_clustra = function(c1 = 4, c2 = 4, c3 =  4, c4 = 4,
           ## TODO add an all.equal on cl instances
           if(is.null(compare)) {
             compare = cl$group
+            agree = NA
           } else {
             agree = all.equal(compare, cl$group)
           }

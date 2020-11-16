@@ -241,7 +241,7 @@ xit_report = function(cl, fp) {
     xit = c(xit, "converged")
   if(!all(sapply(cl$tps, is, class = "bam")))
     xit = c(xit, "bamfail")
-  if(cl$iterations >= fp$iter)
+  if(cl$iterations >= fp$iter && fp$iter != 1)
     xit = c(xit, "max iter")
   xit
 }
