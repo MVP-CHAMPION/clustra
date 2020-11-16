@@ -4,7 +4,7 @@ bench_clustra = function(c1 = 4, c2 = 4, c3 =  4, c4 = 4,
   rng_prev = RNGkind("L'Ecuyer-CMRG")
   data = gen_traj_data(n_id = 1000, m_obs = 25, s_range = c(-50, -10),
                        e_range = c(3*365, 10*365), reference = 100)
-  results = data.frame(matrix(NA, nrow=c1*c2*c3*c4, ncol = 5))
+  results = data.frame(matrix(NA, nrow=c1*c2*c3*c4, ncol = 6))
   names(results) = c("ec", "mc", "bc", "bl", "time", "all.equal")
   compare = NULL
   for(ec in seq(1, c1)) {
