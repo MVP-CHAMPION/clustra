@@ -102,8 +102,9 @@ start_groups = function(data, k, fp,
 
     fp$iter = 1  # single iter for starts only here
     f = trajectories(data_start, k, group, fp, cores = cores, verbose = verbose)
-    if(!is.null((er = xit_report(f, fp)))) cat(" ", er, "\n")
-
+    er = xit_report(f, fp)
+    if(verbose && !is.null((er))) cat(" ", er)
+    
     diversity = sum(dist(
         do.call(rbind, lapply(parallel::mclapply(f$tps, pred_g,
                                        data = test_data, mc.cores = cores["e_mc"]),
@@ -294,8 +295,9 @@ clustra = function(data, k, group = NULL,
 
     ## kmeans iteration to assign id's to groups
     cl = trajectories(data, k, group, fp, cores, verbose = verbose)
-    if(!is.null( (er = xit_report(cl, fp)) )) cat(" ", er, "\n")
-    if( any( c("converged", "max iter") %in% xit_report(cl, fp) ) )break
+    er = xit_report(cl, fp)
+    if(verbose && !is.null(er)) cat(" ", er)
+    if( any( c("converged", "max iter") %in% er ) )break
     cat("\n Restarting clustra. Error exit. \n")
   }
   cl$retry = retry
