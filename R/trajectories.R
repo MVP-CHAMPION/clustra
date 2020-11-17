@@ -232,6 +232,15 @@ trajectories = function(data, k, group, fp,
        changes = changes)
 }
 
+#' xit_report examines trajectories output to name what was concluded, such as
+#' convergence, maximum iterations reached, a zero cluster, etc.
+#' 
+#' @param cl
+#' Output structure from trajectories() function
+#' @param fp
+#' Fitting parameters. See \code{link{trajectories}}.
+#' 
+#' @export
 xit_report = function(cl, fp) {
   xit = NULL
   if(!is.null(cl$counts_df) && any(cl$counts_df < fp$maxdf))
