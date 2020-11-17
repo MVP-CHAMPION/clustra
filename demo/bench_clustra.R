@@ -7,6 +7,7 @@ library(clustra)
 #' Vector of data size configurations using number of id's
 #' 
 bench_clustra = function(nid = c(10000, 20000),
+    fp = list(maxdf = 30, iter = 8, starts = 4, idperstart = 20, retry_max = 3),
                          c1 = 2, c2 = 2, c3 =  2, c4 = 2, 
                          verbose = FALSE) {
   rng_prev = RNGkind("L'Ecuyer-CMRG")
