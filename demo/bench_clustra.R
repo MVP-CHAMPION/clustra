@@ -13,7 +13,7 @@ bench_clustra = function(nid = c(10000, 20000),
   for(n_id in nid) {
     data = gen_traj_data(n_id, m_obs = 25, s_range = c(-50, -10),
                          e_range = c(3*365, 10*365), reference = 100)
-    results = data.frame(matrix(NA, nrow=length(nid)*c1*c2*c3*c4, ncol = 8))
+    results = data.frame(matrix(NA, nrow=length(nid)*c1*c2*c3*c4, ncol = 9))
     names(results) = c("n_id", "rep", "ec", "mc", "bc", "bl", 
                        "time", "xit", "all.equal")
     compare = NULL
