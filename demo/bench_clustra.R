@@ -66,4 +66,4 @@ bench_clustra = function(nid,
 }
 
 # bench_clustra(c(80000, 160000), 1:6, 1:6, 1, 1, 1:2)
-bench_clustra(c(80000, 160000, 320000), 1, 1, 1:2, 1, 1:2)
+bench_clustra(c(80000, 160000, 320000), 2:6, 2:6, 1, 1, 1:2)
