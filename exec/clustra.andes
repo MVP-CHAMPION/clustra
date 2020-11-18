@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH -J clustra
 #SBATCH -A gen011
-#SBATCH -t 05:30:00
+#SBATCH -t 08:30:00
 #SBATCH -N 1
 #SBATCH -n 1
 #SBATCH -c 32
