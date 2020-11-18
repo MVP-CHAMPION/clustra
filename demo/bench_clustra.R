@@ -49,11 +49,9 @@ bench_clustra = function(nid,
               }
               cat(er, time["elapsed"], agree, "\n")
             
-              ir = (ec - 1)*length(m_mc)*length(nthreads)*length(blas)*length(reps) + 
-                (mc - 1)*length(nthreads)*length(blas)*length(reps) + 
-                (bc - 1)*length(blas)*length(reps) +
-                (bl - 1)*length(reps) +
-                rep
+              ir = (((((n_id - 1)*llength(e_mc) + (ec - 1))*length(m_mc) + 
+                (mc - 1))*length(nthreads) + (bc - 1))*length(blas) +
+                (bl - 1))*length(reps) + rep
               results[ir, ] = data.frame(n_id = n_id, rep = rep,
                                          ec = ec, mc = mc, bc = bc, bl = bl,
                                          time = time["elapsed"], xit = er,
@@ -68,4 +66,4 @@ bench_clustra = function(nid,
 }
 
 # bench_clustra(c(80000, 160000), 1:6, 1:6, 1, 1, 1:2)
-bench_clustra(c(80000, 160000), 1, 1, 1:2, 1, 1:2)
+bench_clustra(c(80000, 160000, 320000), 1, 1, 1:2, 1, 1:2)
