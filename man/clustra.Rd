@@ -8,7 +8,7 @@ clustra(
   data,
   k,
   group = NULL,
-  fp = list(maxdf = 30, iter = 8, starts = 4, idperstart = 20, retry_max = 3),
+  fp = list(maxdf = 30, iter = 8, starts = 3, idperstart = 20, retry_max = 3),
   cores = c(e_mc = 1, m_mc = 1, nthreads = 1, blas = 1),
   verbose = FALSE
 )
@@ -31,4 +31,13 @@ Normally, this is NULL and good starts are provided by
 Most users will run the wrapper \code{\link{clustra}} function, which takes
 care of starting values. See vignette("clustra_basic.Rmd") for
 more details.
+}
+\examples{
+set.seed(13)
+data = gen_traj_data(n_id = 200, m_obs = 20, s_range = c(-50, -10),
+              e_range = c(3*365, 10*365), reference = 100)
+cl = clustra(data, k = 3, verbose = TRUE)
+names(cl)
+cl$tps
+
 }

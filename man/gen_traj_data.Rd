@@ -61,3 +61,10 @@ of observations within the time spans. Each trajectory follows a randomly
 selected response function with added N(mean, sd) error.
 }
 
+\examples{
+set.seed(123)
+data = gen_traj_data(n_id = 20, m_obs = 10, s_range = c(-50, -10),
+              e_range = c(3*365, 10*365), reference = 100)
+head(data)
+
+}

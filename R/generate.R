@@ -33,6 +33,11 @@
 #' @return A data frame with one response per row and three columns:
 #'   `id` (an integer in 1:(3*n_id), `time` (an iteger in `s_range[1]` to
 #'    `e_range[2]` observation time), and `response`.
+#' @examples
+#' set.seed(123)
+#' data = gen_traj_data(n_id = 20, m_obs = 10, s_range = c(-50, -10),
+#'               e_range = c(3*365, 10*365), reference = 100)
+#' head(data)
 #' 
 #' @importFrom stats dist rnorm rpois runif
 #' @export

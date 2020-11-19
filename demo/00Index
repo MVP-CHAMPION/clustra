@@ -1,1 +1,2 @@
-benchmark     An unfinished code to benchmark various core combinations for components of clustra.
+bench_clustra     Code to benchmark various core combinations for components of clustra.
+mgcv_veclib   Minimal code from mgcv example to show veclib hang on a mac
