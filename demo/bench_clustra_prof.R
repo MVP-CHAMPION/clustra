@@ -1,8 +1,9 @@
 ## profile clustra
-set.seed(123473)
-data = gen_traj_data(200000, m_obs = 45, s_range = c(-50, -10), e_range = c(3*365, 10*365), reference = 100)
+library(clustra)
+set.seed(123)
+data = gen_traj_data(80000, m_obs = 45, s_range = c(-50, -10), e_range = c(3*365, 10*365), reference = 100)
 data$id = as.numeric(factor(data$id))
-set.seed(12347313)
+set.seed(1234)
 Rprof()
 cl = clustra(data, k = 3, fp = list(maxdf = 30, iter = 10, starts = 8, idperstart = 20, retry_max = 3), cores = c(e_mc = 6, m_mc = 6, nthreads = 1, blas = 1), verbose = TRUE)
 Rprof(NULL)
