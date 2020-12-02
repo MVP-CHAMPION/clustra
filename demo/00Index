@@ -1,2 +1,3 @@
-bench_clustra     Code to benchmark various core combinations for components of clustra.
+bench_clustra_core     Code to benchmark various core combinations for components of clustra.
+bench_clustra_prof     Code to run profiler on clustra
 mgcv_veclib   Minimal code from mgcv example to show veclib hang on a mac

@@ -48,10 +48,10 @@ pred_g = function(tps, data)
 #' See \code{\link{trajectories}}
 #'
 mse_g = function(g, pred, data) # mean squared error
-  as.numeric(tapply((data$response - pred[[g]]$fit)^2, data$id, mean))
+  as.numeric(iotools::ctapply((data$response - pred[[g]]$fit)^2, data$id, mean))
 #' @rdname mse_g
 mxe_g = function(g, pred, data) # maximum error
-  as.numeric(tapply(abs(data$response - pred[[g]]$fit), data$id, max))
+  as.numeric(iotools::ctapply(abs(data$response - pred[[g]]$fit), data$id, max))
 
 #' Function to assign starting groups.
 #'

@@ -69,3 +69,16 @@ The ten random starts agree the most for *k*=3.
 ## restore RNG
 RNGkind(rng_prev[1])
 ```
+## Installation notes for stringi in KDI linux VM or Murphy login node
+First *wget http://manage01.kdi.local/temp/icudt61l.zip*,
+then start R and *install.packages("stringi", configure.vars="ICUDT_DIR=.")*.
+
+It is useful to have a .Rprofile in your home directory that contains
+*options(repos = "http://manage01.kdi.local/CRAN")* for automated access to the internal CRAN. 
+
+Consider export R_LIBS=/usr/me/local/R/library
+
+## mvpia install notes:
+package nloptr seems to depend on R 4.0 and fails to install under R 3.6. The web suggests updating R or using an older version of nloptr. Is the next step to accept conda and Ryan's note? What issues will conda bring? Is it possible to make conda a transparent default for R? Like an alias that runs another script?
+This is frustrating!!!
+###################################################!!!!!!!!!!!!!!!!!!!!!!!
