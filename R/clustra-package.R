@@ -9,4 +9,12 @@
 #' @docType package
 #' @author George Ostrouchov, David Gagnon, Hanna Gerlovin
 #' @keywords Package
+#' 
+#' # Import package operators
+#' @importFrom data.table ":="
+
+# Make sure data.table knows we know we're using it
+.datatable.aware = TRUE
+
+#' 
 NULL

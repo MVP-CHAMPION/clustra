@@ -47,11 +47,19 @@ pred_g = function(tps, data)
 #' @param data
 #' See \code{\link{trajectories}}
 #'
-mse_g = function(g, pred, data) # mean squared error
-  as.numeric(iotools::ctapply((data$response - pred[[g]]$fit)^2, data$id, mean))
+mse_g = function(g, pred, data) { # mean squared error (use unique() to get order)
+  ## ctapply assumes id are contiguous within data! can we make sure? 
+  data[, esq:=(response - pred[[g]]$fit)^2]
+#  tt = as.numeric(tapply(data$e_sq, data$id, mean))
+  tt = data[, mean(esq), by=id][, 2]
+#  ct = as.numeric(iotools::ctapply(esq, data$id, mean))
+#  cat(" tt", length(tt), tt[1:10], "\n")
+#  cat(" ct", length(ct), ct[1:10], "\n")
+  tt
+}
 #' @rdname mse_g
 mxe_g = function(g, pred, data) # maximum error
-  as.numeric(iotools::ctapply(abs(data$response - pred[[g]]$fit), data$id, max))
+  as.numeric(tapply(abs(data$response - pred[[g]]$fit), data$id, max))
 
 #' Function to assign starting groups.
 #'
@@ -176,6 +184,9 @@ trajectories = function(data, k, group, fp,
   if(min(data$id) != 1 | max(data$id) != length(group)){
     cat("\ntrajectories: Expecting sequential id's starting from 1.\n")
   }
+  
+  ## make sure that data is a data.table
+  if(!data.table::is.data.table(data)) data = data.table::as.data.table(data)
 
   ## get number of unique id
   n_id = length(unique(data$id))

@@ -3,7 +3,14 @@
 \docType{package}
 \name{clustra-package}
 \alias{clustra-package}
+\alias{.datatable.aware}
 \title{clustra-package}
+\format{
+An object of class \code{logical} of length 1.
+}
+\usage{
+.datatable.aware
+}
 \description{
 Performs k-means clustering, where each mean is a thin plate spline fit to
 all points from trajectories in cluster. Distance is the mean squared error
@@ -12,4 +19,8 @@ or maximum error of spline to trajectory points.
 \author{
 George Ostrouchov, David Gagnon, Hanna Gerlovin
 }
+\keyword{#}
+\keyword{Import}
 \keyword{Package}
+\keyword{operators}
+\keyword{package}

@@ -11,6 +11,7 @@ Authors@R: c(person("George", "Ostrouchov", role = c("aut", "cre"), email =
 Depends:
     R (>= 3.5.0)
 Imports:
+    data.table,
     graphics,
     grDevices,
     iotools,
