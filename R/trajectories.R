@@ -274,8 +274,9 @@ xit_report = function(cl, fp) {
 #' more details.
 #'
 #' @param data
-#' Data frame with response measurements, one response per observation.
-#' Required variables are (id, time, response). Other variables are ignored.
+#' Data frame or, preferably, also a data.table with response measurements, one
+#' response per observation. Required variables are (id, time, response).
+#' Other variables are ignored.
 #' @param k
 #' Number of clusters
 #' @param group
@@ -303,6 +304,8 @@ clustra = function(data, k, group = NULL,
   ## check for required variables in data
   vnames = c("id", "time", "response")
   if(!is.data.frame(data)) stop("Expecting a data frame.")
+  ## further, make sure that data is a data.table (convert if not)
+  if(!data.table::is.data.table(data)) data = data.table::as.data.table(data)
   if(!all(vnames %in% names(data))) 
     stop(paste0("Expecting (", paste0(vnames, collapse = ","), ") in data."))
   
