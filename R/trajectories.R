@@ -18,7 +18,7 @@
 #' @param nthreads
 #' Controls \code{\link[mgcv]{bam}} threads.
 #'
-sub_g = function(g, data) data[data$group == g, ]
+sub_g = function(g, data) data[data$group == g, ] # separated out subsetting
 tps_g = function(data, maxdf, nthreads) {
   tps = mgcv::bam(response ~ s(time, k = maxdf), data = data,
                   discrete = TRUE, nthreads = nthreads)
@@ -49,7 +49,7 @@ pred_g = function(tps, data)
 #'
 mse_g = function(g, pred, data) { # mean squared error (use unique() to get order)
   ## ctapply assumes id are contiguous within data! can we make sure? 
-  data[, esq:=(response - pred[[g]]$fit)^2]
+  data[, esq:=(response - ..pred[[g]]$fit)^2]
 #  tt = as.numeric(tapply(data$e_sq, data$id, mean))
   tt = data[, mean(esq), by=id][, 2]
 #  ct = as.numeric(iotools::ctapply(esq, data$id, mean))
@@ -189,7 +189,7 @@ trajectories = function(data, k, group, fp,
   if(!data.table::is.data.table(data)) data = data.table::as.data.table(data)
 
   ## get number of unique id
-  n_id = length(unique(data$id))
+  n_id = nrow(data[,.N,by=id])
 
   ## EM algorithm to cluster ids into k groups
   ## iterates fitting a thin plate spline (tps) center to each group (M-step)
@@ -199,7 +199,7 @@ trajectories = function(data, k, group, fp,
     ##
     ## M-step:
     ##   Estimate tps model parameters for each cluster from id's in that cluster
-    datg = parallel::mclapply(1:k, sub_g, data, mc.cores = cores["m_mc"])
+    datg = parallel::mclapply(1:k, function(g) data[group == g])
     tps = parallel::mclapply(datg, tps_g, maxdf = fp$maxdf,
                              mc.cores = cores["m_mc"], nthreads = cores["nthreads"])
     if(verbose) a = deltime(a, "M-step")
@@ -230,7 +230,7 @@ trajectories = function(data, k, group, fp,
     if(verbose)
        cat(" Changes:", changes, "Counts:", counts, "Deviance:", deviance)
     group = new_group
-    data$group = as.factor(group[data$id]) # expand group to data frame
+    data[, group:=..new_group[id]] # expand group to data frame
     counts_df = tabulate(data$group, k)
     
     ## break if converged or if any cluster gets too small for fp$maxdf
@@ -309,9 +309,8 @@ clustra = function(data, k, group = NULL,
   if(!all(vnames %in% names(data))) 
     stop(paste0("Expecting (", paste0(vnames, collapse = ","), ") in data."))
   
-  ## Internally, force sequential ids by converting to a factor
-  data$id = as.numeric(factor(data$id))
-  if(!is.null(group)) data$group = group[data$id] # expand group to all data
+  data[, id:=.GRP, by=id] # replace group ids to be sequential
+  data[, group:=..group[id]] # expand group to all data
 
   for(retry in 1:fp$retry_max) {
     ## get initial group assignments

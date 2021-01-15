@@ -237,8 +237,14 @@ clustra_rand = function(data, k, replicates = 10,
                         save = FALSE, verbose = FALSE) {
   results = vector("list", replicates*length(k))
   
-  ## Internally, force sequential ids by converting to a factor
-  data$id = as.numeric(factor(data$id))
+  ## check for required variables in data
+  vnames = c("id", "time", "response")
+  if(!is.data.frame(data)) stop("Expecting class data frame and data.table.")
+  if(!data.table::is.data.table(data)) data = data.table::as.data.table(data)
+  if(!all(vnames %in% names(data))) 
+    stop(paste0("Expecting (", paste0(vnames, collapse = ","), ") in data."))
+  
+  data[, id:=.GRP, by=id] # replace group ids to be sequential
   
   a_rand = deltime()
   for(j in 1:length(k)) {
@@ -248,7 +254,8 @@ clustra_rand = function(data, k, replicates = 10,
       
       ## Random initial groups to assess stability
       group = sample(kj, length(unique(data$id)), replace = TRUE)
-      data$group = group[data$id] # expand group to all data
+      data[, group:=..group[id]] # expand group to all data
+      
       f = trajectories(data, kj, group, fp, verbose = verbose)
       if(!is.null( (er = xit_report(f, fp)) )) print(er)
       

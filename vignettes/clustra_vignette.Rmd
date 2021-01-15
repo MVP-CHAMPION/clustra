@@ -46,7 +46,7 @@ ggplot(data[sampobs, ], aes(x = time, y = response)) +
 Next, cluster the trajectories. Set RNGkind and seed for reproducibility. Set *k=3*, spline max degrees of freedom to 30, maximum iterations to 10, use best of 5 random starts to initialize clusters, use 20 ids to quickly evaluate the random starts, and retry up to 3 times when an initialization fails to have enough data in a cluster to estimate the spline. *cores* parameters set the number of cores to use in various components of the code. Note that this does not work on Windows operating systems, where it should be left at 1. We proceed with verbose output to get starts and change counts from iterations.
 ```{r}
 rng_prev = RNGkind("L'Ecuyer-CMRG")
-set.seed(123473)
+set.seed(1234737)
 cl = clustra(data, k = 3, fp = list(maxdf = 30, iter = 10, starts = 5, idperstart = 20, retry_max = 3), cores = c(e_mc = 1, m_mc = 1, nthreads = 1, blas = 1), verbose = TRUE)
 ```
 
@@ -69,20 +69,20 @@ The ten random starts agree the most for *k*=3.
 ## restore RNG
 RNGkind(rng_prev[1])
 ```
-## Installation notes for stringi in KDI linux VM or Murphy login node
+## KDI installation notes for stringi on linux VM or on Murphy login node
 First *wget http://manage01.kdi.local/temp/icudt61l.zip*,
-then start R and *install.packages("stringi", configure.vars="ICUDT_DIR=.")*.
+then start R in the same directory and 
+*install.packages("stringi", configure.vars="ICUDT_DIR=.")*.
 
 It is useful to have a .Rprofile in your home directory that contains
 *options(repos = "http://manage01.kdi.local/CRAN")* for automated access to the internal CRAN. 
 
-Consider export R_LIBS=/usr/me/local/R/library
+Consider export R_LIBS=/usr/me/local/R/library to enable a personal package installation location (replace *me* with your uid).
 
-## mvpia install notes:
-package nloptr seems to depend on R 4.0 and fails to install under R 3.6. The web suggests updating R or using an older version of nloptr. So the issue seems to be that the KDI R version is updated less frequently than CRAN.
+## KDI installation notes for mvpia:
+Package *nloptr* seems to depend on R 4.0 and fails to install under R 3.6. The web suggests updating R or using an older version of *nloptr*. So the issue seems to be that the KDI R version is updated less frequently than CRAN, letting some packages get ahead of it.
 
-To use conda requires additional steps before starting R.
+To use conda for external dependency management requires additional steps before starting R. See internal Getting Started web pages.
 
-Is the next step to accept conda and Ryan's note? What issues will conda bring? Is it possible to make conda a transparent default for R? Like an alias that runs another script?
-This is frustrating!!!
-###################################################!!!!!!!!!!!!!!!!!!!!!!!
+More notes to come: What issues will conda bring? Is it possible to make conda a transparent default for R? Like an alias that runs another script?
+
