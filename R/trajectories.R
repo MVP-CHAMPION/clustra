@@ -18,7 +18,6 @@
 #' @param nthreads
 #' Controls \code{\link[mgcv]{bam}} threads.
 #'
-sub_g = function(g, data) data[data$group == g, ] # separated out subsetting
 tps_g = function(data, maxdf, nthreads) {
   tps = mgcv::bam(response ~ s(time, k = maxdf), data = data,
                   discrete = TRUE, nthreads = nthreads)
@@ -83,9 +82,9 @@ start_groups = function(data, k, fp,
                         verbose = FALSE) {
   if(verbose) cat("\nStarts : ")
 
-  ## test data for diversity criterion
+  ## Prepare test data for diversity criterion
   test_data = data.frame(id = rep(0, k*2*fp$maxdf),
-                time = rep(seq(min(data$time), max(data$time),
+                time = rep(seq(data[, min(time)], data[, max(time)],
                                length.out = 2*fp$maxdf), times = k),
                 response = rep(NA, k*2*fp$maxdf),
                 group = rep(1:k, each = 2*fp$maxdf))
@@ -95,18 +94,18 @@ start_groups = function(data, k, fp,
   ##   of fits (sum of distances between group fits).
   ## Then classifies all ids based on fit from best sample
   max_div = 0
-  start_id = sort(sample(unique(data$id), k*fp$idperstart)) # for speed and diversity!
-  data_start = data[match(data$id, start_id, nomatch = 0) > 0, ]
+  start_id = sort(sample(data[, unique(id)], k*fp$idperstart)) # for speed and diversity!
+  data_start = data[id %in% start_id]
 
-  data_start$id = as.numeric(factor(data_start$id))
-  ## Note: since id are not sequential (Am I losing correspondence to ids? No,
+  data_start[, id:=.GRP, by=id] # replace id's to be sequential
+  ## Note: since id are not sequential, am I losing correspondence to ids? No,
   ##  because spline models do not know about ids. The classification process
   ##  only needs who has same id, not what is the id.)
 
   ## evaluate starts on id sample
   for(i in 1:fp$starts) {
     group = sample(k, k*fp$idperstart, replace = TRUE) # random groups
-    data_start$group = group[data_start$id] # expand group to all responses
+    data_start[, group:=..group[id]] # expand group to all data
 
     fp$iter = 1  # single iter for starts only here
     f = trajectories(data_start, k, group, fp, cores = cores, verbose = verbose)
@@ -122,7 +121,7 @@ start_groups = function(data, k, fp,
       max_div = diversity
       best_tps_cov = f$tps
     }
-    if(verbose) cat("Diversity:", round(diversity, 2), "")
+    if(verbose) cat(" Diversity:", round(diversity, 2), "")
   }
 
   if(max_div == 0) return(NULL) # all starts failed!
@@ -179,17 +178,17 @@ start_groups = function(data, k, fp,
 trajectories = function(data, k, group, fp,
                         cores = c(e_mc = 1, m_mc = 1, nthreads = 1, blas = 1),
                         verbose = FALSE) {
-
-  if(verbose) a = a_0 = deltime(a)
-  if(min(data$id) != 1 | max(data$id) != length(group)){
-    cat("\ntrajectories: Expecting sequential id's starting from 1.\n")
-  }
   
   ## make sure that data is a data.table
   if(!data.table::is.data.table(data)) data = data.table::as.data.table(data)
+  
+  if(verbose) a = a_0 = deltime(a)
+  if(data[, min(id)] != 1 | data[, max(id)] != length(group)){
+    cat("\ntrajectories: Expecting sequential id's starting from 1.\n")
+  }
 
   ## get number of unique id
-  n_id = nrow(data[,.N,by=id])
+  n_id = data.table::uniqueN(data[, id])
 
   ## EM algorithm to cluster ids into k groups
   ## iterates fitting a thin plate spline (tps) center to each group (M-step)
@@ -231,14 +230,14 @@ trajectories = function(data, k, group, fp,
        cat(" Changes:", changes, "Counts:", counts, "Deviance:", deviance)
     group = new_group
     data[, group:=..new_group[id]] # expand group to data frame
-    counts_df = tabulate(data$group, k)
+    counts_df = data[, .N, by=group][, N]
     
     ## break if converged or if any cluster gets too small for fp$maxdf
-    if(changes == 0 || any(counts_df < fp$maxdf)) break
+    if(changes == 0 || any(counts_df <= fp$maxdf) || length(counts_df) < k) break
   }
 
   if(verbose) deltime(a_0, "\n trajectories time =")
-  list(deviance = deviance, group = group, loss = loss, data_group = data$group,
+  list(deviance = deviance, group = group, loss = loss, data_group = data[, group],
        tps = tps, iterations = i, counts = counts, counts_df = counts_df,
        changes = changes)
 }
@@ -309,15 +308,15 @@ clustra = function(data, k, group = NULL,
   if(!all(vnames %in% names(data))) 
     stop(paste0("Expecting (", paste0(vnames, collapse = ","), ") in data."))
   
-  data[, id:=.GRP, by=id] # replace group ids to be sequential
-  data[, group:=..group[id]] # expand group to all data
+  data[, id:=.GRP, by=id] # replace id's to be sequential
+  if(!is.null(group)) data[, group:=..group[id]] # expand group to all data
 
   for(retry in 1:fp$retry_max) {
     ## get initial group assignments
     while(is.null(group)) {
       group = start_groups(data, k, fp, verbose = verbose)
-      data$group = group[data$id] # expand group to all data
-      if(any(tabulate(data$group, k) < fp$maxdf)) {
+      data[, group:=..group[id]] # expand group to all data
+      if(any(data[, .(low = .N < ..fp$maxdf, by=group)][, low])) {
         group = NULL
         cat("\nRepeating starts due to cluster observations under fp$maxdf ...")
       }

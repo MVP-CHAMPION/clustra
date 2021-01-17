@@ -55,12 +55,14 @@ plot(mgcViz::getViz(cl$tps))
 ```
 Average silhouette value is a way to select the number of clusters and a silhouette plot provides a way for a deeper evaluation (Rouseeuw 1986). As silhouette requires distances between trajectories, this is not possible due to unequal trajectory sampling without fitting a separate model for each id. As a proxy for distance between points, we use point distances to cluster means in the *clustra_sil()* function. The structure returned from the *clustra()* function contains the matrix *loss*, which has all the information needed to construct these proxy silhouette plots. The function *clustra_sil()* performs clustering for a number of *k* values and outputs a list of "silhouette" class structures that can be displayed with *fviz_silhouette()* function from the package **factoextra**.
 ```{r fig.width = 7}
+set.seed(1234737)
 sil = clustra_sil(data, k = c(2, 3, 4), verbose = TRUE)
 ## TODO add sampling option if too many ids
 splots = lapply(sil, function(x) print(factoextra::fviz_silhouette(x)))
 ```
 Another way to select the number of clusters is the Rand Index comparing different random starts and different number of clusters. When we replicate clustering with different random seeds, the "replicability" is an indicator of how stable the results are for a given k, the number of clusters. For this demonstration, we look at *k = c(2, 3, 4)*, and 10 replicates for each *k*. Note that this uses just random starts rather than "best of 4 random starts" that the *clustra()* function would use because we want to evaluate raw stability. We plot the resulting matrix of Rand Indices.
 ```{r fig.width = 7, fig.height=7}
+set.seed(1234737)
 ran = clustra_rand(data, k = c(2, 3, 4), replicates = 10, verbose = TRUE)
 rand_plot(ran)
 ```
