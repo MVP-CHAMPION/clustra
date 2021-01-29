@@ -18,29 +18,27 @@ gen_traj_data(
 \arguments{
 \item{n_id}{Number of id to generate.}
 
-\item{m_obs}{Mean number of observation per `id` using}
+\item{m_obs}{Mean number of observation per id. Provides \code{lambda} parameter in
+\code{\link[stats]{rpois}}.}
 
-\item{s_range}{A vector of length 2, giving the min and max limits of
-uniformly generated start observation time.}
+\item{s_range}{A vector of length 2, giving the min and max limits of uniformly generated
+start observation time.}
 
-\item{e_range}{A vector of length 2, giving the min and max limits of
-uniformly generated end observation time.}
+\item{e_range}{A vector of length 2, giving the min and max limits of uniformly generated
+end observation time.}
 
-\item{reference}{A nominal response reference (for example, blood pressure
-is near 100, which is the default)}
+\item{reference}{A nominal response reference (for example, blood pressure is near 100, which
+is the default)}
 
-\item{noise}{Vector of length 2 giving the *mean* and *sd* of added
-N(mean, sd) noise.}
+\item{noise}{Vector of length 2 giving the *mean* and *sd* of added N(mean, sd) noise.}
 
 \item{k}{Number of response types (So far works only for k = 2 and 3)}
 
-\item{min_obs}{Minimum number of observations in addition to zero time
-observation.}
+\item{min_obs}{Minimum number of observations in addition to zero time observation.}
 }
 \value{
 A data frame with one response per row and three columns:
-  `id` (an integer in 1:(3*n_id), `time` (an iteger in `s_range[1]` to
-   `e_range[2]` observation time), and `response`.
+  \code{id}, \code{time}, \code{response}, and \code{group}.
 }
 \description{
 Generates a collection of longitudinal responses with possibly varying

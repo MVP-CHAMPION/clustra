@@ -4,10 +4,10 @@
 ##
 
 #' Function to fit thin plate spline (tps) to a group with
-#' \code{\link[mgcv]{bam}} from the \code{mgcv} package. Crossvalidation does
-#' not know about zero weights, resulting in different smoothing parameters, so
-#' subset parameter (rather than zero weights) is used to ensure correct
-#' crossvalidation sampling.
+#' \code{\link[mgcv]{bam}} from the \code{mgcv} package. 
+#' Crossvalidation does not know about zero weights, resulting in
+#' different smoothing parameters, so subset parameter (rather than
+#' zero weights) is used to ensure correct crossvalidation sampling.
 #'
 #' @param g
 #' Integer group number.

@@ -50,8 +50,17 @@ set.seed(1234737)
 cl = clustra(data, k = 3, fp = list(maxdf = 30, iter = 10, starts = 5, idperstart = 20, retry_max = 3), cores = c(e_mc = 1, m_mc = 1, nthreads = 1, blas = 1), verbose = TRUE)
 ```
 
+Next, plot the resulting fit with a sample of data, colored by the cluster value.
 ```{r fig.width = 7, fig.height = 7}
-plot(mgcViz::getViz(cl$tps))
+sdt = data[, group:=factor(..cl$data_group)][sample(nrow(data), 10000)]
+np = 100
+k = length(cl$tps)
+ntime = seq(data[, min(time)], data[, max(time)], length.out = np)
+pdata = expand.grid(time = ntime, group = factor(1:k))
+pdata$pred = do.call(c, lapply(cl$tps, predict, newdata = list(time = ntime),
+                         type = "response"))
+ggplot(pdata, aes(x = time, y = pred, color = group)) + geom_line() +
+  geom_point(data = sdt, aes(y = response), pch = ".") 
 ```
 Average silhouette value is a way to select the number of clusters and a silhouette plot provides a way for a deeper evaluation (Rouseeuw 1986). As silhouette requires distances between trajectories, this is not possible due to unequal trajectory sampling without fitting a separate model for each id. As a proxy for distance between points, we use point distances to cluster means in the *clustra_sil()* function. The structure returned from the *clustra()* function contains the matrix *loss*, which has all the information needed to construct these proxy silhouette plots. The function *clustra_sil()* performs clustering for a number of *k* values and outputs a list of "silhouette" class structures that can be displayed with *fviz_silhouette()* function from the package **factoextra**.
 ```{r fig.width = 7}

@@ -3,10 +3,10 @@
 \name{tps_g}
 \alias{tps_g}
 \title{Function to fit thin plate spline (tps) to a group with
-\code{\link[mgcv]{bam}} from the \code{mgcv} package. Crossvalidation does
-not know about zero weights, resulting in different smoothing parameters, so
-subset parameter (rather than zero weights) is used to ensure correct
-crossvalidation sampling.}
+\code{\link[mgcv]{bam}} from the \code{mgcv} package. 
+Crossvalidation does not know about zero weights, resulting in
+different smoothing parameters, so subset parameter (rather than
+zero weights) is used to ensure correct crossvalidation sampling.}
 \usage{
 tps_g(data, maxdf, nthreads)
 }
@@ -21,8 +21,8 @@ tps_g(data, maxdf, nthreads)
 }
 \description{
 Function to fit thin plate spline (tps) to a group with
-\code{\link[mgcv]{bam}} from the \code{mgcv} package. Crossvalidation does
-not know about zero weights, resulting in different smoothing parameters, so
-subset parameter (rather than zero weights) is used to ensure correct
-crossvalidation sampling.
+\code{\link[mgcv]{bam}} from the \code{mgcv} package. 
+Crossvalidation does not know about zero weights, resulting in
+different smoothing parameters, so subset parameter (rather than
+zero weights) is used to ensure correct crossvalidation sampling.
 }

@@ -16,23 +16,29 @@
 #' of observations within the time spans. Each trajectory follows a randomly 
 #' selected response function with added N(mean, sd) error.
 #' 
-#' @param n_id Number of id to generate.
-#' @param m_obs Mean number of observation per `id` using
-#' @param s_range A vector of length 2, giving the min and max limits of
-#'   uniformly generated start observation time.
-#' @param e_range A vector of length 2, giving the min and max limits of
-#'   uniformly generated end observation time.
-#' @param reference A nominal response reference (for example, blood pressure
-#'   is near 100, which is the default)
-#' @param noise Vector of length 2 giving the *mean* and *sd* of added
-#'  N(mean, sd) noise.
-#' @param k Number of response types (So far works only for k = 2 and 3)
-#' @param min_obs Minimum number of observations in addition to zero time
-#'   observation.
+#' @param n_id 
+#' Number of id to generate.
+#' @param m_obs 
+#' Mean number of observation per id. Provides \code{lambda} parameter in
+#' \code{\link[stats]{rpois}}.
+#' @param s_range 
+#' A vector of length 2, giving the min and max limits of uniformly generated
+#' start observation time.
+#' @param e_range 
+#' A vector of length 2, giving the min and max limits of uniformly generated
+#' end observation time.
+#' @param reference 
+#' A nominal response reference (for example, blood pressure is near 100, which
+#' is the default)
+#' @param noise 
+#' Vector of length 2 giving the *mean* and *sd* of added N(mean, sd) noise.
+#' @param k 
+#' Number of response types (So far works only for k = 2 and 3)
+#' @param min_obs 
+#' Minimum number of observations in addition to zero time observation.
 #' 
 #' @return A data frame with one response per row and three columns:
-#'   `id` (an integer in 1:(3*n_id), `time` (an iteger in `s_range[1]` to
-#'    `e_range[2]` observation time), and `response`.
+#'   \code{id}, \code{time}, \code{response}, and \code{group}.
 #' @examples
 #' set.seed(123)
 #' data = gen_traj_data(n_id = 20, m_obs = 10, s_range = c(-50, -10),
@@ -70,13 +76,13 @@ gen_traj_data = function(n_id, m_obs, s_range, e_range, reference = 100,
                   rep(reference, length(times)), # constant
                   reference*sin(pi/4 + pi*times/e_range[2]), # part of sin curve
                   reference*(1.5 - 1/(1 + exp(-times/e_range[2]*5))) # 1 - sigmoid
-                  )
-    cbind(times, resp + rnorm(n_obs, mean = noise[1], sd = noise[2])) # add Gaussian noise
+                  ) + rnorm(n_obs, mean = noise[1], sd = noise[2])
+    cbind(times, resp, type)
   }
 
   id_list = gendata(n_id, m_obs, s_range, e_range, k)
-  id_df = as.data.frame(do.call(rbind, id_list))
-  names(id_df) = c("id", "time", "response")
+  id_dt = data.table::as.data.table(do.call(rbind, id_list))
+  names(id_dt) = c("id", "time", "response", "true_group")
   
-  id_df
+  id_dt
 }

@@ -22,7 +22,6 @@ Imports:
     stats
 Suggests:
     ggplot2,
-    mgcViz,
     knitr,
     rmarkdown
 Description: Performs k-means clustering, where each mean is a thin plate spline
