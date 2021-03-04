@@ -3,7 +3,8 @@
 \name{xit_report}
 \alias{xit_report}
 \title{xit_report examines trajectories output to name what was concluded, such as
-convergence, maximum iterations reached, a zero cluster, etc.}
+convergence, maximum iterations reached, a zero cluster, etc. Multiple
+conclusions are possible as not all are mutually exclusive.}
 \usage{
 xit_report(cl, fp)
 }
@@ -14,5 +15,6 @@ xit_report(cl, fp)
 }
 \description{
 xit_report examines trajectories output to name what was concluded, such as
-convergence, maximum iterations reached, a zero cluster, etc.
+convergence, maximum iterations reached, a zero cluster, etc. Multiple
+conclusions are possible as not all are mutually exclusive.
 }

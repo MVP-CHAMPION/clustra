@@ -21,6 +21,7 @@ Imports:
     parallel,
     stats
 Suggests:
+    factoextra,
     ggplot2,
     knitr,
     rmarkdown

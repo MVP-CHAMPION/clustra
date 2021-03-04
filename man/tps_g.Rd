@@ -8,16 +8,16 @@ Crossvalidation does not know about zero weights, resulting in
 different smoothing parameters, so subset parameter (rather than
 zero weights) is used to ensure correct crossvalidation sampling.}
 \usage{
-tps_g(data, maxdf, nthreads)
+tps_g(g, data, maxdf, nthreads)
 }
 \arguments{
+\item{g}{Integer group number.}
+
 \item{data}{See \code{\link{clustra}} description.}
 
 \item{maxdf}{See \code{\link{trajectories}} description.}
 
 \item{nthreads}{Controls \code{\link[mgcv]{bam}} threads.}
-
-\item{g}{Integer group number.}
 }
 \description{
 Function to fit thin plate spline (tps) to a group with

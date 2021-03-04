@@ -27,7 +27,7 @@ start observation time.}
 \item{e_range}{A vector of length 2, giving the min and max limits of uniformly generated
 end observation time.}
 
-\item{reference}{A nominal response reference (for example, blood pressure is near 100, which
+\item{reference}{A nominal response value (for example, blood pressure is near 100, which
 is the default)}
 
 \item{noise}{Vector of length 2 giving the *mean* and *sd* of added N(mean, sd) noise.}
@@ -62,7 +62,7 @@ selected response function with added N(mean, sd) error.
 \examples{
 set.seed(123)
 data = gen_traj_data(n_id = 20, m_obs = 10, s_range = c(-50, -10),
-              e_range = c(3*365, 10*365), reference = 100)
+              e_range = c(2*365, 5*365))
 head(data)
 
 }

@@ -1,4 +1,4 @@
-#' allpair_RandIndex is used internally by \code{\link{rand_clustra}} and
+#' allpair_RandIndex is used internally by \code{\link{clustra_rand}} and
 #' provides its return value.
 #' 
 #' Runs \code{\link[MixSim]{RandIndex}} for all pairs of cluster results in its
@@ -6,7 +6,7 @@
 #' 
 #' @param results
 #' A list with each element packed internally by the
-#' \code{\link{rand_clustra}} function.
+#' \code{\link{clustra_rand}} function.
 #' 
 #' @return A data frame with \code{\link[MixSim]{RandIndex}} for all pairs from
 #' trajectories results. The data frame names and format is intended to be the
@@ -223,6 +223,8 @@ clustra_sil = function(data, k, save = FALSE, verbose = FALSE) {
 #' Vector of k values to try.
 #' @param replicates
 #' Number of replicates for each k.
+#' @param fp
+#' Fitting parameters. See \code{link{trajectories}}.
 #' @param save
 #' Logical. When TRUE, save all results as file \code{results.Rdata}.
 #' @param verbose
@@ -232,9 +234,10 @@ clustra_sil = function(data, k, save = FALSE, verbose = FALSE) {
 #' 
 #' @export
 clustra_rand = function(data, k, replicates = 10,
-                        fp = list(maxdf = 30, iter = 8, starts = 4,
+                        fp = list(maxdf = 30, iter = 10, starts = 4,
                                   idperstart = 20, retry_max = 3),
                         save = FALSE, verbose = FALSE) {
+  id = .GRP = ..group = NULL # for data.table R CMD check
   results = vector("list", replicates*length(k))
   
   ## check for required variables in data

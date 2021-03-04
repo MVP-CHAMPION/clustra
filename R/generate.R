@@ -28,7 +28,7 @@
 #' A vector of length 2, giving the min and max limits of uniformly generated
 #' end observation time.
 #' @param reference 
-#' A nominal response reference (for example, blood pressure is near 100, which
+#' A nominal response value (for example, blood pressure is near 100, which
 #' is the default)
 #' @param noise 
 #' Vector of length 2 giving the *mean* and *sd* of added N(mean, sd) noise.
@@ -42,7 +42,7 @@
 #' @examples
 #' set.seed(123)
 #' data = gen_traj_data(n_id = 20, m_obs = 10, s_range = c(-50, -10),
-#'               e_range = c(3*365, 10*365), reference = 100)
+#'               e_range = c(2*365, 5*365))
 #' head(data)
 #' 
 #' @importFrom stats dist rnorm rpois runif
@@ -60,29 +60,31 @@ gen_traj_data = function(n_id, m_obs, s_range, e_range, reference = 100,
     n_obs = min_obs + rpois(n_id, lambda = m_obs) # number of observations
     type = sample(k, n_id, replace = TRUE) # curve type
     id_vec = sample.int(idr[2], n_id, replace = FALSE) # non-consecutive
-    lapply(1:n_id,   # construct by id bunches of responses
-           function(i) cbind(rep(id_vec[i], n_obs[i]),
-                             response(n_obs[i], type[i], start[i], end[i], 
-                                      reference)))
+    lapply(1:n_id,   # construct by id
+           function(i) oneid(id_vec[i], n_obs[i], type[i], start[i], end[i],
+                                reference))
   }
   ## response
-  response = function(n_obs, type, start, end, reference) {
-    times = c(start,
+  oneid = function(id, n_obs, type, start, end, reference) {
+    id = rep(id, n_obs)
+    true_group = rep(type, n_obs)
+    time = c(start,
               start + sort(floor(runif(n_obs - 3, min = start, max = end))),
               end)
-    times = c(times[times <= 0], 0, times[times > 0]) # insert 0
+    time = c(time[time <= 0], 0, time[time > 0]) # insert 0
+
     ## TODO add user supplied functions
-    resp = switch(type, # 1 = constant, 2 = sin, 3 = sigmoid
-                  rep(reference, length(times)), # constant
-                  reference*sin(pi/4 + pi*times/e_range[2]), # part of sin curve
-                  reference*(1.5 - 1/(1 + exp(-times/e_range[2]*5))) # 1 - sigmoid
+    response = switch(type, # 1 = constant, 2 = sin, 3 = sigmoid
+                  rep(reference, length(time)), # constant
+                  reference*sin(pi/4 + pi*time/e_range[2]), # part of sin curve
+                  reference*(1.5 - 1/(1 + exp(-time/e_range[2]*5))) # 1 - sigmoid
                   ) + rnorm(n_obs, mean = noise[1], sd = noise[2])
-    cbind(times, resp, type)
+    cbind(id, time, response, true_group)
   }
 
   id_list = gendata(n_id, m_obs, s_range, e_range, k)
-  id_dt = data.table::as.data.table(do.call(rbind, id_list))
-  names(id_dt) = c("id", "time", "response", "true_group")
-  
+  id_mat = do.call(rbind, id_list)
+  id_dt = data.table::data.table(id_mat)
+
   id_dt
 }

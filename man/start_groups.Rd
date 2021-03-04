@@ -21,7 +21,7 @@ sequential starting from 1. This affects expanding group numbers to ids.}
 
 \item{fp}{Fitting parameters. See \code{link{trajectories}}.}
 
-\item{cores}{}
+\item{cores}{A vector of core assignments for multicore components. See}
 
 \item{verbose}{Turn on more output for debugging.}
 }

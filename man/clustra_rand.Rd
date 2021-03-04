@@ -10,7 +10,7 @@ clustra_rand(
   data,
   k,
   replicates = 10,
-  fp = list(maxdf = 30, iter = 8, starts = 4, idperstart = 20, retry_max = 3),
+  fp = list(maxdf = 30, iter = 10, starts = 4, idperstart = 20, retry_max = 3),
   save = FALSE,
   verbose = FALSE
 )
@@ -21,6 +21,8 @@ clustra_rand(
 \item{k}{Vector of k values to try.}
 
 \item{replicates}{Number of replicates for each k.}
+
+\item{fp}{Fitting parameters. See \code{link{trajectories}}.}
 
 \item{save}{Logical. When TRUE, save all results as file \code{results.Rdata}.}
 

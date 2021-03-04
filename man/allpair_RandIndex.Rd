@@ -2,14 +2,14 @@
 % Please edit documentation in R/evaluate.R
 \name{allpair_RandIndex}
 \alias{allpair_RandIndex}
-\title{allpair_RandIndex is used internally by \code{\link{rand_clustra}} and
+\title{allpair_RandIndex is used internally by \code{\link{clustra_rand}} and
 provides its return value.}
 \usage{
 allpair_RandIndex(results)
 }
 \arguments{
 \item{results}{A list with each element packed internally by the
-\code{\link{rand_clustra}} function.}
+\code{\link{clustra_rand}} function.}
 }
 \value{
 A data frame with \code{\link[MixSim]{RandIndex}} for all pairs from

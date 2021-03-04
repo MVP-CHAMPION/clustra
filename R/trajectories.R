@@ -18,10 +18,13 @@
 #' @param nthreads
 #' Controls \code{\link[mgcv]{bam}} threads.
 #'
-tps_g = function(data, maxdf, nthreads) {
-  tps = mgcv::bam(response ~ s(time, k = maxdf), data = data,
-                  discrete = TRUE, nthreads = nthreads)
-  tps
+tps_g = function(g, data, maxdf, nthreads) {
+  if(nrow(data[[g]]) > 0) {
+    return(mgcv::bam(response ~ s(time, k = maxdf), data = data[[g]],
+                  discrete = TRUE, nthreads = nthreads))
+  } else {
+    return(NULL)
+  }
 }
 
 #' Function to predict for new data based on fitted tps of a group
@@ -31,8 +34,13 @@ tps_g = function(data, maxdf, nthreads) {
 #' @param data
 #' See \code{\link{clustra}} description.
 #'
-pred_g = function(tps, data)
-  predict(object = tps, newdata = data, type = "response", se.fit = TRUE)
+pred_g = function(tps, data) {
+  if(is.null(tps)) {
+    return(NULL)
+  } else {
+    predict(object = tps, newdata = data, type = "response", se.fit = TRUE)
+  }
+}
 
 #' Loss functions
 #'
@@ -46,19 +54,54 @@ pred_g = function(tps, data)
 #' @param data
 #' See \code{\link{trajectories}}
 #'
-mse_g = function(g, pred, data) { # mean squared error (use unique() to get order)
-  ## ctapply assumes id are contiguous within data! can we make sure? 
-  data[, esq:=(response - ..pred[[g]]$fit)^2]
-#  tt = as.numeric(tapply(data$e_sq, data$id, mean))
-  tt = data[, mean(esq), by=id][, 2]
-#  ct = as.numeric(iotools::ctapply(esq, data$id, mean))
-#  cat(" tt", length(tt), tt[1:10], "\n")
-#  cat(" ct", length(ct), ct[1:10], "\n")
-  tt
+mse_g = function(g, pred, data) { # mean squared error
+  esq = response = ..pred = id = NULL # for data.table R CMD check
+  if(is.null(pred[[g]])) {
+    return(NULL)
+  } else {
+    data[, esq:=(response - ..pred[[g]]$fit)^2]
+#   tt = as.numeric(tapply(data$e_sq, data$id, mean))
+    ## note as.numeric(unlist(.)) needed to convert from a 1 col data.table!
+    tt = as.numeric(unlist(data[, mean(esq), by=id][, 2]))
+#   ct = as.numeric(iotools::ctapply(esq, data$id, mean))
+#   cat(" tt", length(tt), tt[1:10], "\n")
+#   cat(" ct", length(ct), ct[1:10], "\n")
+    return(tt)
+  }
 }
 #' @rdname mse_g
 mxe_g = function(g, pred, data) # maximum error
   as.numeric(tapply(abs(data$response - pred[[g]]$fit), data$id, max))
+
+#' Function to check if non-zero group members have enough data for spline fit
+#' degrees of freedom.
+#' 
+#' @param group
+#' Group membership vector for each id.
+#' @param loss
+#' A matrix with rows of computed loss values of each id across all models
+#' @param data
+#' A data.table with data. See \code{link{trajectories}}.
+#' @param fp
+#' Fitting parameters. See \code{link{trajectories}}.
+#' 
+#' @return 
+#' Returns the vector of group membership of id's either unchanged or changed
+#' to have sufficient data in non-zero groups.
+#' 
+check_df = function(group, loss, data, fp) {
+  ..group = id = NULL # for data.table R CMD check
+  counts_df = data[, tabulate(group)]
+  while(any(counts_df > 0 & counts_df <= fp$maxdf)) {  # need to reallocate
+    low_gp = which(counts_df > 0 & counts_df <= fp$maxdf)[1]
+    loss[, low_gp] = rep(Inf, nrow(loss)) # set to Inf to zero group
+    move_id = (group == low_gp)
+    group[move_id] = apply(loss[move_id, , drop = FALSE], 1, which.min)
+    data[, group:=..group[id]]  # push group change into data
+    counts_df = data[, tabulate(group)]
+  }
+  group
+}
 
 #' Function to assign starting groups.
 #'
@@ -70,8 +113,8 @@ mxe_g = function(g, pred, data) # maximum error
 #' Number of clusters (groups).
 #' @param fp
 #' Fitting parameters. See \code{link{trajectories}}.
-#' @param cores 
-#' 
+#' @param cores
+#' A vector of core assignments for multicore components. See
 #' @param verbose 
 #' Turn on more output for debugging.
 #'
@@ -80,6 +123,8 @@ mxe_g = function(g, pred, data) # maximum error
 start_groups = function(data, k, fp,
                         cores = c(e_mc = 1, m_mc = 1, nthreads = 1, blas = 1),
                         verbose = FALSE) {
+  time = id = .GRP = ..group = NULL # for data.table R CMD check
+  
   if(verbose) cat("\nStarts : ")
 
   ## Prepare test data for diversity criterion
@@ -126,14 +171,17 @@ start_groups = function(data, k, fp,
 
   if(max_div == 0) return(NULL) # all starts failed!
 
-  ## expand best start sample fit to full set of id's
+  ## predict from best sample fit to full set of id's
   pred = parallel::mclapply(best_tps_cov, pred_g, data = data, 
                             mc.cores = cores["e_mc"])
   ## compute mse for each id
   loss = parallel::mclapply(1:k, mse_g, pred = pred, data = data,
-                  mc.cores = cores["e_mc"]) # !!! loss is not data dimensioned!!!!
-  ## classify id to group with min mse
-  group = apply(do.call(cbind, loss), 1, which.min)
+                  mc.cores = cores["e_mc"])
+  loss = do.call(cbind, loss) # combine list into matrix columns
+  group = apply(loss, 1, which.min) # set group with min loss
+  data[, group:=..group[id]] # expand group to all data
+  group = check_df(group, loss, data, fp) # check sufficient df
+  
   if(verbose) cat("\nStart counts", tabulate(group, k), "->", max_div, "")
   group ## report group for each id
 }
@@ -154,7 +202,7 @@ start_groups = function(data, k, fp,
 #' @param group
 #' Group numbers corresponding to sequential ids.
 #' @param fp
-#' List with addtional fitting parameters: *maxdf* basis dimension of smooth
+#' List with additional fitting parameters: *maxdf* basis dimension of smooth
 #' term (see \code{\link[mgcv]{s}}, parameter k, in package \code{mgcv}),
 #' *iter* maximum number of EM iterations, *starts* number of trial random starts
 #' from which the b  est is chosen, *idperstart* number of `id`s to sample for
@@ -162,7 +210,7 @@ start_groups = function(data, k, fp,
 #' encounters a cluster too small for \code{\link[mgcv]{bam}} fitting with the
 #' given *maxdf*.
 #' @param cores
-#' Vector of length 4. Core allocations to various sections of code: `e_mc` dores to use
+#' Vector of length 4. Core allocations to various sections of code: `e_mc` cores to use
 #' by `mclapply` of e_mc (expectation over k), `m_mc` cores to use by 
 #' `mclapply` of m_mc (maximization across k), `nthreads` threads to use by
 #' \link[mgcv]{bam}, `blas` cores to use by OpenBLAS.
@@ -178,13 +226,15 @@ start_groups = function(data, k, fp,
 trajectories = function(data, k, group, fp,
                         cores = c(e_mc = 1, m_mc = 1, nthreads = 1, blas = 1),
                         verbose = FALSE) {
+  id = ..new_group = ..group = NULL # for data.table R CMD check
   
   ## make sure that data is a data.table
   if(!data.table::is.data.table(data)) data = data.table::as.data.table(data)
+  k_cl = k  # start with k clusters
   
   if(verbose) a = a_0 = deltime(a)
   if(data[, min(id)] != 1 | data[, max(id)] != length(group)){
-    cat("\ntrajectories: Expecting sequential id's starting from 1.\n")
+    cat(" trajectories: Expecting sequential id's starting from 1.\n")
   }
 
   ## get number of unique id
@@ -198,52 +248,54 @@ trajectories = function(data, k, group, fp,
     ##
     ## M-step:
     ##   Estimate tps model parameters for each cluster from id's in that cluster
-    datg = parallel::mclapply(1:k, function(g) data[group == g])
-    tps = parallel::mclapply(datg, tps_g, maxdf = fp$maxdf,
+    ##   
+    counts = tabulate(group)
+    datg = parallel::mclapply(1:k_cl, function(g) data[group == g])
+    nz = which(sapply(datg, nrow) > 0) # nonzero groups
+    k_cl = length(nz) # reset number of clusters to nonzeros only
+    tps = parallel::mclapply(nz, tps_g, data = datg, maxdf = fp$maxdf,
                              mc.cores = cores["m_mc"], nthreads = cores["nthreads"])
     if(verbose) a = deltime(a, "M-step")
 
-    ## break if any bam fit fails
-    if(!all(sapply(tps, is, class = "bam"))) {
-      changes = counts_df = counts = loss = NULL
-      break
-    }
-
     ##
     ## E-step:
-    ##   predict each id trajectory by each model
+    ##   predict each id's trajectory with each model
     pred = parallel::mclapply(tps, pred_g, data = data, mc.cores = cores["e_mc"])
-    ##   compute loss of each id to each model
-    loss = parallel::mclapply(1:k, mse_g, pred = pred, data = data,
+    ##   compute loss of all id's to all groups (models)
+    ##   TODO better parallel balance by skipping empty groups
+    loss = parallel::mclapply(1:k_cl, mse_g, pred = pred, data = data,
                               mc.cores = cores["e_mc"])
-    loss = do.call(cbind, loss)
-
-    ## classify each id to model with smallest loss
-    new_group = apply(loss, 1, which.min)
+    loss = do.call(cbind, loss) # NULL loss elements go away (removes 0 groups)
+    ## classify each id to model with smallest loss (Expected group)
+    ## Note: Groups are renumbered as NULL loss is compressed in above do.call.
+    new_group = apply(loss, 1, which.min) # already without original zero groups
     if(verbose) a = deltime(a, " E-step")
 
     ## evaluate results and update groups
-    changes = sum(new_group != group)
-    counts = tabulate(new_group, k)
-    deviance = sum(unlist(lapply(1:k, function(g) deviance(tps[[g]]))))
+    changes = sum(new_group != group) # may exaggerate due to renumbering
+    counts = tabulate(new_group)
+    deviance = sum(unlist(lapply(1:k_cl, function(g) deviance(tps[[g]]))))
     if(verbose)
        cat(" Changes:", changes, "Counts:", counts, "Deviance:", deviance)
     group = new_group
     data[, group:=..new_group[id]] # expand group to data frame
-    counts_df = data[, .N, by=group][, N]
-    
-    ## break if converged or if any cluster gets too small for fp$maxdf
-    if(changes == 0 || any(counts_df <= fp$maxdf) || length(counts_df) < k) break
+    group = check_df(group, loss, data, fp)
+    data[, group:=..group[id]]
+    counts_df = data[, tabulate(group)]
+
+    ## break if converged
+    if(changes == 0) break
   }
 
   if(verbose) deltime(a_0, "\n trajectories time =")
-  list(deviance = deviance, group = group, loss = loss, data_group = data[, group],
-       tps = tps, iterations = i, counts = counts, counts_df = counts_df,
-       changes = changes)
+  list(deviance = deviance, group = group, loss = loss, k = k, k_cl = k_cl,
+       data_group = data[, group], tps = tps, iterations = i, counts = counts,
+       counts_df = counts_df, changes = changes)
 }
 
 #' xit_report examines trajectories output to name what was concluded, such as
-#' convergence, maximum iterations reached, a zero cluster, etc.
+#' convergence, maximum iterations reached, a zero cluster, etc. Multiple
+#' conclusions are possible as not all are mutually exclusive.
 #' 
 #' @param cl
 #' Output structure from trajectories() function
@@ -255,14 +307,12 @@ xit_report = function(cl, fp) {
   xit = NULL
   if(!is.null(cl$counts_df) && any(cl$counts_df < fp$maxdf))
     xit = c(xit, "undermaxdf")
-  if(!is.null(cl$counts) && any(cl$counts == 0))
+  if(cl$k_cl < cl$k)
     xit = c(xit, "zerocluster")
   if(!is.null(cl$changes) && cl$changes == 0)
     xit = c(xit, "converged")
-  if(!all(sapply(cl$tps, is, class = "bam")))
-    xit = c(xit, "bamfail")
   if(cl$iterations >= fp$iter && fp$iter != 1)
-    xit = c(xit, "max iter")
+    xit = c(xit, "max-iter")
   xit
 }
 
@@ -284,22 +334,28 @@ xit_report = function(cl, fp) {
 #' \code{link{start_groups}}.
 #' @param fp
 #' Fitting parameters. See \code{link{trajectories}}.
+#' @param cores
+#' A vector of core assignments for multicore components. See
+#' \code{link{trajectories}}. 
 #' @param verbose
 #' Logical to turn on more output during fit iterations.
 #' 
 #' @examples
 #' set.seed(13)
-#' data = gen_traj_data(n_id = 200, m_obs = 20, s_range = c(-50, -10),
-#'               e_range = c(3*365, 10*365), reference = 100)
-#' cl = clustra(data, k = 3, verbose = TRUE)
+#' data = gen_traj_data(n_id = 100, m_obs = 20, s_range = c(-50, -10),
+#'               e_range = c(2*365, 5*365))
+#' fp = list(maxdf = 20, iter = 5, starts = 2, idperstart = 20, retry_max = 3)
+#' cl = clustra(data, k = 3, fp = fp, verbose = TRUE)
 #' names(cl)
 #' cl$tps
 #'
 #' @export
 clustra = function(data, k, group = NULL,
-                   fp = list(maxdf = 30, iter = 8, starts = 3, idperstart = 20,
+                   fp = list(maxdf = 30, iter = 10, starts = 3, idperstart = 20,
                    retry_max = 3), cores = c(e_mc = 1, m_mc = 1, nthreads = 1,
                                              blas = 1), verbose = FALSE) {
+  id = .GRP = ..group = NULL # for data.table R CMD check
+  
   ## check for required variables in data
   vnames = c("id", "time", "response")
   if(!is.data.frame(data)) stop("Expecting a data frame.")
@@ -313,20 +369,13 @@ clustra = function(data, k, group = NULL,
 
   for(retry in 1:fp$retry_max) {
     ## get initial group assignments
-    while(is.null(group)) {
-      group = start_groups(data, k, fp, verbose = verbose)
-      data[, group:=..group[id]] # expand group to all data
-      if(any(data[, .(low = .N < ..fp$maxdf, by=group)][, low])) {
-        group = NULL
-        cat("\nRepeating starts due to cluster observations under fp$maxdf ...")
-      }
-    }
+    group = start_groups(data, k, fp, verbose = verbose)
 
     ## kmeans iteration to assign id's to groups
     cl = trajectories(data, k, group, fp, cores, verbose = verbose)
     er = xit_report(cl, fp)
     if(verbose && !is.null(er)) cat(" ", er)
-    if( any( c("converged", "max iter") %in% er ) )break
+    if( any( c("converged", "max-iter") %in% er ) )break
     cat("\n Restarting clustra. Error exit. \n")
   }
   cl$retry = retry
