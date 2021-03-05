@@ -12,9 +12,9 @@ check_df(group, loss, data, fp)
 
 \item{loss}{A matrix with rows of computed loss values of each id across all models}
 
-\item{data}{A data.table with data. See \code{link{trajectories}}.}
+\item{data}{A data.table with data. See \code{\link{trajectories}}.}
 
-\item{fp}{Fitting parameters. See \code{link{trajectories}}.}
+\item{fp}{Fitting parameters. See \code{\link{trajectories}}.}
 }
 \value{
 Returns the vector of group membership of id's either unchanged or changed

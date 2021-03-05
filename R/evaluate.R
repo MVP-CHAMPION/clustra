@@ -146,15 +146,10 @@ rand_plot = function(rand_pairs, name = NULL) {
 #' clustra_sil:
 #' Performs \code{\link{clustra}} runs for several k and makes silhouette plots.
 #' 
-#' Available selection indices are "silhouette" and "rand".
 #' Silhouette computes a proxy silhouette index based on distances to cluster
 #' centers rather than trajectory pairs. The cost is essentially that of
 #' running clustra for several k as this information is
 #' available directly from clustra.
-#'
-#' Rand runs several random start replicates per k, resulting in a much slower
-#' algorithm. Then prepares a Rand index comparison between
-#' all pairs of clusterings.
 #' 
 #' @param data
 #' The data (see \code{\link{clustra}} description).
@@ -182,10 +177,8 @@ clustra_sil = function(data, k, save = FALSE, verbose = FALSE) {
   for(j in 1:length(k)) {
     kj = k[j]
     a_0 = deltime()
-      
-    ## Random initial groups to assess stability (NULL gets good starts)
-    group = sample(kj, length(unique(data$id)), replace = TRUE)
-    f = clustra(data, kj, group, verbose = verbose)
+
+    f = clustra(data, kj, verbose = verbose)
 
     smat = t(apply(f$loss, 1, sil))
     colnames(smat) = c("cluster", "neighbor", "sil_width")
@@ -234,8 +227,7 @@ clustra_sil = function(data, k, save = FALSE, verbose = FALSE) {
 #' 
 #' @export
 clustra_rand = function(data, k, replicates = 10,
-                        fp = list(maxdf = 30, iter = 10, starts = 4,
-                                  idperstart = 20, retry_max = 3),
+                        fp = list(maxdf = 30, iter = 10),
                         save = FALSE, verbose = FALSE) {
   id = .GRP = ..group = NULL # for data.table R CMD check
   results = vector("list", replicates*length(k))

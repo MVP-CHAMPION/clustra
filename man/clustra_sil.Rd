@@ -20,14 +20,8 @@ clustra_sil(data, k, save = FALSE, verbose = FALSE)
 See \code{\link{allpair_RandIndex}}
 }
 \description{
-Available selection indices are "silhouette" and "rand".
 Silhouette computes a proxy silhouette index based on distances to cluster
 centers rather than trajectory pairs. The cost is essentially that of
 running clustra for several k as this information is
 available directly from clustra.
-}
-\details{
-Rand runs several random start replicates per k, resulting in a much slower
-algorithm. Then prepares a Rand index comparison between
-all pairs of clusterings.
 }

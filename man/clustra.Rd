@@ -2,13 +2,14 @@
 % Please edit documentation in R/trajectories.R
 \name{clustra}
 \alias{clustra}
-\title{Cluster trajectories}
+\title{Cluster trajectoriesß}
 \usage{
 clustra(
   data,
   k,
+  starts = c(1, 0),
   group = NULL,
-  fp = list(maxdf = 30, iter = 10, starts = 3, idperstart = 20, retry_max = 3),
+  fp = list(maxdf = 30, iter = 10),
   cores = c(e_mc = 1, m_mc = 1, nthreads = 1, blas = 1),
   verbose = FALSE
 )
@@ -20,14 +21,16 @@ Other variables are ignored.}
 
 \item{k}{Number of clusters}
 
+\item{starts}{A vector of length two. See \code{\link{start_groups}}.}
+
 \item{group}{A vector of initial cluster assignments for unique id's in data.
 Normally, this is NULL and good starts are provided by
-\code{link{start_groups}}.}
+\code{\link{start_groups}}.}
 
-\item{fp}{Fitting parameters. See \code{link{trajectories}}.}
+\item{fp}{Fitting parameters. See \code{\link{trajectories}}.}
 
 \item{cores}{A vector of core assignments for multicore components. See
-\code{link{trajectories}}.}
+\code{\link{trajectories}}.}
 
 \item{verbose}{Logical to turn on more output during fit iterations.}
 }

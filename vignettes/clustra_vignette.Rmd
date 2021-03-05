@@ -9,27 +9,24 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r, include = FALSE}
-knitr::opts_chunk$set(
+```{r, setup}
+## Time start 11:27
+# First, set up a directory where we want to have any output from this vignette.  
+playdir = "~/clustra_play"
+if(!dir.exists(playdir)) dir.create(playdir)
+knitr::opts_knit$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  root.dir = playdir
 )
 ```
 The **clustra** package was built to cluster medical trajectories related by an intervention. For example, a number of individuals are started on a specific drug regimen and their blood pressure data is collected for a varying amount of time before and after the start of the medication. Time is recorded as negative before the start and positive after the start, meaning that the trajectories are aligned at zero, irrespective of any reference to calendar time. Time units can be anything (days, weeks, hours, minutes, etc.) as long as they are the same across all patients. Observations can be unequally spaced.  
 
-First, we load the package and set up a directory where we want to have any output from this vignette.  
-```{r setup}
-library(clustra)
-
-## Set working directory
-playdir = "~/clustra_play"
-if(!dir.exists(playdir)) dir.create(playdir)
-setwd(playdir)
-```
 We begin by generating a data set. The parameters generate *id*s and for each *id*, a random number of observations based on the *Poisson*($\lambda =$ *m_obs*) distribution plus 3. The 3 additional observations are to guarantee one before intervention at time *start*, one at the intervention time 0, and one after the intervention at time *end*. The *start* time is *Uniform(s_range)* and the *end* time is *Uniform(e_range)*. The remaining times are at times Uniform(*start*, *end*). The time units are arbitrary and depend on your application.
 
-We also set a generator kind and seed for reproducibility, look at a few observations of the generated data, and write the data to a csv file.
+We also set *RNGkind* and *seed* for reproducibility. Code below generates the data, looks at a few observations of the generated data, and writes the data to a csv file in our working directory.
 ```{r}
+library(clustra)
 rng_prev = RNGkind("L'Ecuyer-CMRG")
 set.seed(1234567)
 data = gen_traj_data(n_id = 3000, m_obs = 25, s_range = c(-50, -10),
@@ -43,10 +40,10 @@ library(ggplot2)
 ggplot(data[id %in% sample(unique(data[, id]), 9)],
        aes(x = time, y = response)) + facet_wrap(~ id) + geom_point()
 ```
-Next, cluster the trajectories. Set *k=3*, spline max degrees of freedom to 30, maximum iterations to 10, use best of 5 random starts to initialize clusters, use 20 ids to quickly evaluate the random starts, and retry up to 3 times when an initialization fails to have enough data in a cluster to estimate the spline. *cores* parameters set the number of cores to use in various components of the code. Note that this does not work on Windows operating systems, where it should be left at 1. We proceed with verbose output to get starts and change counts from iterations.
+Next, cluster the trajectories. Set *k=3*, spline max degrees of freedom to 30, and maximum iterations to 10. *cores* parameters set the number of cores to use in various components of the code. Note that this does not work on Windows operating systems, where it should be left at 1. In the code that follows, we use verbose output to get information from each iteration.
 ```{r}
 set.seed(1234737)
-cl = clustra(data, k = 3, fp = list(maxdf = 30, iter = 10, starts = 4, idperstart = 20, retry_max = 3), cores = c(e_mc = 1, m_mc = 1, nthreads = 1, blas = 1), verbose = TRUE)
+cl = clustra(data, k = 3, fp = list(maxdf = 30, iter = 10), verbose = TRUE)
 ```
 
 Next, plot the resulting fit with a sample of data, colored by the cluster value.
@@ -83,13 +80,13 @@ iplot = sample(unique(data2$id), 9)
 sampobs = match(data2$id, iplot, nomatch = 0) > 0
 ggplot(data2[sampobs], aes(x = time, y = response)) + 
   facet_wrap(~ id) + geom_point()
-cl = clustra(data2, k = 3, fp = list(maxdf = 30, iter = 10, starts = 4, idperstart = 20, retry_max = 3), cores = c(e_mc = 1, m_mc = 1, nthreads = 1, blas = 1), verbose = TRUE)
+cl = clustra(data2, k = 3, fp = list(maxdf = 30, iter = 10), verbose = TRUE)
 MixSim::RandIndex(cl$data_group, data2[, true_group])
 ```
-Next, we request too many clusters.
+Next, we try requesting too many clusters in the noisy data.
 ```{r}
 set.seed(1234737)
-cl = clustra(data2, k = 20, fp = list(maxdf = 30, iter = 20, starts = 4, idperstart = 20, retry_max = 3), cores = c(e_mc = 1, m_mc = 1, nthreads = 1, blas = 1), verbose = TRUE)
+cl = clustra(data2, k = 20, fp = list(maxdf = 30, iter = 20), verbose = TRUE)
 ```
 Next, plot the resulting fit with a sample of data, colored by the cluster value.
 ```{r fig.width = 7, fig.height = 7}
@@ -112,7 +109,7 @@ pdata$pred = do.call(c, pred)
 ggplot(pdata, aes(x = time, y = pred, color = group)) + geom_line() +
   geom_point(data = sdt, aes(y = response), pch = ".") 
 ```
-We stopped the process after 20 iterations. When a cluster has too few data points for maximum spline degrees of freedom, it is allocated to the next nearest cluster and the process continues with fewer clusters. When clusters are well-defined in the data, this process can eliminate some unnecessary clusters. The above process nearly converges at 16 clusters. With this level of variability a few clusters do jump between the original 3 generating true clusters.
+We stopped the process after 20 iterations. When a cluster has too few data points for maximum spline degrees of freedom, it is allocated to the next nearest cluster and the process continues with fewer clusters. When clusters are well-defined in the data, this process can eliminate some unnecessary clusters. The above process nearly converges at `r cl$k_cl` clusters. With this level of variability a few clusters do jump between the original 3 generating true clusters.
 
 Average silhouette value is a way to select the number of clusters and a silhouette plot provides a way for a deeper evaluation (Rouseeuw 1986). As silhouette requires distances between trajectories, this is not possible due to unequal trajectory sampling without fitting a separate model for each id. As a proxy for distance between points, we use point distances to cluster means in the *clustra_sil()* function. The structure returned from the *clustra()* function contains the matrix *loss*, which has all the information needed to construct these proxy silhouette plots. The function *clustra_sil()* performs clustering for a number of *k* values and outputs a list of "silhouette" class structures that can be displayed with *fviz_silhouette()* function from the package **factoextra**. We use the first data set with *noise = c(0, 5)*.
 ```{r fig.width = 7}
@@ -126,7 +123,7 @@ set.seed(1234737)
 ran = clustra_rand(data, k = c(2, 3, 4), replicates = 10, verbose = TRUE)
 rand_plot(ran)
 ```
-The plot shows similarity level between all pairs of 30 clusterings (10 random starts for each of 2, 3, and 4 clusters). The ten random starts agree the most for *k*=3, which also approach the smallest deviance values among all starts and *k* values. But there is also a separate local deviance minimum for two of the 3-cluster starts. Also, interestingly, one of the four cluster attempts collapses to the optimal 3 clusters. In addition, Five of the two-cluster starts are consistent with the 3-cluster optimum.  
+The plot shows similarity level between all pairs of 30 clusterings (10 random starts for each of 2, 3, and 4 clusters). The ten random starts agree the most for *k* = 2 and *k*=3, making it difficult to decide. But considering deviance, we see that seven of the *k*=3 clusters are near the best deviance attainable even with *k* = 4. Also, interestingly, two of the four cluster attempts collapse to 3 clusters. 
 ```{r}
 ## restore RNG
 RNGkind(rng_prev[1])

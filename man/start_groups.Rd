@@ -7,6 +7,7 @@
 start_groups(
   data,
   k,
+  starts,
   fp,
   cores = c(e_mc = 1, m_mc = 1, nthreads = 1, blas = 1),
   verbose = FALSE
@@ -19,12 +20,22 @@ sequential starting from 1. This affects expanding group numbers to ids.}
 
 \item{k}{Number of clusters (groups).}
 
-\item{fp}{Fitting parameters. See \code{link{trajectories}}.}
+\item{starts}{A vector of length two, giving the number of start values to try and the
+number of ids per cluster to evaluate the starts (If the number of ids is 
+less than 1, use all data and do not subset data for starts.). If more than 
+one start, the most diverse after one trajectories iteration on a sample of 
+data is used. The default is *c(1, 0)*, meaning that one random start is 
+used with all the data.}
+
+\item{fp}{Fitting parameters. See \code{\link{trajectories}}.}
 
 \item{cores}{A vector of core assignments for multicore components. See}
 
 \item{verbose}{Turn on more output for debugging.}
 }
 \description{
-Function to assign starting groups.
+If only one start, a random assignment is done. If more than one start, 
+picks tps fit with best deviance after one iteration among random starts. 
+Choosing from samples increases diversity of fits (sum of distances between 
+group fits). Then classifies all ids based on fit from best sample.
 }

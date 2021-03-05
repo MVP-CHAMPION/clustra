@@ -10,7 +10,7 @@ clustra_rand(
   data,
   k,
   replicates = 10,
-  fp = list(maxdf = 30, iter = 10, starts = 4, idperstart = 20, retry_max = 3),
+  fp = list(maxdf = 30, iter = 10),
   save = FALSE,
   verbose = FALSE
 )
