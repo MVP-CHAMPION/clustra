@@ -1,6 +1,6 @@
 Package: clustra
-Version: 0.1.2
-Date: 2021-01-14
+Version: 0.1.3
+Date: 2021-03-05
 Title: Clustering trajectories anchored at intervention time
 Authors@R: c(person("George", "Ostrouchov", role = c("aut", "cre"), email = 
         "ostrouchovg@ornl.gov"),
