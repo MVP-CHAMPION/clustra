@@ -160,11 +160,11 @@ rand_plot = function(rand_pairs, name = NULL) {
 #' @param verbose
 #' Logical. When TRUE, information about each run of clustra is printed.
 #' 
-#' @return Invisibly returns a list, where each element is the matrix used 
-#' by plot_sil.
+#' @return Invisibly returns a list, where each element is the matrix used
+#' by plot_sil
 #' 
 #' @export
-clustra_sil = function(data, k, save = FALSE, verbose = FALSE) {
+clustra_sil = function(data, k, cores, save = FALSE, verbose = FALSE) {
   sil = function(x) {
     ord = order(x)
     ck = ord[1]
@@ -178,7 +178,7 @@ clustra_sil = function(data, k, save = FALSE, verbose = FALSE) {
     kj = k[j]
     a_0 = deltime()
 
-    f = clustra(data, kj, verbose = verbose)
+    f = clustra(data, kj, cores = cores, verbose = verbose)
 
     ## prepare data for silhouette plot
     smat = as.data.frame(t(apply(f$loss, 1, sil)))
@@ -187,23 +187,17 @@ clustra_sil = function(data, k, save = FALSE, verbose = FALSE) {
     smat$id = factor(rownames(smat), levels = rownames(smat))
     smat$cluster = as.factor(smat$cluster)
     results[[j]] = smat
-
-    if(verbose) cat(kj, "dev =", f$deviance, "err =", f$try_errors, "ch =",
+      
+    if(verbose) cat("\nSil:", kj, "Dev:", f$deviance, "Err:", f$try_errors, "LCh:",
                     f$changes, "\n")
-    if(verbose) {
-      avg = tapply(smat[, "silhouette"], smat[, "cluster"], mean)
-      n = tapply(smat[, "cluster"], smat[, "cluster"], length)
-      x.report = data.frame(cluster = names(avg), size = n,
-                            avg.width = round(avg, 2),
-                            stringsAsFactors = TRUE)
-      print(x.report)
-    }
+    rm(f, smat)
+    gc()
   }
   
   ## save object results and parameters
   if(save) save(results, k, file = "clustra_sil.Rdata")
   
-  invisible(results)
+  results
 }
 
 #' clustra_rand:
@@ -236,7 +230,7 @@ clustra_sil = function(data, k, save = FALSE, verbose = FALSE) {
 #' @return See \code{\link{allpair_RandIndex}}
 #' 
 #' @export
-clustra_rand = function(data, k, replicates = 10,
+clustra_rand = function(data, k, cores, replicates = 10,
                         fp = list(maxdf = 30, iter = 10),
                         save = FALSE, verbose = FALSE) {
   id = .GRP = ..group = NULL # for data.table R CMD check
@@ -261,7 +255,7 @@ clustra_rand = function(data, k, replicates = 10,
       group = sample(kj, length(unique(data$id)), replace = TRUE)
       data[, group:=..group[id]] # expand group to all data
       
-      f = trajectories(data, kj, group, fp, verbose = verbose)
+      f = trajectories(data, kj, group, fp, cores, verbose = verbose)
       if(!is.null( (er = xit_report(f, fp)) )) print(er)
       
       results[[(j - 1)*replicates + i]] = list(k = as.integer(kj), 
@@ -273,6 +267,8 @@ clustra_rand = function(data, k, replicates = 10,
       if(verbose) cat(kj, i, "it =", f$iterations, "dev =", f$deviance,
                       "err =", f$try_errors, "ch =", f$changes, "time =",
                       a - a_0, "\n")
+      rm(f)
+      gc()
     }
   }
   

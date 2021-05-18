@@ -12,6 +12,6 @@
 deltime = function(ltime = proc.time()["elapsed"], text = NULL) {
   time = proc.time()["elapsed"]
   if(!is.null(text))
-    cat(text, time - ltime)
+    cat(paste0(text, round(time - ltime, 1)))
   invisible(time)
 }
