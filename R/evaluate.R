@@ -160,7 +160,8 @@ rand_plot = function(rand_pairs, name = NULL) {
 #' @param verbose
 #' Logical. When TRUE, information about each run of clustra is printed.
 #' 
-#' @return See \code{\link{allpair_RandIndex}}
+#' @return Invisibly returns a list, where each element is the matrix used 
+#' by plot_sil.
 #' 
 #' @export
 clustra_sil = function(data, k, save = FALSE, verbose = FALSE) {
@@ -173,27 +174,36 @@ clustra_sil = function(data, k, save = FALSE, verbose = FALSE) {
   }
   results = vector("list", length(k))
   
-  a_rand = deltime()
   for(j in 1:length(k)) {
     kj = k[j]
     a_0 = deltime()
 
     f = clustra(data, kj, verbose = verbose)
 
-    smat = t(apply(f$loss, 1, sil))
-    colnames(smat) = c("cluster", "neighbor", "sil_width")
-    class(smat) = "silhouette"
+    ## prepare data for silhouette plot
+    smat = as.data.frame(t(apply(f$loss, 1, sil)))
+    names(smat) = c("cluster", "neighbor", "silhouette")
+    smat = smat[order(smat$cluster, -smat$silhouette), ]
+    smat$id = factor(rownames(smat), levels = rownames(smat))
+    smat$cluster = as.factor(smat$cluster)
     results[[j]] = smat
-      
-    a = deltime()
+
     if(verbose) cat(kj, "dev =", f$deviance, "err =", f$try_errors, "ch =",
-                    f$changes, "time =", a - a_0, "\n")
+                    f$changes, "\n")
+    if(verbose) {
+      avg = tapply(smat[, "silhouette"], smat[, "cluster"], mean)
+      n = tapply(smat[, "cluster"], smat[, "cluster"], length)
+      x.report = data.frame(cluster = names(avg), size = n,
+                            avg.width = round(avg, 2),
+                            stringsAsFactors = TRUE)
+      print(x.report)
+    }
   }
   
   ## save object results and parameters
   if(save) save(results, k, file = "clustra_sil.Rdata")
   
-  results
+  invisible(results)
 }
 
 #' clustra_rand:

@@ -1,13 +1,14 @@
 Package: clustra
 Version: 0.1.3
-Date: 2021-03-05
-Title: Clustering trajectories anchored at intervention time
-Authors@R: c(person("George", "Ostrouchov", role = c("aut", "cre"), email = 
-        "ostrouchovg@ornl.gov"),
-        person("David", "Gagnon", role = "aut"),
-        person("Hanna", "Gerlovin", role = "aut"),
-        person("Chen", "Wei-Chen", role = "ctb"),
-        person("Schmidt", "Drew", role = "ctb"))
+Date: 2021-03-29
+Title: Clustering Trajectories Anchored at Intervention Time
+Authors@R: c(
+    person("Ostrouchov", "George", role = c("aut", "cre"), email = 
+    "ostrouchovg@ornl.gov"),
+    person("Gagnon", "David", role = "aut"),
+    person("Gerlovin", "Hanna", role = "aut"),
+    person("Chen", "Wei-Chen", role = "ctb"),
+    person("Schmidt", "Drew", role = "ctb"))
 Depends:
     R (>= 3.5.0)
 Imports:
@@ -21,15 +22,17 @@ Imports:
     parallel,
     stats
 Suggests:
-    factoextra,
     ggplot2,
     knitr,
     rmarkdown
-Description: Performs k-means clustering, where each mean is a thin plate spline
-        fit to all points of trajectories in cluster. 
+Description: Performs k-means-like clustering, where each mean is a thin plate
+    spline fit via mgcv::bam() to combined points of trajectories in each
+    cluster. Each trajectory's distance to a spline mean is mean squared loss
+    across its points. All trajectories have the same time units, can be
+    unequally spaced and have unequal number of observations, and are aligned
+    at time 0.
 LazyLoad: yes
 License: Mozilla Public License 2.0
 Encoding: UTF-8
-Mintainer: George Ostrouchov <ostrouchovg@ornl.gov>
 RoxygenNote: 7.1.1
 VignetteBuilder: knitr

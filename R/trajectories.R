@@ -19,6 +19,8 @@
 #' Controls \code{\link[mgcv]{bam}} threads.
 #'
 tps_g = function(g, data, maxdf, nthreads) {
+#  filename = paste0("process", Sys.getpid(), ".txt")
+#  cat("Entered tps_g. Group", g, "\n", file = filename)
   if(nrow(data[[g]]) > 0) {
     return(mgcv::bam(response ~ s(time, k = maxdf), data = data[[g]],
                   discrete = TRUE, nthreads = nthreads))
@@ -121,7 +123,8 @@ check_df = function(group, loss, data, fp) {
 #' @param fp
 #' Fitting parameters. See \code{\link{trajectories}}.
 #' @param cores
-#' A vector of core assignments for multicore components. See
+#' A vector of core assignments for multicore components. See 
+#' \code{\link{trajectories}}
 #' @param verbose 
 #' Turn on more output for debugging.
 #'
@@ -247,7 +250,8 @@ trajectories = function(data, k, group, fp,
     ## M-step: Estimate model parameters for each cluster
     ##   
     counts = tabulate(group)
-    datg = parallel::mclapply(1:k_cl, function(g) data[group == g])
+    datg = parallel::mclapply(1:k_cl, function(g) copy(data[group == g]),
+                              mc.cores = 1) # more than 1 slows here
     nz = which(sapply(datg, nrow) > 0) # nonzero groups
     k_cl = length(nz) # reset number of clusters to nonzeros only
     tps = parallel::mclapply(nz, tps_g, data = datg, maxdf = fp$maxdf,
@@ -368,7 +372,7 @@ clustra = function(data, k, starts = c(1, 0), group = NULL,
   if(!is.null(group)) data[, group:=..group[id]] # replicate group to ids
 
   ## get initial group assignments
-  group = start_groups(data, k, starts, fp, verbose = verbose)
+  group = start_groups(data, k, starts, fp, cores, verbose = verbose)
 
   ## kmeans iteration to assign id's to groups
   cl = trajectories(data, k, group, fp, cores, verbose = verbose)

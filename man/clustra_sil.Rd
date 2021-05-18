@@ -17,7 +17,8 @@ clustra_sil(data, k, save = FALSE, verbose = FALSE)
 \item{verbose}{Logical. When TRUE, information about each run of clustra is printed.}
 }
 \value{
-See \code{\link{allpair_RandIndex}}
+Invisibly returns a list, where each element is the matrix used 
+by plot_sil.
 }
 \description{
 Silhouette computes a proxy silhouette index based on distances to cluster

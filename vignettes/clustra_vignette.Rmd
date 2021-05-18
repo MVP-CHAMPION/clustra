@@ -10,7 +10,6 @@ vignette: >
 ---
 
 ```{r, setup}
-## Time start 11:27
 # First, set up a directory where we want to have any output from this vignette.  
 playdir = "~/clustra_play"
 if(!dir.exists(playdir)) dir.create(playdir)
@@ -111,11 +110,18 @@ ggplot(pdata, aes(x = time, y = pred, color = group)) + geom_line() +
 ```
 We stopped the process after 20 iterations. When a cluster has too few data points for maximum spline degrees of freedom, it is allocated to the next nearest cluster and the process continues with fewer clusters. When clusters are well-defined in the data, this process can eliminate some unnecessary clusters. The above process nearly converges at `r cl$k_cl` clusters. With this level of variability a few clusters do jump between the original 3 generating true clusters.
 
-Average silhouette value is a way to select the number of clusters and a silhouette plot provides a way for a deeper evaluation (Rouseeuw 1986). As silhouette requires distances between trajectories, this is not possible due to unequal trajectory sampling without fitting a separate model for each id. As a proxy for distance between points, we use point distances to cluster means in the *clustra_sil()* function. The structure returned from the *clustra()* function contains the matrix *loss*, which has all the information needed to construct these proxy silhouette plots. The function *clustra_sil()* performs clustering for a number of *k* values and outputs a list of "silhouette" class structures that can be displayed with *fviz_silhouette()* function from the package **factoextra**. We use the first data set with *noise = c(0, 5)*.
+Average silhouette value is a way to select the number of clusters and a silhouette plot provides a way for a deeper evaluation (Rouseeuw 1986). As silhouette requires distances between trajectories, this is not possible due to unequal trajectory sampling without fitting a separate model for each id. As a proxy for distance between points, we use point distances to cluster means in the *clustra_sil()* function. The structure returned from the *clustra()* function contains the matrix *loss*, which has all the information needed to construct these proxy silhouette plots. The function *clustra_sil()* performs clustering for a number of *k* values and outputs a corresponding list of data frames with required information for silhouette plots, which we plot below with ggplot2. We use the first data set with *noise = c(0, 5)*.
 ```{r fig.width = 7}
 set.seed(1234737)
 sil = clustra_sil(data, k = c(2, 3, 4), verbose = TRUE)
-splots = lapply(sil, function(x) print(factoextra::fviz_silhouette(x)))
+plot_sil = function(x) {
+  msil = round(mean(x$silhouette), 2)
+  ggplot(x, aes(id, silhouette, color = cluster, fill = cluster)) + geom_col() + 
+    ggtitle(paste("Average width:", msil)) + 
+    scale_x_discrete(breaks = NULL) + scale_y_continuous("Silhouette Width") +
+    geom_hline(yintercept = msil, linetype = "dashed", color = "red" )
+}
+lapply(sil, plot_sil)
 ```
 Another way to select the number of clusters is the Rand Index comparing different random starts and different numbers of clusters. When we replicate clustering with different random seeds, the "replicability" is an indicator of how stable the results are for a given k, the number of clusters. For this demonstration, we look at *k = c(2, 3, 4)*, and 10 replicates for each *k*. Note that this uses just random starts rather than "best of 4 random starts" that the *clustra()* function would use because we want to evaluate raw stability. We plot the resulting matrix of Rand Indices.
 ```{r fig.width = 7, fig.height=7}
@@ -123,7 +129,7 @@ set.seed(1234737)
 ran = clustra_rand(data, k = c(2, 3, 4), replicates = 10, verbose = TRUE)
 rand_plot(ran)
 ```
-The plot shows similarity level between all pairs of 30 clusterings (10 random starts for each of 2, 3, and 4 clusters). The ten random starts agree the most for *k* = 2 and *k*=3, making it difficult to decide. But considering deviance, we see that seven of the *k*=3 clusters are near the best deviance attainable even with *k* = 4. Also, interestingly, two of the four cluster attempts collapse to 3 clusters. 
+The plot shows similarity level between all pairs of 30 clusterings (10 random starts for each of 2, 3, and 4 clusters). The ten random starts agree the most for *k* = 2 and *k*=3, making it difficult to decide. But considering deviance reported earlier during iterations, we see that seven of the *k*=3 clusters are near the best deviance attainable even with *k* = 4. Also, interestingly, two of the four cluster attempts collapse to 3 clusters. 
 ```{r}
 ## restore RNG
 RNGkind(rng_prev[1])
@@ -141,7 +147,16 @@ Consider export R_LIBS=/usr/me/local/R/library to enable a personal package inst
 ## KDI installation notes for mvpia:
 Package *nloptr* seems to depend on R 4.0 and fails to install under R 3.6. The web suggests updating R or using an older version of *nloptr*. So the issue seems to be that the KDI R version is updated less frequently than CRAN, letting some packages get ahead of it.
 
-To use conda for external dependency management requires additional steps before starting R. See internal Getting Started web pages.
+To use conda for external dependency management requires additional steps before starting R.
+
+conda setup:
+conda activate (for version 4.3 currently in KDI):
+* `source anaconda3/bin/conda` activates conda
+* `conda info` gives conda version
+* `conda info --envs` give installed environments
+* `source activate R` will activate the R environment (after anaconda3 above is already activated)
+
+
 
 More notes to come: What issues will conda bring? Is it possible to make conda a transparent default for R? Like an alias that runs another script?
 
