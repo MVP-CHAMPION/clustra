@@ -1,8 +1,7 @@
 ## profile clustra
 library(clustra)
-RNGkind("L'Ecuyer-CMRG")
 set.seed(123)
-data = gen_traj_data(160000, m_obs = 45, s_range = c(-50, -10), e_range = c(3*365, 10*365), reference = 100)
+data = gen_traj_data(320000, m_obs = 45, s_range = c(-50, -10), e_range = c(3*365, 10*365), reference = 100)
 library(data.table)
 data = as.data.table(data)
 data = data[order(id)]

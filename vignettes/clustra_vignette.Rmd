@@ -18,6 +18,7 @@ knitr::opts_knit$set(
   comment = "#>",
   root.dir = playdir
 )
+start_knit = proc.time()
 ```
 The **clustra** package was built to cluster medical trajectories related by an intervention. For example, a number of individuals are started on a specific drug regimen and their blood pressure data is collected for a varying amount of time before and after the start of the medication. Time is recorded as negative before the start and positive after the start, meaning that the trajectories are aligned at zero, irrespective of any reference to calendar time. Time units can be anything (days, weeks, hours, minutes, etc.) as long as they are the same across all patients. Observations can be unequally spaced.  
 
@@ -42,7 +43,8 @@ ggplot(data[id %in% sample(unique(data[, id]), 9)],
 Next, cluster the trajectories. Set *k=3*, spline max degrees of freedom to 30, and maximum iterations to 10. *cores* parameters set the number of cores to use in various components of the code. Note that this does not work on Windows operating systems, where it should be left at 1. In the code that follows, we use verbose output to get information from each iteration.
 ```{r}
 set.seed(1234737)
-cl = clustra(data, k = 3, fp = list(maxdf = 30, iter = 10), verbose = TRUE)
+cl = clustra(data, k = 3, fp = list(maxdf = 30, iter = 10),
+                   cores = c(e_mc = 4, m_mc = 4, nthreads = 1, blas = 1), verbose = TRUE)
 ```
 
 Next, plot the resulting fit with a sample of data, colored by the cluster value.
@@ -79,13 +81,16 @@ iplot = sample(unique(data2$id), 9)
 sampobs = match(data2$id, iplot, nomatch = 0) > 0
 ggplot(data2[sampobs], aes(x = time, y = response)) + 
   facet_wrap(~ id) + geom_point()
-cl = clustra(data2, k = 3, fp = list(maxdf = 30, iter = 10), verbose = TRUE)
+cl = clustra(data2, k = 3, fp = list(maxdf = 30,
+                   cores = c(e_mc = 4, m_mc = 4, nthreads = 1, blas = 1),
+                   iter = 10), verbose = TRUE)
 MixSim::RandIndex(cl$data_group, data2[, true_group])
 ```
 Next, we try requesting too many clusters in the noisy data.
 ```{r}
 set.seed(1234737)
-cl = clustra(data2, k = 20, fp = list(maxdf = 30, iter = 20), verbose = TRUE)
+cl = clustra(data2, k = 20, fp = list(maxdf = 30, iter = 20),
+                   cores = c(e_mc = 4, m_mc = 4, nthreads = 1, blas = 1), verbose = TRUE)
 ```
 Next, plot the resulting fit with a sample of data, colored by the cluster value.
 ```{r fig.width = 7, fig.height = 7}
@@ -110,53 +115,57 @@ ggplot(pdata, aes(x = time, y = pred, color = group)) + geom_line() +
 ```
 We stopped the process after 20 iterations. When a cluster has too few data points for maximum spline degrees of freedom, it is allocated to the next nearest cluster and the process continues with fewer clusters. When clusters are well-defined in the data, this process can eliminate some unnecessary clusters. The above process nearly converges at `r cl$k_cl` clusters. With this level of variability a few clusters do jump between the original 3 generating true clusters.
 
-Average silhouette value is a way to select the number of clusters and a silhouette plot provides a way for a deeper evaluation (Rouseeuw 1986). As silhouette requires distances between trajectories, this is not possible due to unequal trajectory sampling without fitting a separate model for each id. As a proxy for distance between points, we use point distances to cluster means in the *clustra_sil()* function. The structure returned from the *clustra()* function contains the matrix *loss*, which has all the information needed to construct these proxy silhouette plots. The function *clustra_sil()* performs clustering for a number of *k* values and outputs a corresponding list of data frames with required information for silhouette plots, which we plot below with ggplot2. We use the first data set with *noise = c(0, 5)*.
+Average silhouette value is a way to select the number of clusters and a silhouette plot provides a way for a deeper evaluation (Rouseeuw 1986). As silhouette requires distances between trajectories, this is not possible due to unequal trajectory sampling without fitting a separate model for each id. As a proxy for distance between points, we use point distances to cluster means in the *clustra_sil()* function. The structure returned from the *clustra()* function contains the matrix *loss*, which has all the information needed to construct these proxy silhouette plots. The function *clustra_sil()* performs clustering for a number of *k* values and outputs a list of "silhouette" class structures that can be displayed with *fviz_silhouette()* function from the package **factoextra**. We use the first data set with *noise = c(0, 5)*.
 ```{r fig.width = 7}
 set.seed(1234737)
-sil = clustra_sil(data, k = c(2, 3, 4), verbose = TRUE)
+sil = clustra_sil(data, k = c(2, 3, 4), cores = c(e_mc = 4, m_mc = 4, nthreads = 1, blas = 1),
+                  verbose = TRUE)
 plot_sil = function(x) {
   msil = round(mean(x$silhouette), 2)
-  ggplot(x, aes(id, silhouette, color = cluster, fill = cluster)) + geom_col() + 
-    ggtitle(paste("Average width:", msil)) + 
+  ggplot(x, aes(id, silhouette, color = cluster, fill = cluster)) + geom_col() +
+    ggtitle(paste("Average Width:", msil)) +
     scale_x_discrete(breaks = NULL) + scale_y_continuous("Silhouette Width") +
-    geom_hline(yintercept = msil, linetype = "dashed", color = "red" )
+    geom_hline(yintercept = msil, linetype = "dashed", color = "red")
 }
 lapply(sil, plot_sil)
 ```
 Another way to select the number of clusters is the Rand Index comparing different random starts and different numbers of clusters. When we replicate clustering with different random seeds, the "replicability" is an indicator of how stable the results are for a given k, the number of clusters. For this demonstration, we look at *k = c(2, 3, 4)*, and 10 replicates for each *k*. Note that this uses just random starts rather than "best of 4 random starts" that the *clustra()* function would use because we want to evaluate raw stability. We plot the resulting matrix of Rand Indices.
 ```{r fig.width = 7, fig.height=7}
 set.seed(1234737)
-ran = clustra_rand(data, k = c(2, 3, 4), replicates = 10, verbose = TRUE)
+ran = clustra_rand(data, k = c(2, 3, 4),
+                   cores = c(e_mc = 4, m_mc = 4, nthreads = 1, blas = 1),
+                   replicates = 10, verbose = TRUE)
 rand_plot(ran)
 ```
-The plot shows similarity level between all pairs of 30 clusterings (10 random starts for each of 2, 3, and 4 clusters). The ten random starts agree the most for *k* = 2 and *k*=3, making it difficult to decide. But considering deviance reported earlier during iterations, we see that seven of the *k*=3 clusters are near the best deviance attainable even with *k* = 4. Also, interestingly, two of the four cluster attempts collapse to 3 clusters. 
+The plot shows similarity level between all pairs of 30 clusterings (10 random starts for each of 2, 3, and 4 clusters). The ten random starts agree the most for *k* = 2 and *k*=3, making it difficult to decide. But considering deviance, we see that seven of the *k*=3 clusters are near the best deviance attainable even with *k* = 4. Also, interestingly, two of the four cluster attempts collapse to 3 clusters. 
 ```{r}
 ## restore RNG
 RNGkind(rng_prev[1])
+cat("clustra knit run time:\n")
+print(proc.time() - start_knit)
 ```
-## KDI installation notes for stringi on linux VM or on Murphy login node
-First *wget http://manage01.kdi.local/temp/icudt61l.zip*,
-then start R in the same directory and 
-*install.packages("stringi", configure.vars="ICUDT_DIR=.")*.
+## KDI installation notes for stringi on linux VM
+```{r eval = FALSE}
+system("wget http://manage01.kdi.local/temp/icudt61l.zip")
+conf = paste0("ICUDT_DIR=", system("pwd", intern = TRUE))
+install.packages("stringi", configure.vars=conf)
+```
+It is useful to have `.Rprofile` in your home directory that contains
+```{r eval = FALSE}
+options(repos = "http://manage01.kdi.local/CRAN")
+```
+for automated access to the internal CRAN. 
 
-It is useful to have a .Rprofile in your home directory that contains
-*options(repos = "http://manage01.kdi.local/CRAN")* for automated access to the internal CRAN. 
-
-Consider export R_LIBS=/usr/me/local/R/library to enable a personal package installation location (replace *me* with your uid).
+Also, consider 
+```{sh eval = FALSE}
+export R_LIBS=/usr/me/local/R/library
+```
+at the unix prompt to enable a personal package installation location (replace *me* with your uid).
 
 ## KDI installation notes for mvpia:
 Package *nloptr* seems to depend on R 4.0 and fails to install under R 3.6. The web suggests updating R or using an older version of *nloptr*. So the issue seems to be that the KDI R version is updated less frequently than CRAN, letting some packages get ahead of it.
 
-To use conda for external dependency management requires additional steps before starting R.
-
-conda setup:
-conda activate (for version 4.3 currently in KDI):
-* `source anaconda3/bin/conda` activates conda
-* `conda info` gives conda version
-* `conda info --envs` give installed environments
-* `source activate R` will activate the R environment (after anaconda3 above is already activated)
-
-
+To use conda for external dependency management requires additional steps before starting R. See internal Getting Started web pages.
 
 More notes to come: What issues will conda bring? Is it possible to make conda a transparent default for R? Like an alias that runs another script?
 
