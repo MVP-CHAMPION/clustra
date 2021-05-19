@@ -9,6 +9,7 @@ index.}
 clustra_rand(
   data,
   k,
+  cores,
   replicates = 10,
   fp = list(maxdf = 30, iter = 10),
   save = FALSE,

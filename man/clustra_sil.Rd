@@ -5,7 +5,7 @@
 \title{clustra_sil:
 Performs \code{\link{clustra}} runs for several k and makes silhouette plots.}
 \usage{
-clustra_sil(data, k, save = FALSE, verbose = FALSE)
+clustra_sil(data, k, cores, save = FALSE, verbose = FALSE)
 }
 \arguments{
 \item{data}{The data (see \code{\link{clustra}} description).}
@@ -17,7 +17,8 @@ clustra_sil(data, k, save = FALSE, verbose = FALSE)
 \item{verbose}{Logical. When TRUE, information about each run of clustra is printed.}
 }
 \value{
-See \code{\link{allpair_RandIndex}}
+Invisibly returns a list, where each element is the matrix used
+by plot_sil
 }
 \description{
 Silhouette computes a proxy silhouette index based on distances to cluster

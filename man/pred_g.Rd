@@ -4,7 +4,7 @@
 \alias{pred_g}
 \title{Function to predict for new data based on fitted tps of a group}
 \usage{
-pred_g(tps, data)
+pred_g(tps, newdata)
 }
 \arguments{
 \item{tps}{Output structure of \code{\link[mgcv]{bam}}.}
