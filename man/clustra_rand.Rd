@@ -21,6 +21,9 @@ clustra_rand(
 
 \item{k}{Vector of k values to try.}
 
+\item{cores}{A vector of core assignments for multicore components. See 
+\code{\link{trajectories}}.}
+
 \item{replicates}{Number of replicates for each k.}
 
 \item{fp}{Fitting parameters. See \code{link{trajectories}}.}

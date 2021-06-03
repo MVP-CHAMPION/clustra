@@ -5,16 +5,16 @@
 \alias{mxe_g}
 \title{Loss functions}
 \usage{
-mse_g(g, pred, data)
+mse_g(pred, id, response)
 
-mxe_g(g, pred, data)
+mxe_g(pred, id, response)
 }
 \arguments{
-\item{g}{Integer group number.}
+\item{pred}{Vector of predicted values.}
 
-\item{pred}{List. Element g is output of \code{\link{pred_g}} for group g.}
+\item{id}{Integer vector of group assignments.}
 
-\item{data}{See \code{\link{trajectories}}}
+\item{response}{Vector of response values.}
 }
 \description{
 \code{mse_g} Computes mean-squared loss for each group.

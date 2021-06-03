@@ -12,6 +12,9 @@ clustra_sil(data, k, cores, save = FALSE, verbose = FALSE)
 
 \item{k}{Vector of k values to try.}
 
+\item{cores}{A vector of core assignments for multicore components. See 
+\code{\link{trajectories}}.}
+
 \item{save}{Logical. When TRUE, save all results as file \code{results.Rdata}.}
 
 \item{verbose}{Logical. When TRUE, information about each run of clustra is printed.}

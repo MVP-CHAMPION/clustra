@@ -29,7 +29,8 @@ used with all the data.}
 
 \item{fp}{Fitting parameters. See \code{\link{trajectories}}.}
 
-\item{cores}{A vector of core assignments for multicore components. See}
+\item{cores}{A vector of core assignments for multicore components. See 
+\code{\link{trajectories}}.}
 
 \item{verbose}{Turn on more output for debugging.}
 }

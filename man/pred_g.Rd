@@ -9,7 +9,7 @@ pred_g(tps, newdata)
 \arguments{
 \item{tps}{Output structure of \code{\link[mgcv]{bam}}.}
 
-\item{data}{See \code{\link{clustra}} description.}
+\item{newdata}{See \code{\link{clustra}} description.}
 }
 \description{
 Function to predict for new data based on fitted tps of a group

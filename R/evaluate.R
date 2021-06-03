@@ -155,6 +155,9 @@ rand_plot = function(rand_pairs, name = NULL) {
 #' The data (see \code{\link{clustra}} description).
 #' @param k
 #' Vector of k values to try.
+#' @param cores
+#' A vector of core assignments for multicore components. See 
+#' \code{\link{trajectories}}.
 #' @param save
 #' Logical. When TRUE, save all results as file \code{results.Rdata}.
 #' @param verbose
@@ -218,6 +221,9 @@ clustra_sil = function(data, k, cores, save = FALSE, verbose = FALSE) {
 #' The data (see \code{\link{clustra}} description).
 #' @param k
 #' Vector of k values to try.
+#' @param cores
+#' A vector of core assignments for multicore components. See 
+#' \code{\link{trajectories}}.
 #' @param replicates
 #' Number of replicates for each k.
 #' @param fp

@@ -33,11 +33,10 @@ bench_clustra_core = function(nid,
               set.seed(1234737)
               cat("starting", n_id, rep, ec, mc, bc, bl, "...")
               time = system.time((
-                cl = clustra(data, k = 3,
-                             fp = list(maxdf = 30, iter = 10, starts = 5,
-                                       idperstart = 20, retry_max = 3),
+                cl = clustra(data, k = 3, fp = list(maxdf = 30, iter = 10),
                              cores = c(e_mc = ec, m_mc = mc, nthreads = bc,
-                                       blas = bl), verbose = verbose)
+                                       blas = bl),
+                             verbose = verbose)
               ))
               er = paste(xit_report(cl, fp), collapse = " ")
 

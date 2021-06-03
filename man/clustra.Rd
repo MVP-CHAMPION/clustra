@@ -2,7 +2,7 @@
 % Please edit documentation in R/trajectories.R
 \name{clustra}
 \alias{clustra}
-\title{Cluster trajectoriesß}
+\title{Cluster trajectories}
 \usage{
 clustra(
   data,

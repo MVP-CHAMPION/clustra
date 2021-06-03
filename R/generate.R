@@ -1,3 +1,35 @@
+
+## responses
+oneid = function(id, n_obs, type, start, end, smin, emax, reference, noise) {
+  id = rep(id, n_obs)
+  true_group = rep(type, n_obs)
+  time = c(start, sort(floor(runif(n_obs - 3, min = start, max = end))), end)
+  time = c(time[time <= 0], 0, time[time > 0]) # insert 0
+  
+  ## TODO add user supplied functions
+  response = switch(type, # 1 = constant, 2 = sin, 3 = sigmoid
+                    rep(reference, length(time)), # constant
+                    reference*sin(pi/2 + pi*time/emax), # part of sin curve
+                    reference*(1 - 1/(1 + exp(-time/emax*5))) # 1 - sigmoid
+  ) + rnorm(n_obs, mean = noise[1], sd = noise[2])
+  cbind(id, time, response, true_group)
+}
+
+## support
+## s_range . . . 0 . . . . e_range
+gendata = function(n_id, m_obs, s_range, e_range, k, min_obs, reference, noise) {
+  idr = c(1, 3*n_id) # id range to pick (so non-consecutive)
+  
+  start = round(runif(n_id, min = s_range[1], max = s_range[2])) # start time
+  end = floor(runif(n_id, min = e_range[1], max = e_range[2])) # end time
+  n_obs = min_obs + rpois(n_id, lambda = m_obs) # number of observations
+  type = sample(k, n_id, replace = TRUE) # curve type
+  id_vec = sample.int(idr[2], n_id, replace = FALSE) # non-consecutive
+  lapply(1:n_id,   # construct by id
+         function(i) oneid(id_vec[i], n_obs[i], type[i], start[i], end[i],
+                           smin = min(start), emax = max(end), reference, noise))
+}
+
 #' Data Generators
 #' 
 #' Generates a collection of longitudinal responses with possibly varying
@@ -50,39 +82,7 @@
 gen_traj_data = function(n_id, m_obs, s_range, e_range, reference = 100,
                          noise = c(0, abs(reference/20)), k = 3, min_obs = 3)
 {
-  ## support
-  ## s_range . . . 0 . . . . e_range
-  gendata = function(n_id, m_obs, s_range, e_range, k) {
-    idr = c(1, 3*n_id) # id range to pick (so non-consecutive)
-    
-    start = round(runif(n_id, min = s_range[1], max = s_range[2])) # start time
-    end = floor(runif(n_id, min = e_range[1], max = e_range[2])) # end time
-    n_obs = min_obs + rpois(n_id, lambda = m_obs) # number of observations
-    type = sample(k, n_id, replace = TRUE) # curve type
-    id_vec = sample.int(idr[2], n_id, replace = FALSE) # non-consecutive
-    lapply(1:n_id,   # construct by id
-           function(i) oneid(id_vec[i], n_obs[i], type[i], start[i], end[i],
-                                reference))
-  }
-  ## response
-  oneid = function(id, n_obs, type, start, end, reference) {
-    id = rep(id, n_obs)
-    true_group = rep(type, n_obs)
-    time = c(start,
-              start + sort(floor(runif(n_obs - 3, min = start, max = end))),
-              end)
-    time = c(time[time <= 0], 0, time[time > 0]) # insert 0
-
-    ## TODO add user supplied functions
-    response = switch(type, # 1 = constant, 2 = sin, 3 = sigmoid
-                  rep(reference, length(time)), # constant
-                  reference*sin(pi/4 + pi*time/e_range[2]), # part of sin curve
-                  reference*(1.5 - 1/(1 + exp(-time/e_range[2]*5))) # 1 - sigmoid
-                  ) + rnorm(n_obs, mean = noise[1], sd = noise[2])
-    cbind(id, time, response, true_group)
-  }
-
-  id_list = gendata(n_id, m_obs, s_range, e_range, k)
+  id_list = gendata(n_id, m_obs, s_range, e_range, k, min_obs, reference, noise)
   id_mat = do.call(rbind, id_list)
   id_dt = data.table::data.table(id_mat)
 

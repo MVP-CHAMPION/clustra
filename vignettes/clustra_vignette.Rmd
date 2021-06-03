@@ -27,10 +27,11 @@ We begin by generating a data set. The parameters generate *id*s and for each *i
 We also set *RNGkind* and *seed* for reproducibility. Code below generates the data, looks at a few observations of the generated data, and writes the data to a csv file in our working directory.
 ```{r}
 library(clustra)
+cores_alloc = c(e_mc = 1, m_mc = 1, nthreads = 1, blas = 1)
 rng_prev = RNGkind("L'Ecuyer-CMRG")
 set.seed(1234567)
-data = gen_traj_data(n_id = 3000, m_obs = 25, s_range = c(-50, -10),
-                     e_range = c(3*365, 10*365), noise = c(0, 5))
+data = gen_traj_data(n_id = 3000, m_obs = 25, s_range = c(-365, -14),
+                     e_range = c(0.5*365, 2*365), noise = c(0, 5))
 head(data)
 write.table(data, file = "clustra_gen_data.csv")
 ```
@@ -44,7 +45,7 @@ Next, cluster the trajectories. Set *k=3*, spline max degrees of freedom to 30, 
 ```{r}
 set.seed(1234737)
 cl = clustra(data, k = 3, fp = list(maxdf = 30, iter = 10),
-                   cores = c(e_mc = 4, m_mc = 4, nthreads = 1, blas = 1), verbose = TRUE)
+                   cores = cores_alloc, verbose = TRUE)
 ```
 
 Next, plot the resulting fit with a sample of data, colored by the cluster value.
@@ -61,7 +62,7 @@ for(i in 1:k)
   if(is.null(cl$tps[[i]])) {
     pred[[i]] = NULL
   } else {
-    pred[[i]] = predict(cl$tps[[i]], newdata = list(time = ntime),
+    pred[[i]] = mgcv::predict.bam(cl$tps[[i]], newdata = list(time = ntime),
                         type = "response")
   }
 pdata$pred = do.call(c, pred)
@@ -75,22 +76,21 @@ MixSim::RandIndex(cl$data_group, data[, true_group])
 A perfect score! Let's double the error variance (4*sd) in data generation ...
 ```{r fig.width = 7, fig.height = 9}
 set.seed(1234567)
-data2 = gen_traj_data(n_id = 3000, m_obs = 25, s_range = c(-50, -10),
-                     e_range = c(3*365, 10*365), noise = c(0, 20))
+data2 = gen_traj_data(n_id = 3000, m_obs = 25, s_range = c(-365, -14),
+                     e_range = c(60, 2*365), noise = c(0, 20))
 iplot = sample(unique(data2$id), 9)
 sampobs = match(data2$id, iplot, nomatch = 0) > 0
 ggplot(data2[sampobs], aes(x = time, y = response)) + 
   facet_wrap(~ id) + geom_point()
-cl = clustra(data2, k = 3, fp = list(maxdf = 30,
-                   cores = c(e_mc = 4, m_mc = 4, nthreads = 1, blas = 1),
-                   iter = 10), verbose = TRUE)
+cl = clustra(data2, k = 3, fp = list(maxdf = 30, iter = 10),
+             cores = cores_alloc, verbose = TRUE)
 MixSim::RandIndex(cl$data_group, data2[, true_group])
 ```
 Next, we try requesting too many clusters in the noisy data.
 ```{r}
 set.seed(1234737)
 cl = clustra(data2, k = 20, fp = list(maxdf = 30, iter = 20),
-                   cores = c(e_mc = 4, m_mc = 4, nthreads = 1, blas = 1), verbose = TRUE)
+                   cores = cores_alloc, verbose = TRUE)
 ```
 Next, plot the resulting fit with a sample of data, colored by the cluster value.
 ```{r fig.width = 7, fig.height = 7}
@@ -106,7 +106,7 @@ for(i in 1:k)
   if(is.null(cl$tps[[i]])) {
     pred[[i]] = NULL
   } else {
-    pred[[i]] = predict(cl$tps[[i]], newdata = list(time = ntime),
+    pred[[i]] = mgcv::predict.bam(cl$tps[[i]], newdata = list(time = ntime),
                         type = "response")
   }
 pdata$pred = do.call(c, pred)
@@ -118,8 +118,7 @@ We stopped the process after 20 iterations. When a cluster has too few data poin
 Average silhouette value is a way to select the number of clusters and a silhouette plot provides a way for a deeper evaluation (Rouseeuw 1986). As silhouette requires distances between trajectories, this is not possible due to unequal trajectory sampling without fitting a separate model for each id. As a proxy for distance between points, we use point distances to cluster means in the *clustra_sil()* function. The structure returned from the *clustra()* function contains the matrix *loss*, which has all the information needed to construct these proxy silhouette plots. The function *clustra_sil()* performs clustering for a number of *k* values and outputs a list of "silhouette" class structures that can be displayed with *fviz_silhouette()* function from the package **factoextra**. We use the first data set with *noise = c(0, 5)*.
 ```{r fig.width = 7}
 set.seed(1234737)
-sil = clustra_sil(data, k = c(2, 3, 4), cores = c(e_mc = 4, m_mc = 4, nthreads = 1, blas = 1),
-                  verbose = TRUE)
+sil = clustra_sil(data, k = c(2, 3, 4), cores = cores_alloc, verbose = TRUE)
 plot_sil = function(x) {
   msil = round(mean(x$silhouette), 2)
   ggplot(x, aes(id, silhouette, color = cluster, fill = cluster)) + geom_col() +
@@ -132,9 +131,8 @@ lapply(sil, plot_sil)
 Another way to select the number of clusters is the Rand Index comparing different random starts and different numbers of clusters. When we replicate clustering with different random seeds, the "replicability" is an indicator of how stable the results are for a given k, the number of clusters. For this demonstration, we look at *k = c(2, 3, 4)*, and 10 replicates for each *k*. Note that this uses just random starts rather than "best of 4 random starts" that the *clustra()* function would use because we want to evaluate raw stability. We plot the resulting matrix of Rand Indices.
 ```{r fig.width = 7, fig.height=7}
 set.seed(1234737)
-ran = clustra_rand(data, k = c(2, 3, 4),
-                   cores = c(e_mc = 4, m_mc = 4, nthreads = 1, blas = 1),
-                   replicates = 10, verbose = TRUE)
+ran = clustra_rand(data, k = c(2, 3, 4), cores = cores_alloc, replicates = 10,
+                   verbose = TRUE)
 rand_plot(ran)
 ```
 The plot shows similarity level between all pairs of 30 clusterings (10 random starts for each of 2, 3, and 4 clusters). The ten random starts agree the most for *k* = 2 and *k*=3, making it difficult to decide. But considering deviance, we see that seven of the *k*=3 clusters are near the best deviance attainable even with *k* = 4. Also, interestingly, two of the four cluster attempts collapse to 3 clusters. 

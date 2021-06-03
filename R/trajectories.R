@@ -31,14 +31,14 @@ tps_g = function(g, data, maxdf, nthreads) {
 #'
 #' @param tps
 #' Output structure of \code{\link[mgcv]{bam}}.
-#' @param data
+#' @param newdata
 #' See \code{\link{clustra}} description.
 #'
 pred_g = function(tps, newdata) {
   if(is.null(tps)) {
     return(NULL)
   } else {
-    return(as.vector(predict(object = tps, newdata = newdata, type = "response",
+    return(as.vector(mgcv::predict.bam(object = tps, newdata = newdata, type = "response",
                              newdata.guaranteed = TRUE)))
   }
 }
@@ -48,29 +48,35 @@ pred_g = function(tps, newdata) {
 #' \code{mse_g} Computes mean-squared loss for each group.
 #' \code{mxe_g} is maximum loss.
 #'
-#' @param g
-#' Integer group number.
 #' @param pred
-#' List. Element g is output of \code{\link{pred_g}} for group g.
-#' @param data
-#' See \code{\link{trajectories}}
+#' Vector of predicted values.
+#' @param id
+#' Integer vector of group assignments.
+#' @param response
+#' Vector of response values.
 #'
-mse_g = function(g, pred, data) { # mean squared error
-  esq = response = ..pred = id = NULL # for data.table R CMD check
-  if(is.null(pred[[g]])) {
+mse_g = function(pred, id, response) {
+  if(is.null(pred)) {
     return(NULL)
   } else {
-    fit = pred[[g]]
-    esq = force((data[, response] - fit)^2)
-    id = force(data[, id])
-    DT = force(data.table(esq, id))  
+    esq = (response - pred)^2
+    DT = data.table::data.table(esq, id)
     tt = as.numeric(unlist(DT[, mean(esq), by=id][, 2]))
     return(tt)
   }
 }
 #' @rdname mse_g
-mxe_g = function(g, pred, data) # maximum error
-  as.numeric(tapply(abs(data$response - pred[[g]]$fit), data$id, max))
+mxe_g = function(pred, id, response) { # maximum error
+  if(is.null(pred)) {
+    return(NULL)
+  } else {
+    eabs = abs(response - pred)
+    DT = data.table::data.table(eabs, id)
+    tt = as.numeric(unlist(DT[, max(eabs), by=id][, 2]))
+    return(tt)
+  }
+}
+
 
 #' Function to check if non-zero group members have enough data for spline fit
 #' degrees of freedom.
@@ -125,7 +131,8 @@ check_df = function(group, loss, data, fp) {
 #' @param fp
 #' Fitting parameters. See \code{\link{trajectories}}.
 #' @param cores
-#' A vector of core assignments for multicore components. See
+#' A vector of core assignments for multicore components. See 
+#' \code{\link{trajectories}}.
 #' @param verbose 
 #' Turn on more output for debugging.
 #'
@@ -134,7 +141,7 @@ check_df = function(group, loss, data, fp) {
 start_groups = function(data, k, starts, fp,
                         cores = c(e_mc = 1, m_mc = 1, nthreads = 1, blas = 1),
                         verbose = FALSE) {
-  time = id = .GRP = ..group = NULL # for data.table R CMD check
+  time = response = id = .GRP = ..group = NULL # for data.table R CMD check
   
   if(verbose) cat("\nStarts : ")
 
@@ -187,8 +194,10 @@ start_groups = function(data, k, starts, fp,
   gc()
   
   ## compute loss for each id wrt model of each cluster
-  loss = parallel::mclapply(1:k, mse_g, pred = pred, data = data,
-                  mc.cores = cores["e_mc"])
+  loss = parallel::mclapply(pred, mse_g,
+                            id = force(data[, id]),
+                            response = force(data[, response]),
+                            mc.cores = cores["e_mc"])
   loss = do.call(cbind, loss) # combine list into matrix columns
   group = apply(loss, 1, which.min) # set group as closest cluster mean
   data[, group:=..group[id]] # replicate group numbers within ids
@@ -236,7 +245,7 @@ trajectories = function(data, k, group, fp,
                         verbose = FALSE) {
   if(verbose) a = a_0 = deltime(a)
 
-  id = ..new_group = ..group = NULL # for data.table R CMD check
+  time = response = id = ..new_group = ..group = NULL # for data.table R CMD check
   
   ## make sure that data is a data.table
   if(!data.table::is.data.table(data)) data = data.table::as.data.table(data)
@@ -271,7 +280,7 @@ trajectories = function(data, k, group, fp,
     ## E-step:
     ##   predict each id's trajectory with each model
     if(verbose) cat(" (E-step ")
-    newdata = force(as.data.frame(data[, .(time, response)])) # avoid data.table in fork
+    newdata = force(as.data.frame(data[, list(time, response)])) # avoid data.table in fork
     pred = parallel::mclapply(tps, pred_g, newdata = newdata, 
                               mc.cores = cores["e_mc"])
     if(verbose && any(sapply(pred, is.null))) cat("*P*")
@@ -281,8 +290,10 @@ trajectories = function(data, k, group, fp,
     ##   compute loss of all id's to all groups (models)
     ##   TODO better parallel balance by skipping empty groups
     if(verbose) cat("2")
-    loss = parallel::mclapply(1:k_cl, mse_g, pred = pred, data = data,
-                              mc.cores = cores["e_mc"])
+    loss = parallel::mclapply(pred, mse_g,
+                             id = force(data[, id]),
+                             response = force(data[, response]),
+                             mc.cores = cores["e_mc"])
     rm(pred)
     if(verbose && any(sapply(loss, is.null))) cat("*E*")
     if(verbose) cat("3")
@@ -338,7 +349,7 @@ xit_report = function(cl, fp) {
   xit
 }
 
-#' Cluster trajectoriesß
+#' Cluster trajectories
 #'
 #' Most users will run the wrapper \code{\link{clustra}} function, which takes
 #' care of starting values. See vignette("clustra_basic.Rmd") for
