@@ -5,7 +5,7 @@
 \title{Function to check if non-zero group members have enough data for spline fit
 degrees of freedom.}
 \usage{
-check_df(group, loss, data, fp)
+check_df(group, loss, data, maxdf)
 }
 \arguments{
 \item{group}{Group membership vector for each id.}
@@ -14,7 +14,7 @@ check_df(group, loss, data, fp)
 
 \item{data}{A data.table with data. See \code{\link{trajectories}}.}
 
-\item{fp}{Fitting parameters. See \code{\link{trajectories}}.}
+\item{maxdf}{Fitting parameters. See \code{\link{trajectories}}.}
 }
 \value{
 Returns the vector of group membership of id's either unchanged or changed

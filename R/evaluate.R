@@ -155,9 +155,8 @@ rand_plot = function(rand_pairs, name = NULL) {
 #' The data (see \code{\link{clustra}} description).
 #' @param k
 #' Vector of k values to try.
-#' @param cores
-#' A vector of core assignments for multicore components. See 
-#' \code{\link{trajectories}}.
+#' @param mccores
+#' See \code{\link{trajectories}}.
 #' @param save
 #' Logical. When TRUE, save all results as file \code{results.Rdata}.
 #' @param verbose
@@ -167,7 +166,7 @@ rand_plot = function(rand_pairs, name = NULL) {
 #' by plot_sil
 #' 
 #' @export
-clustra_sil = function(data, k, cores, save = FALSE, verbose = FALSE) {
+clustra_sil = function(data, k, mccores, save = FALSE, verbose = FALSE) {
   sil = function(x) {
     ord = order(x)
     ck = ord[1]
@@ -181,7 +180,7 @@ clustra_sil = function(data, k, cores, save = FALSE, verbose = FALSE) {
     kj = k[j]
     a_0 = deltime()
 
-    f = clustra(data, kj, cores = cores, verbose = verbose)
+    f = clustra(data, kj, mccores = mccores, verbose = verbose)
 
     ## prepare data for silhouette plot
     smat = as.data.frame(t(apply(f$loss, 1, sil)))
@@ -203,6 +202,25 @@ clustra_sil = function(data, k, cores, save = FALSE, verbose = FALSE) {
   results
 }
 
+#' Function to run trajectories inside mclapply with one core.
+#' 
+#' @param group
+#' Vector of starting group values for unique id's.
+#' @param data
+#' The data (see \code{\link{clustra}} description).
+#' @param k
+#' Integer number of clusters.
+#' @param maxdf
+#' Fitting parameters. See \code{link{trajectories}}.
+#' @param iter
+#' Fitting parameters. See \code{link{trajectories}}.
+#' 
+traj_rep = function(group, data, k, maxdf, iter) {
+  id = ..group = NULL
+  data[, group:=..group[id]] # expand group to all data
+  trajectories(data, k, group, maxdf, iter, 1, verbose = FALSE)
+}
+
 #' clustra_rand:
 #' Performs \code{\link{clustra}} runs for several k and presents a k selection
 #' index.
@@ -221,12 +239,13 @@ clustra_sil = function(data, k, cores, save = FALSE, verbose = FALSE) {
 #' The data (see \code{\link{clustra}} description).
 #' @param k
 #' Vector of k values to try.
-#' @param cores
-#' A vector of core assignments for multicore components. See 
-#' \code{\link{trajectories}}.
+#' @param mccores
+#' Number of cores for replicate parallelism via mclapply.
 #' @param replicates
 #' Number of replicates for each k.
-#' @param fp
+#' @param maxdf
+#' Fitting parameters. See \code{link{trajectories}}.
+#' @param iter
 #' Fitting parameters. See \code{link{trajectories}}.
 #' @param save
 #' Logical. When TRUE, save all results as file \code{results.Rdata}.
@@ -236,9 +255,8 @@ clustra_sil = function(data, k, cores, save = FALSE, verbose = FALSE) {
 #' @return See \code{\link{allpair_RandIndex}}
 #' 
 #' @export
-clustra_rand = function(data, k, cores, replicates = 10,
-                        fp = list(maxdf = 30, iter = 10),
-                        save = FALSE, verbose = FALSE) {
+clustra_rand = function(data, k, mccores, replicates = 10, maxdf = 30,
+                        iter = 10, save = FALSE, verbose = FALSE) {
   id = .GRP = ..group = NULL # for data.table R CMD check
   results = vector("list", replicates*length(k))
   
@@ -252,30 +270,28 @@ clustra_rand = function(data, k, cores, replicates = 10,
   data[, id:=.GRP, by=id] # replace group ids to be sequential
   
   a_rand = deltime()
+  n_id = length(unique(data$id))
   for(j in 1:length(k)) {
     kj = k[j]
+    
+    ## Set starting groups outside parallel section to guarantee reproducibility
+    grp = lapply(rep(kj, replicates), sample.int, size = n_id, replace = TRUE)
+    f = parallel::mclapply(grp, traj_rep, data = data, k = kj, maxdf = maxdf,
+                           iter = iter, mc.cores = mccores)
+    fer = lapply(f, function(f, maxdf, iter)
+      if(!is.null( (er = xit_report(f, maxdf, iter)) )) {
+        return(er)} else return(NULL), maxdf = maxdf, iter = iter)
     for(i in 1:replicates) {
-      a_0 = deltime()
-      
-      ## Random initial groups to assess stability
-      group = sample(kj, length(unique(data$id)), replace = TRUE)
-      data[, group:=..group[id]] # expand group to all data
-      
-      f = trajectories(data, kj, group, fp, cores, verbose = verbose)
-      if(!is.null( (er = xit_report(f, fp)) )) print(er)
-      
       results[[(j - 1)*replicates + i]] = list(k = as.integer(kj), 
                                                rep = as.integer(i),
-                                               deviance = f$deviance,
-                                               group = f$group)
-      
-      a = deltime()
-      if(verbose) cat(kj, i, "it =", f$iterations, "dev =", f$deviance,
-                      "err =", f$try_errors, "ch =", f$changes, "time =",
-                      a - a_0, "\n")
-      rm(f)
-      gc()
+                                               deviance = f[[i]]$deviance,
+                                               group = f[[i]]$group)
+      if(verbose) 
+        cat(kj, i, "it =", f[[i]]$iterations, "dev =", f[[i]]$deviance,
+                      "err =", f[[i]]$try_errors, "ch =", f[[i]]$changes, "\n")
     }
+    rm(f)
+    gc()
   }
   
   ## save object results and parameters

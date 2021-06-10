@@ -9,9 +9,10 @@ index.}
 clustra_rand(
   data,
   k,
-  cores,
+  mccores,
   replicates = 10,
-  fp = list(maxdf = 30, iter = 10),
+  maxdf = 30,
+  iter = 10,
   save = FALSE,
   verbose = FALSE
 )
@@ -21,12 +22,13 @@ clustra_rand(
 
 \item{k}{Vector of k values to try.}
 
-\item{cores}{A vector of core assignments for multicore components. See 
-\code{\link{trajectories}}.}
+\item{mccores}{Number of cores for replicate parallelism via mclapply.}
 
 \item{replicates}{Number of replicates for each k.}
 
-\item{fp}{Fitting parameters. See \code{link{trajectories}}.}
+\item{maxdf}{Fitting parameters. See \code{link{trajectories}}.}
+
+\item{iter}{Fitting parameters. See \code{link{trajectories}}.}
 
 \item{save}{Logical. When TRUE, save all results as file \code{results.Rdata}.}
 

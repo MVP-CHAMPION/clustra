@@ -6,12 +6,14 @@
 convergence, maximum iterations reached, a zero cluster, etc. Multiple
 conclusions are possible as not all are mutually exclusive.}
 \usage{
-xit_report(cl, fp)
+xit_report(cl, maxdf, iter)
 }
 \arguments{
 \item{cl}{Output structure from trajectories() function}
 
-\item{fp}{Fitting parameters. See \code{link{trajectories}}.}
+\item{maxdf}{Fitting parameters. See \code{link{trajectories}}.}
+
+\item{iter}{Fitting parameters. See \code{link{trajectories}}.}
 }
 \description{
 xit_report examines trajectories output to name what was concluded, such as

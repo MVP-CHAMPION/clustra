@@ -4,14 +4,7 @@
 \alias{start_groups}
 \title{Function to assign starting groups.}
 \usage{
-start_groups(
-  data,
-  k,
-  starts,
-  fp,
-  cores = c(e_mc = 1, m_mc = 1, nthreads = 1, blas = 1),
-  verbose = FALSE
-)
+start_groups(data, k, starts, maxdf, iter, mccores = 1, verbose = FALSE)
 }
 \arguments{
 \item{data}{Data frame with response measurements, one per observation.
@@ -27,10 +20,11 @@ one start, the most diverse after one trajectories iteration on a sample of
 data is used. The default is *c(1, 0)*, meaning that one random start is 
 used with all the data.}
 
-\item{fp}{Fitting parameters. See \code{\link{trajectories}}.}
+\item{maxdf}{Fitting parameters. See \code{\link{trajectories}}.}
 
-\item{cores}{A vector of core assignments for multicore components. See 
-\code{\link{trajectories}}.}
+\item{iter}{Fitting parameters. See \code{\link{trajectories}}.}
+
+\item{mccores}{See \code{\link{trajectories}}.}
 
 \item{verbose}{Turn on more output for debugging.}
 }

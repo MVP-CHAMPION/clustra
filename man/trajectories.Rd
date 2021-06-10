@@ -4,14 +4,7 @@
 \alias{trajectories}
 \title{Cluster longitudinal trajectories of a response variable.}
 \usage{
-trajectories(
-  data,
-  k,
-  group,
-  fp,
-  cores = c(e_mc = 1, m_mc = 1, nthreads = 1, blas = 1),
-  verbose = FALSE
-)
+trajectories(data, k, group, maxdf, iter, mccores, verbose = FALSE)
 }
 \arguments{
 \item{data}{Data frame with response measurements, one per observation. Column
@@ -23,14 +16,13 @@ numbers to ids.}
 
 \item{group}{Vector of initial group numbers corresponding to ids.}
 
-\item{fp}{List with additional fitting parameters: *maxdf* basis dimension of smooth
-term (see \code{\link[mgcv]{s}}, parameter k, in package \code{mgcv}),
-*iter* maximum number of EM iterations.}
+\item{maxdf}{Integer. Basis dimension of smooth term. See \code{\link[mgcv]{s}},
+parameter k, in package \code{mgcv},}
 
-\item{cores}{Vector of length 4. Core allocations to various sections of code: *e_mc*
-cores to use by *mclapply* of e_mc (expectation over k), *m_mc* cores to use
-by *mclapply* of m_mc (maximization across k), *nthreads* threads to use by
-\link[mgcv]{bam}, cores to use by OpenBLAS.}
+\item{iter}{Integer. Maximum number of EM iterations.}
+
+\item{mccores}{Integer number of cores to use by *mclapply* sections. Parallelization is 
+over *k*, the number of clusters.}
 
 \item{verbose}{Logical, whether to produce debug output.}
 }

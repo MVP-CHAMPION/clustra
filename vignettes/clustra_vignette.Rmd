@@ -10,30 +10,28 @@ vignette: >
 ---
 
 ```{r, setup}
-# First, set up a directory where we want to have any output from this vignette.  
-playdir = "~/clustra_play"
-if(!dir.exists(playdir)) dir.create(playdir)
 knitr::opts_knit$set(
   collapse = TRUE,
-  comment = "#>",
-  root.dir = playdir
+  comment = "#>"
 )
 start_knit = proc.time()
 ```
-The **clustra** package was built to cluster medical trajectories related by an intervention. For example, a number of individuals are started on a specific drug regimen and their blood pressure data is collected for a varying amount of time before and after the start of the medication. Time is recorded as negative before the start and positive after the start, meaning that the trajectories are aligned at zero, irrespective of any reference to calendar time. Time units can be anything (days, weeks, hours, minutes, etc.) as long as they are the same across all patients. Observations can be unequally spaced.  
+The **clustra** package was built to **clu**ster medical **tra**jectories (time series) related by an intervention. For example, a number of individuals are started on a specific drug regimen and their blood pressure data is collected for a varying amount of time before and after the start of the medication. Time is recorded as negative before the start and positive after the start, meaning that the trajectories are aligned at zero, irrespective of any reference to calendar time. Time units can be anything (days, weeks, hours, minutes, etc.) as long as they are the same across all patients. Observations can be unequally spaced.  
 
-We begin by generating a data set. The parameters generate *id*s and for each *id*, a random number of observations based on the *Poisson*($\lambda =$ *m_obs*) distribution plus 3. The 3 additional observations are to guarantee one before intervention at time *start*, one at the intervention time 0, and one after the intervention at time *end*. The *start* time is *Uniform(s_range)* and the *end* time is *Uniform(e_range)*. The remaining times are at times Uniform(*start*, *end*). The time units are arbitrary and depend on your application.
+Clustering proceeds by an EM algorithm that iterates switching between fitting a bspline to combined responses within each cluster (M-step) and reassigning cluster membership based on nearest fitted bspline (E-step). Initial cluster assignments are random. The fitting is done with the *mgcv* package function *bam*, which scales well to very large data sets.
 
-We also set *RNGkind* and *seed* for reproducibility. Code below generates the data, looks at a few observations of the generated data, and writes the data to a csv file in our working directory.
+For this vignette, we begin by generating a data set with the *gen_traj_data()* function. Given its parameters, the function generates groups of *id*s (their size given by the vector *n_id*) and for each *id*, a random number of observations based on the *Poisson*($\lambda =$ *m_obs* + 3) distribution. The 3 additional observations are to guarantee one before intervention at time *start*, one at the intervention time 0, and one after the intervention at time *end*. The *start* time is *Uniform*(*s_range*) and the *end* time is *Uniform*(*e_range*). The remaining times are at times Uniform(*start*, *end*). The time units are arbitrary and depend on your application. Up to 3 groups are implemented so far, with Sin, Sigmoid, and constant forms. 
+
+We also set *RNGkind* and *seed* for reproducibility. Code below generates the data, looks at a few observations of the generated data, and writes the data to a csv file in our working directory. The *mc* variable sets core use and will be assigned to *mccores* parameter through the rest of the vignette. By default, 1 core is assigned. Parallel sections are implemented with *parallel::mclappy()*, so on unix and Mac platforms it is recommended to use the full number of cores available for faster performance.
 ```{r}
 library(clustra)
-cores_alloc = c(e_mc = 1, m_mc = 1, nthreads = 1, blas = 1)
+mc = 1
 rng_prev = RNGkind("L'Ecuyer-CMRG")
 set.seed(1234567)
-data = gen_traj_data(n_id = 3000, m_obs = 25, s_range = c(-365, -14),
-                     e_range = c(0.5*365, 2*365), noise = c(0, 5))
+data = gen_traj_data(n_id = c(500, 1000, 2000), m_obs = 25, 
+                     s_range = c(-365, -14), e_range = c(0.5*365, 2*365),
+                     noise = c(0, 5))
 head(data)
-write.table(data, file = "clustra_gen_data.csv")
 ```
 Select a few random *id*s and print their scatterplots.
 ```{r fig.width = 7, fig.height = 9}
@@ -41,16 +39,18 @@ library(ggplot2)
 ggplot(data[id %in% sample(unique(data[, id]), 9)],
        aes(x = time, y = response)) + facet_wrap(~ id) + geom_point()
 ```
-Next, cluster the trajectories. Set *k=3*, spline max degrees of freedom to 30, and maximum iterations to 10. *cores* parameters set the number of cores to use in various components of the code. Note that this does not work on Windows operating systems, where it should be left at 1. In the code that follows, we use verbose output to get information from each iteration.
+Next, cluster the trajectories. Set *k=3*, spline max degrees of freedom to 30, and maximum iterations to 10. *mccores* sets the number of cores to use in various components of the code. Note that this does not work on Windows operating systems, where it should be left at 1. In the code that follows, we use verbose output to get information from each iteration.
 ```{r}
 set.seed(1234737)
-cl = clustra(data, k = 3, fp = list(maxdf = 30, iter = 10),
-                   cores = cores_alloc, verbose = TRUE)
+cl = clustra(data, k = 3, maxdf = 30, iter = 10, mccores = mc, verbose = TRUE)
 ```
 
 Next, plot the resulting fit with a sample of data, colored by the cluster value.
 ```{r fig.width = 7, fig.height = 7}
-sdt = data[, group:=factor(..cl$data_group)][sample(nrow(data), 10000)]
+sdt = data
+if(nrow(data) > 10000)
+  sdt = data[, group:=factor(..cl$data_group)][sample(nrow(data), 10000)]
+ggplot(sdt, aes(x = time, y = response)) + geom_point(pch = ".")
 
 np = 100
 k = length(cl$tps)
@@ -66,8 +66,8 @@ for(i in 1:k)
                         type = "response")
   }
 pdata$pred = do.call(c, pred)
-ggplot(pdata, aes(x = time, y = pred, color = group)) + geom_line() +
-  geom_point(data = sdt, aes(y = response), pch = ".") 
+ggplot(pdata, aes(x = time, y = pred, color = group)) + 
+  geom_point(data = sdt, aes(y = response), pch = ".") + geom_line()
 ```
 The Rand index for comparing with true_groups is
 ```{r}
@@ -76,29 +76,25 @@ MixSim::RandIndex(cl$data_group, data[, true_group])
 A perfect score! Let's double the error variance (4*sd) in data generation ...
 ```{r fig.width = 7, fig.height = 9}
 set.seed(1234567)
-data2 = gen_traj_data(n_id = 3000, m_obs = 25, s_range = c(-365, -14),
+data2 = gen_traj_data(n_id = c(500, 1000, 2000), m_obs = 25, s_range = c(-365, -14),
                      e_range = c(60, 2*365), noise = c(0, 20))
 iplot = sample(unique(data2$id), 9)
 sampobs = match(data2$id, iplot, nomatch = 0) > 0
 ggplot(data2[sampobs], aes(x = time, y = response)) + 
   facet_wrap(~ id) + geom_point()
-cl = clustra(data2, k = 3, fp = list(maxdf = 30, iter = 10),
-             cores = cores_alloc, verbose = TRUE)
+cl = clustra(data2, k = 3, maxdf = 30, iter = 10, mccores = mc, verbose = TRUE)
 MixSim::RandIndex(cl$data_group, data2[, true_group])
 ```
-Next, we try requesting too many clusters in the noisy data.
-```{r}
-set.seed(1234737)
-cl = clustra(data2, k = 20, fp = list(maxdf = 30, iter = 20),
-                   cores = cores_alloc, verbose = TRUE)
-```
-Next, plot the resulting fit with a sample of data, colored by the cluster value.
+The result is less perfect but still pretty good score. Now the plot:
 ```{r fig.width = 7, fig.height = 7}
-sdt = data2[, group:=factor(..cl$data_group)][sample(nrow(data2), 10000)]
+sdt = data2
+if(nrow(data) > 10000)
+  sdt = data2[, group:=factor(..cl$data_group)][sample(nrow(data), 10000)]
+ggplot(sdt, aes(x = time, y = response)) + geom_point(pch = ".")
 
 np = 100
 k = length(cl$tps)
-ntime = seq(data2[, min(time)], data2[, max(time)], length.out = np)
+ntime = seq(data[, min(time)], data[, max(time)], length.out = np)
 pdata = expand.grid(time = ntime, group = factor(1:k))
 pdata = subset(pdata, group %in% which(lengths(cl$tps) > 0))
 pred = vector("list", k)
@@ -110,15 +106,14 @@ for(i in 1:k)
                         type = "response")
   }
 pdata$pred = do.call(c, pred)
-ggplot(pdata, aes(x = time, y = pred, color = group)) + geom_line() +
-  geom_point(data = sdt, aes(y = response), pch = ".") 
+ggplot(pdata, aes(x = time, y = pred, color = group)) + 
+  geom_point(data = sdt, aes(y = response), pch = ".") + geom_line()
 ```
-We stopped the process after 20 iterations. When a cluster has too few data points for maximum spline degrees of freedom, it is allocated to the next nearest cluster and the process continues with fewer clusters. When clusters are well-defined in the data, this process can eliminate some unnecessary clusters. The above process nearly converges at `r cl$k_cl` clusters. With this level of variability a few clusters do jump between the original 3 generating true clusters.
 
-Average silhouette value is a way to select the number of clusters and a silhouette plot provides a way for a deeper evaluation (Rouseeuw 1986). As silhouette requires distances between trajectories, this is not possible due to unequal trajectory sampling without fitting a separate model for each id. As a proxy for distance between points, we use point distances to cluster means in the *clustra_sil()* function. The structure returned from the *clustra()* function contains the matrix *loss*, which has all the information needed to construct these proxy silhouette plots. The function *clustra_sil()* performs clustering for a number of *k* values and outputs a list of "silhouette" class structures that can be displayed with *fviz_silhouette()* function from the package **factoextra**. We use the first data set with *noise = c(0, 5)*.
+Average silhouette value is a way to select the number of clusters and a silhouette plot provides a way for a deeper evaluation (Rouseeuw 1986). As silhouette requires distances between trajectories, this is not possible due to unequal trajectory sampling without fitting a separate model for each id. As a proxy for distance between points, we use point distances to cluster means in the *clustra_sil()* function. The structure returned from the *clustra()* function contains the matrix *loss*, which has all the information needed to construct these proxy silhouette plots. The function *clustra_sil()* performs clustering for a number of *k* values and outputs information for the silhouette plot that is displayed next. We use the first data set with *noise = c(0, 5)*.
 ```{r fig.width = 7}
 set.seed(1234737)
-sil = clustra_sil(data, k = c(2, 3, 4), cores = cores_alloc, verbose = TRUE)
+sil = clustra_sil(data, k = c(2, 3, 4), mccores = mc, verbose = TRUE)
 plot_sil = function(x) {
   msil = round(mean(x$silhouette), 2)
   ggplot(x, aes(id, silhouette, color = cluster, fill = cluster)) + geom_col() +
@@ -128,42 +123,19 @@ plot_sil = function(x) {
 }
 lapply(sil, plot_sil)
 ```
-Another way to select the number of clusters is the Rand Index comparing different random starts and different numbers of clusters. When we replicate clustering with different random seeds, the "replicability" is an indicator of how stable the results are for a given k, the number of clusters. For this demonstration, we look at *k = c(2, 3, 4)*, and 10 replicates for each *k*. Note that this uses just random starts rather than "best of 4 random starts" that the *clustra()* function would use because we want to evaluate raw stability. We plot the resulting matrix of Rand Indices.
+The plots show that 3 clusters give the best Average Width.
+
+Another way to select the number of clusters is the Rand Index comparing different random starts and different numbers of clusters. When we replicate clustering with different random seeds, the "replicability" is an indicator of how stable the results are for a given k, the number of clusters. For this demonstration, we look at *k = c(2, 3, 4)*, and 10 replicates for each *k*.
 ```{r fig.width = 7, fig.height=7}
 set.seed(1234737)
-ran = clustra_rand(data, k = c(2, 3, 4), cores = cores_alloc, replicates = 10,
+ran = clustra_rand(data, k = c(2, 3, 4), mccores = mc, replicates = 10,
                    verbose = TRUE)
 rand_plot(ran)
 ```
-The plot shows similarity level between all pairs of 30 clusterings (10 random starts for each of 2, 3, and 4 clusters). The ten random starts agree the most for *k* = 2 and *k*=3, making it difficult to decide. But considering deviance, we see that seven of the *k*=3 clusters are near the best deviance attainable even with *k* = 4. Also, interestingly, two of the four cluster attempts collapse to 3 clusters. 
+The plot shows Adjusted Rand Index similarity level between all pairs of 30 clusterings (10 random starts for each of 2, 3, and 4 clusters). The ten random starts agree the most for *k*=3. From the deviance results shown during iterations, we also see that all of the *k*=3 clusters are near the best deviance attainable even with *k* = 4. Three of the *k* = 4 results also collapse to 3 clusters ("zerocluster" convergence note) and show the same cluster counts as the *k* = 3 cluster results. Further two agree on two cluster counts (1983 and 532) and split the third into two parts.
 ```{r}
 ## restore RNG
 RNGkind(rng_prev[1])
 cat("clustra knit run time:\n")
 print(proc.time() - start_knit)
 ```
-## KDI installation notes for stringi on linux VM
-```{r eval = FALSE}
-system("wget http://manage01.kdi.local/temp/icudt61l.zip")
-conf = paste0("ICUDT_DIR=", system("pwd", intern = TRUE))
-install.packages("stringi", configure.vars=conf)
-```
-It is useful to have `.Rprofile` in your home directory that contains
-```{r eval = FALSE}
-options(repos = "http://manage01.kdi.local/CRAN")
-```
-for automated access to the internal CRAN. 
-
-Also, consider 
-```{sh eval = FALSE}
-export R_LIBS=/usr/me/local/R/library
-```
-at the unix prompt to enable a personal package installation location (replace *me* with your uid).
-
-## KDI installation notes for mvpia:
-Package *nloptr* seems to depend on R 4.0 and fails to install under R 3.6. The web suggests updating R or using an older version of *nloptr*. So the issue seems to be that the KDI R version is updated less frequently than CRAN, letting some packages get ahead of it.
-
-To use conda for external dependency management requires additional steps before starting R. See internal Getting Started web pages.
-
-More notes to come: What issues will conda bring? Is it possible to make conda a transparent default for R? Like an alias that runs another script?
-

@@ -9,8 +9,9 @@ clustra(
   k,
   starts = c(1, 0),
   group = NULL,
-  fp = list(maxdf = 30, iter = 10),
-  cores = c(e_mc = 1, m_mc = 1, nthreads = 1, blas = 1),
+  maxdf = 30,
+  iter = 10,
+  mccores = 1,
   verbose = FALSE
 )
 }
@@ -27,10 +28,11 @@ Other variables are ignored.}
 Normally, this is NULL and good starts are provided by
 \code{\link{start_groups}}.}
 
-\item{fp}{Fitting parameters. See \code{\link{trajectories}}.}
+\item{maxdf}{Fitting parameters. See \code{\link{trajectories}}.}
 
-\item{cores}{A vector of core assignments for multicore components. See
-\code{\link{trajectories}}.}
+\item{iter}{Fitting parameters. See \code{\link{trajectories}}.}
+
+\item{mccores}{See \code{\link{trajectories}}.}
 
 \item{verbose}{Logical to turn on more output during fit iterations.}
 }
@@ -41,11 +43,10 @@ more details.
 }
 \examples{
 set.seed(13)
-data = gen_traj_data(n_id = 100, m_obs = 20, s_range = c(-50, -10),
-              e_range = c(2*365, 5*365))
-fp = list(maxdf = 20, iter = 5, starts = 2, idperstart = 20, retry_max = 3)
-cl = clustra(data, k = 3, fp = fp, verbose = TRUE)
-names(cl)
-cl$tps
+data = gen_traj_data(n_id = c(50, 100), m_obs = 20, s_range = c(-365, -14),
+              e_range = c(0.5*365, 2*365))
+cl = clustra(data, k = 2, maxdf = 20, iter = 5, verbose = TRUE)
+tabulate(data$group)
+tabulate(data$true_group)
 
 }

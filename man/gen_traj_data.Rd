@@ -11,12 +11,12 @@ gen_traj_data(
   e_range,
   reference = 100,
   noise = c(0, abs(reference/20)),
-  k = 3,
   min_obs = 3
 )
 }
 \arguments{
-\item{n_id}{Number of id to generate.}
+\item{n_id}{Vector whose length is the number of clusters, giving the number of id's to
+generate in each cluster.}
 
 \item{m_obs}{Mean number of observation per id. Provides \code{lambda} parameter in
 \code{\link[stats]{rpois}}.}
@@ -31,8 +31,6 @@ end observation time.}
 is the default)}
 
 \item{noise}{Vector of length 2 giving the *mean* and *sd* of added N(mean, sd) noise.}
-
-\item{k}{Number of response types (So far works only for k = 2 and 3)}
 
 \item{min_obs}{Minimum number of observations in addition to zero time observation.}
 }
@@ -60,9 +58,9 @@ selected response function with added N(mean, sd) error.
 }
 
 \examples{
-set.seed(123)
-data = gen_traj_data(n_id = 20, m_obs = 10, s_range = c(-50, -10),
-              e_range = c(2*365, 5*365))
+data = gen_traj_data(n_id = c(50, 100), m_obs = 20, s_range = c(-365, -14),
+              e_range = c(0.5*365, 2*365))
 head(data)
+tail(data)
 
 }

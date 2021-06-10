@@ -17,15 +17,16 @@ oneid = function(id, n_obs, type, start, end, smin, emax, reference, noise) {
 
 ## support
 ## s_range . . . 0 . . . . e_range
-gendata = function(n_id, m_obs, s_range, e_range, k, min_obs, reference, noise) {
-  idr = c(1, 3*n_id) # id range to pick (so non-consecutive)
+gendata = function(n_id, m_obs, s_range, e_range, min_obs, reference, noise) {
+  idr = c(1, 3*sum(n_id)) # id range to pick (so non-consecutive)
+  t_id = sum(n_id)
   
-  start = round(runif(n_id, min = s_range[1], max = s_range[2])) # start time
-  end = floor(runif(n_id, min = e_range[1], max = e_range[2])) # end time
-  n_obs = min_obs + rpois(n_id, lambda = m_obs) # number of observations
-  type = sample(k, n_id, replace = TRUE) # curve type
-  id_vec = sample.int(idr[2], n_id, replace = FALSE) # non-consecutive
-  lapply(1:n_id,   # construct by id
+  start = round(runif(t_id, min = s_range[1], max = s_range[2]))
+  end = floor(runif(t_id, min = e_range[1], max = e_range[2]))
+  n_obs = min_obs + rpois(t_id, lambda = m_obs)
+  type = sample(1:length(n_id), t_id, replace = TRUE, prob = n_id/t_id)
+  id_vec = sample.int(idr[2], t_id, replace = FALSE) # non-consecutive
+  lapply(1:t_id,   # construct by id
          function(i) oneid(id_vec[i], n_obs[i], type[i], start[i], end[i],
                            smin = min(start), emax = max(end), reference, noise))
 }
@@ -49,7 +50,8 @@ gendata = function(n_id, m_obs, s_range, e_range, k, min_obs, reference, noise) 
 #' selected response function with added N(mean, sd) error.
 #' 
 #' @param n_id 
-#' Number of id to generate.
+#' Vector whose length is the number of clusters, giving the number of id's to
+#' generate in each cluster.
 #' @param m_obs 
 #' Mean number of observation per id. Provides \code{lambda} parameter in
 #' \code{\link[stats]{rpois}}.
@@ -64,25 +66,25 @@ gendata = function(n_id, m_obs, s_range, e_range, k, min_obs, reference, noise) 
 #' is the default)
 #' @param noise 
 #' Vector of length 2 giving the *mean* and *sd* of added N(mean, sd) noise.
-#' @param k 
-#' Number of response types (So far works only for k = 2 and 3)
 #' @param min_obs 
 #' Minimum number of observations in addition to zero time observation.
 #' 
 #' @return A data frame with one response per row and three columns:
 #'   \code{id}, \code{time}, \code{response}, and \code{group}.
+#'   
 #' @examples
-#' set.seed(123)
-#' data = gen_traj_data(n_id = 20, m_obs = 10, s_range = c(-50, -10),
-#'               e_range = c(2*365, 5*365))
+#' data = gen_traj_data(n_id = c(50, 100), m_obs = 20, s_range = c(-365, -14),
+#'               e_range = c(0.5*365, 2*365))
 #' head(data)
+#' tail(data)
 #' 
 #' @importFrom stats dist rnorm rpois runif
 #' @export
 gen_traj_data = function(n_id, m_obs, s_range, e_range, reference = 100,
-                         noise = c(0, abs(reference/20)), k = 3, min_obs = 3)
+                         noise = c(0, abs(reference/20)), min_obs = 3)
 {
-  id_list = gendata(n_id, m_obs, s_range, e_range, k, min_obs, reference, noise)
+  if(length(n_id) > 3) stop("Don't know how to generate more than 3 clusters")
+  id_list = gendata(n_id, m_obs, s_range, e_range, min_obs, reference, noise)
   id_mat = do.call(rbind, id_list)
   id_dt = data.table::data.table(id_mat)
 
