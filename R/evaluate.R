@@ -145,8 +145,7 @@ rand_plot = function(rand_pairs, name = NULL) {
 
 #' clustra_sil:
 #' Performs \code{\link{clustra}} runs for several k and makes silhouette plots.
-#' 
-#' Silhouette computes a proxy silhouette index based on distances to cluster
+#' Computes a proxy silhouette index based on distances to cluster
 #' centers rather than trajectory pairs. The cost is essentially that of
 #' running clustra for several k as this information is
 #' available directly from clustra.
@@ -221,19 +220,11 @@ traj_rep = function(group, data, k, maxdf, iter) {
   trajectories(data, k, group, maxdf, iter, 1, verbose = FALSE)
 }
 
-#' clustra_rand:
-#' Performs \code{\link{clustra}} runs for several k and presents a k selection
-#' index.
-#' 
-#' Available selection indices are "silhouette" and "rand".
-#' Silhouette computes a proxy silhouette index based on distances to cluster
-#' centers rather than trajectory pairs. The cost is essentially that of
-#' running clustra for several k as this information is
-#' available directly from clustra.
-#'
-#' Rand runs several random start replicates per k, resulting in a much slower
-#' algorithm. Then prepares a Rand index comparison between
-#' all pairs of clusterings.
+#' Performs \code{\link{trajectories}} runs for several *k* and several random
+#' start replicates within *k*. Returns a data frame with a Rand Index
+#' comparison between all pairs of clusterings. This data frame is typically
+#' input to \code{\link{rand_plot}} to produce a heat map with the Adjusted
+#' Rand Index results.
 #' 
 #' @param data
 #' The data (see \code{\link{clustra}} description).

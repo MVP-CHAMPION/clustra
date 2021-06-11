@@ -3,7 +3,11 @@
 \name{clustra_sil}
 \alias{clustra_sil}
 \title{clustra_sil:
-Performs \code{\link{clustra}} runs for several k and makes silhouette plots.}
+Performs \code{\link{clustra}} runs for several k and makes silhouette plots.
+Computes a proxy silhouette index based on distances to cluster
+centers rather than trajectory pairs. The cost is essentially that of
+running clustra for several k as this information is
+available directly from clustra.}
 \usage{
 clustra_sil(data, k, mccores, save = FALSE, verbose = FALSE)
 }
@@ -23,7 +27,9 @@ Invisibly returns a list, where each element is the matrix used
 by plot_sil
 }
 \description{
-Silhouette computes a proxy silhouette index based on distances to cluster
+clustra_sil:
+Performs \code{\link{clustra}} runs for several k and makes silhouette plots.
+Computes a proxy silhouette index based on distances to cluster
 centers rather than trajectory pairs. The cost is essentially that of
 running clustra for several k as this information is
 available directly from clustra.

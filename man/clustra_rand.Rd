@@ -2,9 +2,11 @@
 % Please edit documentation in R/evaluate.R
 \name{clustra_rand}
 \alias{clustra_rand}
-\title{clustra_rand:
-Performs \code{\link{clustra}} runs for several k and presents a k selection
-index.}
+\title{Performs \code{\link{trajectories}} runs for several *k* and several random
+start replicates within *k*. Returns a data frame with a Rand Index
+comparison between all pairs of clusterings. This data frame is typically
+input to \code{\link{rand_plot}} to produce a heat map with the Adjusted
+Rand Index results.}
 \usage{
 clustra_rand(
   data,
@@ -38,14 +40,9 @@ clustra_rand(
 See \code{\link{allpair_RandIndex}}
 }
 \description{
-Available selection indices are "silhouette" and "rand".
-Silhouette computes a proxy silhouette index based on distances to cluster
-centers rather than trajectory pairs. The cost is essentially that of
-running clustra for several k as this information is
-available directly from clustra.
-}
-\details{
-Rand runs several random start replicates per k, resulting in a much slower
-algorithm. Then prepares a Rand index comparison between
-all pairs of clusterings.
+Performs \code{\link{trajectories}} runs for several *k* and several random
+start replicates within *k*. Returns a data frame with a Rand Index
+comparison between all pairs of clusterings. This data frame is typically
+input to \code{\link{rand_plot}} to produce a heat map with the Adjusted
+Rand Index results.
 }
