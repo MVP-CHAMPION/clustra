@@ -2,8 +2,8 @@
 % Please edit documentation in R/evaluate.R
 \name{clustra_rand}
 \alias{clustra_rand}
-\title{Performs \code{\link{trajectories}} runs for several *k* and several random
-start replicates within *k*. Returns a data frame with a Rand Index
+\title{Performs \code{\link{trajectories}} runs for several \emph{k} and several random
+start replicates within \emph{k}. Returns a data frame with a Rand Index
 comparison between all pairs of clusterings. This data frame is typically
 input to \code{\link{rand_plot}} to produce a heat map with the Adjusted
 Rand Index results.}
@@ -40,8 +40,8 @@ clustra_rand(
 See \code{\link{allpair_RandIndex}}
 }
 \description{
-Performs \code{\link{trajectories}} runs for several *k* and several random
-start replicates within *k*. Returns a data frame with a Rand Index
+Performs \code{\link{trajectories}} runs for several \emph{k} and several random
+start replicates within \emph{k}. Returns a data frame with a Rand Index
 comparison between all pairs of clusterings. This data frame is typically
 input to \code{\link{rand_plot}} to produce a heat map with the Adjusted
 Rand Index results.

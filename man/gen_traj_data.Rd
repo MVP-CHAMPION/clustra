@@ -30,30 +30,30 @@ end observation time.}
 \item{reference}{A nominal response value (for example, blood pressure is near 100, which
 is the default)}
 
-\item{noise}{Vector of length 2 giving the *mean* and *sd* of added N(mean, sd) noise.}
+\item{noise}{Vector of length 2 giving the \emph{mean} and \emph{sd} of added N(mean, sd) noise.}
 
 \item{min_obs}{Minimum number of observations in addition to zero time observation.}
 }
 \value{
-A data frame with one response per row and three columns:
-  \code{id}, \code{time}, \code{response}, and \code{group}.
+A data table with one response per row and four columns:
+\code{id}, \code{time}, \code{response}, and \code{true_group}.
 }
 \description{
 Generates a collection of longitudinal responses with possibly varying
 lengths and varying numbers of observations. Support is
-[start . . . 0 . . . end], where
-start~uniform(s_range) and end~uniform(e_range), so that
+\code{start} . . . 0 . . . \code{end}, where
+\code{start}~uniform(s_range) and \code{end}~uniform(e_range), so that
 all trajectories are aligned at 0 but can start and end at different times.
 Zero is the intervention time.
 }
 \section{Details}{
 
 Generate longitudinal data for a response variable. Trajectories start
-at time uniformly distributed in s_range and end at time uniformly 
-distributed in e_range. Number of observations in a trajectory is 
-Poisson(m_obs). The result is a number of trajectories, all starting at 
-time 0, with different time spans, and with independently different numbers 
-of observations within the time spans. Each trajectory follows a randomly 
+at time uniformly distributed in s_range and end at time uniformly
+distributed in e_range. Number of observations in a trajectory is
+Poisson(m_obs). The result is a number of trajectories, all starting at
+time 0, with different time spans, and with independently different numbers
+of observations within the time spans. Each trajectory follows a randomly
 selected response function with added N(mean, sd) error.
 }
 

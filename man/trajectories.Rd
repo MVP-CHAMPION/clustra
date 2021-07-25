@@ -9,26 +9,51 @@ trajectories(data, k, group, maxdf, iter, mccores, verbose = FALSE)
 \arguments{
 \item{data}{Data frame with response measurements, one per observation. Column
 names are \code{id}, \code{time}, \code{response}, \code{group}. Note that
-id must be already sequential starting from 1. This affects expanding group
-numbers to ids.}
+\code{id}s must be already sequential starting from 1. This affects expanding group
+numbers to \code{id}s.}
 
 \item{k}{Number of clusters (groups)}
 
-\item{group}{Vector of initial group numbers corresponding to ids.}
+\item{group}{Vector of initial group numbers corresponding to \code{id}s.}
 
-\item{maxdf}{Integer. Basis dimension of smooth term. See \code{\link[mgcv]{s}},
-parameter k, in package \code{mgcv},}
+\item{maxdf}{Integer. Basis dimension of smooth term. See \code{\link[mgcv]{s}} function
+parameter \code{k}, in package \code{mgcv}.}
 
 \item{iter}{Integer. Maximum number of EM iterations.}
 
-\item{mccores}{Integer number of cores to use by *mclapply* sections. Parallelization is 
-over *k*, the number of clusters.}
+\item{mccores}{Integer number of cores to use by \code{mclapply} sections. Parallelization is
+over \code{k}, the number of clusters.}
 
 \item{verbose}{Logical, whether to produce debug output.}
 }
+\value{
+A list with components
+\itemize{
+\item \code{deviance} - The final deviance in each cluster added across clusters.
+\item \code{group} - Integer vector of group assignments corresponding to unique \code{id}s.
+\item \code{loss} - Numeric matrix with rows corresponding to unique \code{id}s and one
+column for each cluster. Each entry is the mean squared loss for the data in
+the \code{id} relative to the cluster model.
+\item \code{k} - An integer giving the requested number of clusters.
+\item \code{k_cl} - An integer giving the converged number of clusters. Can be
+smaller than \code{k} when some clusters become too small for degrees of freedom
+during convergence.
+\item \code{data_group} - An integer vector, giving group assignment as expanded into
+all \code{id} time points.
+\item \code{tps} - A list with \code{k_cl} elements, each an object returned by the
+\code{mgcv::bam} fit of a cluster thin plate spline model.
+\item \code{iterations} - An integer giving the number of iterations taken.
+\item \code{counts} - An integer vector giving the number of \code{id}s in each cluster.
+\item \code{counts_df} - An integer vector giving the total number of observations in
+each cluster (sum of the number of observations for \code{id}s belonging to the
+cluster).
+\item \code{changes} - An integer, giving the number of \code{id}s that changed clusters in
+the last iteration. This is zero if converged.
+}
+}
 \description{
-Trajectory means are splines fit to all ids in a cluster. Typically, this
-function is called by \code{\link{clustra}}.
+Trajectory means are thin plate splines fit to all ids in a cluster.
+Typically, this function is called by \code{\link{clustra}}.
 }
 \author{
 George Ostrouchov and David Gagnon

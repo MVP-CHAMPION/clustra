@@ -2,21 +2,22 @@
 % Please edit documentation in R/trajectories.R
 \name{xit_report}
 \alias{xit_report}
-\title{xit_report examines trajectories output to name what was concluded, such as
-convergence, maximum iterations reached, a zero cluster, etc. Multiple
-conclusions are possible as not all are mutually exclusive.}
+\title{xit_report}
 \usage{
 xit_report(cl, maxdf, iter)
 }
 \arguments{
-\item{cl}{Output structure from trajectories() function}
+\item{cl}{Output structure from \code{\link{trajectories}} function}
 
-\item{maxdf}{Fitting parameters. See \code{link{trajectories}}.}
+\item{maxdf}{Fitting parameters. See \code{\link{trajectories}}.}
 
-\item{iter}{Fitting parameters. See \code{link{trajectories}}.}
+\item{iter}{Fitting parameters. See \code{\link{trajectories}}.}
+}
+\value{
+NULL or a character vector of exit criteria satisfied.
 }
 \description{
-xit_report examines trajectories output to name what was concluded, such as
+Examines trajectories output to name what was concluded, such as
 convergence, maximum iterations reached, a zero cluster, etc. Multiple
 conclusions are possible as not all are mutually exclusive.
 }

@@ -1,9 +1,11 @@
 #' clustra-package
 #' 
-#' Performs k-means clustering, where each mean is a thin plate spline fit to
-#' all points from trajectories in cluster. Distance is the mean squared error
-#' or maximum error of spline to trajectory points.
-#' 
+#' Clusters medical trajectories (unequally spaced and unequal lengths) aligned 
+#' by an intervention time. Performs k-means clustering, where each mean is a 
+#' thin plate spline fit to all points in a cluster. Distance is MSE across 
+#' trajectory points to cluster spline. Provides silhouette plots and Adjusted
+#' Rand Index evaluations of the number of clusters. Scales well to large data
+#' with multicore parallelism available to speed computation.
 #' 
 #' @name clustra-package
 #' @docType package
@@ -12,9 +14,5 @@
 #' 
 #' # Import package operators
 #' @importFrom data.table ":="
-
-# Make sure data.table knows we know we're using it
-.datatable.aware = TRUE
-
 #' 
 NULL

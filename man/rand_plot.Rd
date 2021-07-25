@@ -9,7 +9,7 @@ rand_plot(rand_pairs, name = NULL)
 \arguments{
 \item{rand_pairs}{A data frame result of \code{\link{allpair_RandIndex}}}
 
-\item{name}{Character string file name for pdf plot. If omitted or NULL, plot will 
+\item{name}{Character string file name for pdf plot. If omitted or NULL, plot will
 render to current graphics device.}
 }
 \value{

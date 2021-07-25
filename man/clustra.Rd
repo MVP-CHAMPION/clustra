@@ -36,6 +36,9 @@ Normally, this is NULL and good starts are provided by
 
 \item{verbose}{Logical to turn on more output during fit iterations.}
 }
+\value{
+A list returned by \code{\link{trajectories}}.
+}
 \description{
 Most users will run the wrapper \code{\link{clustra}} function, which takes
 care of starting values. See vignette("clustra_basic.Rmd") for

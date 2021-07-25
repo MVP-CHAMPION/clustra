@@ -18,13 +18,14 @@ clustra_sil(data, k, mccores, save = FALSE, verbose = FALSE)
 
 \item{mccores}{See \code{\link{trajectories}}.}
 
-\item{save}{Logical. When TRUE, save all results as file \code{results.Rdata}.}
+\item{save}{Logical. When TRUE, save all results as file \code{clustra_sil.Rdata}.}
 
 \item{verbose}{Logical. When TRUE, information about each run of clustra is printed.}
 }
 \value{
-Invisibly returns a list, where each element is the matrix used
-by plot_sil
+Invisibly returns a list of length \code{length(k)}, where each element is
+a matrix with \code{nrow(data)} rows and three columns \code{cluster}, \code{neighbor},
+\code{silhouette}. This list of matrices can be used to draw a silhouette plot.
 }
 \description{
 clustra_sil:

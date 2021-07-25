@@ -1,5 +1,29 @@
-
-## responses
+#' Generates data for one `id`
+#' 
+#' @param id
+#' A unique integer.
+#' @param n_obs
+#' An integer number of observations to produce.
+#' @param type
+#' Response type, 1 is constant, 2 is a sin curve portion, and 3 is a sigmoid
+#' portion.
+#' @param start
+#' Negative integer giving time of first observation.
+#' @param end
+#' Positive integer giving time of last observation.
+#' @param smin
+#' The smallest possible `start` value among all `id`s. Currently not used.
+#' @param emax
+#' The largest possible `end` value among all `id`s. Used to scale sin and
+#' sigmoid support.
+#' @param reference
+#' A response value for constant response. Also used to scale sin and sigmoid
+#' responses.
+#' @param noise
+#' Standard deviation of zero mean Gaussian noise added to response functions.
+#' @return 
+#' An `n_obs` by 4 matrix with columns `id`, `time`, `response`, `true_group`.
+#' 
 oneid = function(id, n_obs, type, start, end, smin, emax, reference, noise) {
   id = rep(id, n_obs)
   true_group = rep(type, n_obs)
@@ -15,8 +39,31 @@ oneid = function(id, n_obs, type, start, end, smin, emax, reference, noise) {
   cbind(id, time, response, true_group)
 }
 
-## support
-## s_range . . . 0 . . . . e_range
+#' gendata
+#' 
+#' Generates data for up to three trajectory clusters
+#' 
+#' @param n_id
+#' See parameters of {\code{\link{gen_traj_data}}}.
+#' @param m_obs
+#' See parameters of {\code{\link{gen_traj_data}}}.
+#' @param s_range
+#' See parameters of {\code{\link{gen_traj_data}}}.
+#' @param e_range
+#' See parameters of {\code{\link{gen_traj_data}}}.
+#' @param min_obs
+#' See parameters of {\code{\link{gen_traj_data}}}.
+#' @param reference
+#' See parameters of {\code{\link{gen_traj_data}}}.
+#' @param noise
+#' See parameters of {\code{\link{gen_traj_data}}}.
+#' 
+#' @details 
+#' Time support of each `id` is at least `s . . . 0 . . . . e`, where `s` is in
+#' `s_range` and `e` is in `e_range`. 
+#' @return 
+#' A list of length `sum(n_id)`, where each element is a matrix output by {\code{\link{oneid}}}.
+#' 
 gendata = function(n_id, m_obs, s_range, e_range, min_obs, reference, noise) {
   idr = c(1, 3*sum(n_id)) # id range to pick (so non-consecutive)
   t_id = sum(n_id)
@@ -35,8 +82,8 @@ gendata = function(n_id, m_obs, s_range, e_range, min_obs, reference, noise) {
 #' 
 #' Generates a collection of longitudinal responses with possibly varying
 #' lengths and varying numbers of observations. Support is
-#' [start . . . 0 . . . end], where
-#' start~uniform(s_range) and end~uniform(e_range), so that
+#' `start` . . . 0 . . . `end`, where
+#' `start`~uniform(s_range) and `end`~uniform(e_range), so that
 #' all trajectories are aligned at 0 but can start and end at different times.
 #' Zero is the intervention time.
 #' 
@@ -69,8 +116,8 @@ gendata = function(n_id, m_obs, s_range, e_range, min_obs, reference, noise) {
 #' @param min_obs 
 #' Minimum number of observations in addition to zero time observation.
 #' 
-#' @return A data frame with one response per row and three columns:
-#'   \code{id}, \code{time}, \code{response}, and \code{group}.
+#' @return A data table with one response per row and four columns:
+#'   `id`, `time`, `response`, and `true_group`.
 #'   
 #' @examples
 #' data = gen_traj_data(n_id = c(50, 100), m_obs = 20, s_range = c(-365, -14),
@@ -86,7 +133,5 @@ gen_traj_data = function(n_id, m_obs, s_range, e_range, reference = 100,
   if(length(n_id) > 3) stop("Don't know how to generate more than 3 clusters")
   id_list = gendata(n_id, m_obs, s_range, e_range, min_obs, reference, noise)
   id_mat = do.call(rbind, id_list)
-  id_dt = data.table::data.table(id_mat)
-
-  id_dt
+  data.table::data.table(id_mat)
 }

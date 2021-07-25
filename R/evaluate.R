@@ -9,9 +9,9 @@
 #' \code{\link{clustra_rand}} function.
 #' 
 #' @return A data frame with \code{\link[MixSim]{RandIndex}} for all pairs from
-#' trajectories results. The data frame names and format is intended to be the
-#' input for \code{\link{rand_plot}}. Note that all pairs means lower triangle
-#' plus diagonal of an all-pairs symmetric matrix.
+#' trajectories results. The data frame names and its format is intended to be 
+#' the input for \code{\link{rand_plot}}. Note that all pairs is the lower
+#' triangle plus diagonal of an all-pairs symmetric matrix.
 #' 
 #' @export
 allpair_RandIndex = function(results) {
@@ -157,12 +157,13 @@ rand_plot = function(rand_pairs, name = NULL) {
 #' @param mccores
 #' See \code{\link{trajectories}}.
 #' @param save
-#' Logical. When TRUE, save all results as file \code{results.Rdata}.
+#' Logical. When TRUE, save all results as file `clustra_sil.Rdata`.
 #' @param verbose
 #' Logical. When TRUE, information about each run of clustra is printed.
 #' 
-#' @return Invisibly returns a list, where each element is the matrix used
-#' by plot_sil
+#' @return Invisibly returns a list of length `length(k)`, where each element is
+#' a matrix with `nrow(data)` rows and three columns `cluster`, `neighbor`, 
+#' `silhouette`. This list of matrices can be used to draw a silhouette plot.
 #' 
 #' @export
 clustra_sil = function(data, k, mccores, save = FALSE, verbose = FALSE) {
@@ -198,7 +199,7 @@ clustra_sil = function(data, k, mccores, save = FALSE, verbose = FALSE) {
   ## save object results and parameters
   if(save) save(results, k, file = "clustra_sil.Rdata")
   
-  results
+  invisible(results)
 }
 
 #' Function to run trajectories inside mclapply with one core.

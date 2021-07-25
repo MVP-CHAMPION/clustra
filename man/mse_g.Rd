@@ -16,7 +16,12 @@ mxe_g(pred, id, response)
 
 \item{response}{Vector of response values.}
 }
+\value{
+A numeric value. For mse_g(), returns the mean-squared error.
+For mxe_g(), returns the
+maximum absolute error.
+}
 \description{
-\code{mse_g} Computes mean-squared loss for each group.
-\code{mxe_g} is maximum loss.
+\code{mse_g()} Computes mean-squared error.
+\code{mxe_g()} Computes maximum absolute error.
 }

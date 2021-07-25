@@ -2,15 +2,16 @@
 % Please edit documentation in R/trajectories.R
 \name{check_df}
 \alias{check_df}
-\title{Function to check if non-zero group members have enough data for spline fit
+\title{Checks if non-empty groups have enough data for spline fit
 degrees of freedom.}
 \usage{
 check_df(group, loss, data, maxdf)
 }
 \arguments{
-\item{group}{Group membership vector for each id.}
+\item{group}{An integer vector of group membership for each id.}
 
-\item{loss}{A matrix with rows of computed loss values of each id across all models}
+\item{loss}{A matrix with rows of computed loss values of each id across all models
+as columns.}
 
 \item{data}{A data.table with data. See \code{\link{trajectories}}.}
 
@@ -21,6 +22,11 @@ Returns the vector of group membership of id's either unchanged or changed
 to have sufficient data in non-zero groups.
 }
 \description{
-Function to check if non-zero group members have enough data for spline fit
+Checks if non-empty groups have enough data for spline fit
 degrees of freedom.
+}
+\details{
+When a group has insufficient data for \code{maxdf}, its nearest model loss
+values are set to \code{Inf}, and new nearest model is assigned. The check
+repeats until all groups have sufficient data.
 }

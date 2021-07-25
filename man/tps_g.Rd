@@ -2,27 +2,29 @@
 % Please edit documentation in R/trajectories.R
 \name{tps_g}
 \alias{tps_g}
-\title{Function to fit thin plate spline (tps) to a group with
-\code{\link[mgcv]{bam}} from the \code{mgcv} package. 
-Crossvalidation does not know about zero weights, resulting in
-different smoothing parameters, so subset parameter (rather than
-zero weights) is used to ensure correct crossvalidation sampling.}
+\title{Fits a thin plate spline to a single group with
+\code{\link[mgcv]{bam}}.}
 \usage{
 tps_g(g, data, maxdf, nthreads)
 }
 \arguments{
 \item{g}{Integer group number.}
 
-\item{data}{See \code{\link{clustra}} description.}
+\item{data}{A list of group-separated data using lapply with
+\code{data.table::copy(data[group == g])} from original data in
+\code{\link{clustra}} description.}
 
 \item{maxdf}{See \code{\link{trajectories}} description.}
 
 \item{nthreads}{Controls \code{\link[mgcv]{bam}} threads.}
 }
+\value{
+Returns an object of class "gam". See \code{\link[mgcv]{bam}} value.
+If group data has zero rows, NULL is returned instead.
+}
 \description{
-Function to fit thin plate spline (tps) to a group with
-\code{\link[mgcv]{bam}} from the \code{mgcv} package. 
-Crossvalidation does not know about zero weights, resulting in
-different smoothing parameters, so subset parameter (rather than
-zero weights) is used to ensure correct crossvalidation sampling.
+Fits a thin plate spline to a single group (one list element) in data with
+\code{\link[mgcv]{bam}}. Uses data from only on group rather than a
+zero weights approach. Zero weights would result in
+incorrect crossvalidation sampling.
 }

@@ -1,23 +1,28 @@
-##
-## This is the R translation of trajectories v2.sas code. Possibly, some
-## differences exist, which we hope to reconcile in the near future.
-##
+# Make sure data.table knows we know we're using it
+.datatable.aware = TRUE
 
-#' Function to fit thin plate spline (tps) to a group with
-#' \code{\link[mgcv]{bam}} from the \code{mgcv} package. 
-#' Crossvalidation does not know about zero weights, resulting in
-#' different smoothing parameters, so subset parameter (rather than
-#' zero weights) is used to ensure correct crossvalidation sampling.
+#' Fits a thin plate spline to a single group with
+#' \code{\link[mgcv]{bam}}. 
+#' 
+#' @description 
+#' Fits a thin plate spline to a single group (one list element) in data with
+#' \code{\link[mgcv]{bam}}. Uses data from only on group rather than a
+#' zero weights approach. Zero weights would result in
+#' incorrect crossvalidation sampling.
 #'
 #' @param g
 #' Integer group number.
 #' @param data
-#' See \code{\link{clustra}} description.
+#' A list of group-separated data using lapply with 
+#' \code{data.table::copy(data[group == g])} from original data in
+#' \code{\link{clustra}} description.
 #' @param maxdf
 #' See \code{\link{trajectories}} description.
 #' @param nthreads
 #' Controls \code{\link[mgcv]{bam}} threads.
-#'
+#' @return 
+#' Returns an object of class "gam". See \code{\link[mgcv]{bam}} value. 
+#' If group data has zero rows, NULL is returned instead.
 tps_g = function(g, data, maxdf, nthreads) {
   if(nrow(data[[g]]) > 0) {
     return(mgcv::bam(response ~ s(time, k = maxdf), data = data[[g]],
@@ -27,13 +32,15 @@ tps_g = function(g, data, maxdf, nthreads) {
   }
 }
 
-#' Function to predict for new data based on fitted tps of a group
+#' Function to predict for new data based on fitted gam object.
 #'
 #' @param tps
 #' Output structure of \code{\link[mgcv]{bam}}.
 #' @param newdata
-#' See \code{\link{clustra}} description.
-#'
+#' See \code{\link{clustra}} description of data parameter.
+#' @return 
+#' A numeric vector of predicted values corresponding to rows of newdata. 
+#' If gam object is NULL, NULL is returned instead.
 pred_g = function(tps, newdata) {
   if(is.null(tps)) {
     return(NULL)
@@ -45,8 +52,8 @@ pred_g = function(tps, newdata) {
 
 #' Loss functions
 #'
-#' \code{mse_g} Computes mean-squared loss for each group.
-#' \code{mxe_g} is maximum loss.
+#' \code{mse_g()} Computes mean-squared error.
+#' \code{mxe_g()} Computes maximum absolute error.
 #'
 #' @param pred
 #' Vector of predicted values.
@@ -54,7 +61,10 @@ pred_g = function(tps, newdata) {
 #' Integer vector of group assignments.
 #' @param response
 #' Vector of response values.
-#'
+#' @return 
+#' A numeric value. For mse_g(), returns the mean-squared error. 
+#' For mxe_g(), returns the
+#' maximum absolute error.
 mse_g = function(pred, id, response) {
   if(is.null(pred)) {
     return(NULL)
@@ -78,18 +88,22 @@ mxe_g = function(pred, id, response) { # maximum error
 }
 
 
-#' Function to check if non-zero group members have enough data for spline fit
+#' Checks if non-empty groups have enough data for spline fit
 #' degrees of freedom.
 #' 
 #' @param group
-#' Group membership vector for each id.
+#' An integer vector of group membership for each id.
 #' @param loss
 #' A matrix with rows of computed loss values of each id across all models
+#' as columns.
 #' @param data
 #' A data.table with data. See \code{\link{trajectories}}.
 #' @param maxdf
 #' Fitting parameters. See \code{\link{trajectories}}.
-#' 
+#' @details 
+#' When a group has insufficient data for \code{maxdf}, its nearest model loss
+#' values are set to \code{Inf}, and new nearest model is assigned. The check
+#' repeats until all groups have sufficient data.
 #' @return 
 #' Returns the vector of group membership of id's either unchanged or changed
 #' to have sufficient data in non-zero groups.
@@ -111,23 +125,25 @@ check_df = function(group, loss, data, maxdf) {
 #' Function to assign starting groups.
 #' 
 #' If only one start, a random assignment is done. If more than one start, 
-#' picks tps fit with best deviance after one iteration among random starts. 
+#' picks tps fit with smallest deviance after one iteration among random starts. 
 #' Choosing from samples increases diversity of fits (sum of distances between 
 #' group fits). Then classifies all ids based on fit from best sample.
 #'
 #' @param data 
-#' Data frame with response measurements, one per observation.
-#' Column names are id, time, response, group. Note that id are already
+#' Data.table with response measurements, one per observation.
+#' Column names are id, time, response, group. Note that \code{id}s are assumed
 #' sequential starting from 1. This affects expanding group numbers to ids.
 #' @param k 
 #' Number of clusters (groups).
 #' @param starts
 #' A vector of length two, giving the number of start values to try and the
-#' number of ids per cluster to evaluate the starts (If the number of ids is 
-#' less than 1, use all data and do not subset data for starts.). If more than 
-#' one start, the most diverse after one trajectories iteration on a sample of 
-#' data is used. The default is *c(1, 0)*, meaning that one random start is 
-#' used with all the data.
+#' number of ids per cluster to evaluate the starts (If the number of `id`s is 
+#' less than 1, use all data and do not subset data for starts.). The default
+#' is `c(1, 0)`, meaning that one random start is 
+#' used with all the data. The following are experimental at this time: 
+#' If more than one start is requested, the most diverse after one trajectories
+#' iteration on a sample of data is used. Diversity is measured as sum of 
+#' pairwise distances between models on a time grid of `2*maxdf` points.
 #' @param maxdf
 #' Fitting parameters. See \code{\link{trajectories}}.
 #' @param iter
@@ -136,6 +152,9 @@ check_df = function(group, loss, data, maxdf) {
 #' See \code{\link{trajectories}}.
 #' @param verbose 
 #' Turn on more output for debugging.
+#' @return 
+#' An integer vector corresponding to unique `id`s, giving group number
+#' assignments.
 #'
 #' @importFrom methods is
 #' @export
@@ -211,29 +230,51 @@ start_groups = function(data, k, starts, maxdf, iter, mccores = 1,
 
 #' Cluster longitudinal trajectories of a response variable.
 #'
-#' Trajectory means are splines fit to all ids in a cluster. Typically, this
-#' function is called by \code{\link{clustra}}.
+#' Trajectory means are thin plate splines fit to all ids in a cluster. 
+#' Typically, this function is called by \code{\link{clustra}}.
 #'
 #' @param data
 #' Data frame with response measurements, one per observation. Column
-#' names are \code{id}, \code{time}, \code{response}, \code{group}. Note that
-#' id must be already sequential starting from 1. This affects expanding group
-#' numbers to ids.
+#' names are `id`, `time`, `response`, `group`. Note that
+#' `id`s must be already sequential starting from 1. This affects expanding group
+#' numbers to `id`s.
 #' @param k
 #' Number of clusters (groups)
 #' @param group
-#' Vector of initial group numbers corresponding to ids.
+#' Vector of initial group numbers corresponding to `id`s.
 #' @param maxdf
-#' Integer. Basis dimension of smooth term. See \code{\link[mgcv]{s}},
-#' parameter k, in package \code{mgcv},
+#' Integer. Basis dimension of smooth term. See \code{\link[mgcv]{s}} function
+#' parameter `k`, in package `mgcv`.
 #' @param iter
 #' Integer. Maximum number of EM iterations.
 #' @param mccores
-#' Integer number of cores to use by *mclapply* sections. Parallelization is 
-#' over *k*, the number of clusters.
+#' Integer number of cores to use by `mclapply` sections. Parallelization is 
+#' over `k`, the number of clusters.
 #' @param verbose
 #' Logical, whether to produce debug output.
-#'
+#' @return 
+#' A list with components
+#' * `deviance` - The final deviance in each cluster added across clusters.
+#' * `group` - Integer vector of group assignments corresponding to unique `id`s.
+#' * `loss` - Numeric matrix with rows corresponding to unique `id`s and one 
+#' column for each cluster. Each entry is the mean squared loss for the data in
+#' the `id` relative to the cluster model.
+#' * `k` - An integer giving the requested number of clusters.
+#' * `k_cl` - An integer giving the converged number of clusters. Can be 
+#' smaller than `k` when some clusters become too small for degrees of freedom
+#' during convergence. 
+#' * `data_group` - An integer vector, giving group assignment as expanded into
+#' all `id` time points.
+#' * `tps` - A list with `k_cl` elements, each an object returned by the 
+#' `mgcv::bam` fit of a cluster thin plate spline model.
+#' * `iterations` - An integer giving the number of iterations taken.
+#' * `counts` - An integer vector giving the number of `id`s in each cluster.
+#' * `counts_df` - An integer vector giving the total number of observations in
+#' each cluster (sum of the number of observations for `id`s belonging to the 
+#' cluster).
+#' * `changes` - An integer, giving the number of `id`s that changed clusters in
+#' the last iteration. This is zero if converged.
+#' 
 #' @importFrom stats predict
 #' @importFrom methods is
 #'
@@ -325,18 +366,21 @@ trajectories = function(data, k, group, maxdf, iter, mccores, verbose = FALSE) {
        counts_df = counts_df, changes = changes)
 }
 
-#' xit_report examines trajectories output to name what was concluded, such as
+#' xit_report 
+#' 
+#' Examines trajectories output to name what was concluded, such as
 #' convergence, maximum iterations reached, a zero cluster, etc. Multiple
 #' conclusions are possible as not all are mutually exclusive.
 #' 
 #' @param cl
-#' Output structure from trajectories() function
+#' Output structure from \code{\link{trajectories}} function
 #' @param maxdf
-#' Fitting parameters. See \code{link{trajectories}}.
+#' Fitting parameters. See \code{\link{trajectories}}.
 #' @param iter
-#' Fitting parameters. See \code{link{trajectories}}.
+#' Fitting parameters. See \code{\link{trajectories}}.
+#' @return 
+#' NULL or a character vector of exit criteria satisfied.
 #' 
-#' @export
 xit_report = function(cl, maxdf, iter) {
   xit = NULL
   if(!is.null(cl$counts_df) && any(cl$counts_df < maxdf))
@@ -377,6 +421,9 @@ xit_report = function(cl, maxdf, iter) {
 #' @param verbose
 #' Logical to turn on more output during fit iterations.
 #' 
+#' @return 
+#' A list returned by \code{\link{trajectories}}.
+#' 
 #' @examples
 #' set.seed(13)
 #' data = gen_traj_data(n_id = c(50, 100), m_obs = 20, s_range = c(-365, -14),
@@ -411,10 +458,10 @@ clustra = function(data, k, starts = c(1, 0), group = NULL, maxdf = 30,
     }
   }
   
-  ## Expand group numbers within ids
+  ## Expand group numbers into data within ids
   data[, group:=..group[id]] 
   
-  ## k-means iteration for groups
+  ## Perform k-means iteration for groups
   cl = trajectories(data, k, group, maxdf, iter, mccores, verbose = verbose)
   er = xit_report(cl, maxdf, iter)
   if(verbose && !is.null(er)) cat(" ", er, "\n")

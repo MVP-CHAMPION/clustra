@@ -7,18 +7,20 @@
 start_groups(data, k, starts, maxdf, iter, mccores = 1, verbose = FALSE)
 }
 \arguments{
-\item{data}{Data frame with response measurements, one per observation.
-Column names are id, time, response, group. Note that id are already
+\item{data}{Data.table with response measurements, one per observation.
+Column names are id, time, response, group. Note that \code{id}s are assumed
 sequential starting from 1. This affects expanding group numbers to ids.}
 
 \item{k}{Number of clusters (groups).}
 
 \item{starts}{A vector of length two, giving the number of start values to try and the
-number of ids per cluster to evaluate the starts (If the number of ids is 
-less than 1, use all data and do not subset data for starts.). If more than 
-one start, the most diverse after one trajectories iteration on a sample of 
-data is used. The default is *c(1, 0)*, meaning that one random start is 
-used with all the data.}
+number of ids per cluster to evaluate the starts (If the number of \code{id}s is
+less than 1, use all data and do not subset data for starts.). The default
+is \code{c(1, 0)}, meaning that one random start is
+used with all the data. The following are experimental at this time:
+If more than one start is requested, the most diverse after one trajectories
+iteration on a sample of data is used. Diversity is measured as sum of
+pairwise distances between models on a time grid of \code{2*maxdf} points.}
 
 \item{maxdf}{Fitting parameters. See \code{\link{trajectories}}.}
 
@@ -28,9 +30,13 @@ used with all the data.}
 
 \item{verbose}{Turn on more output for debugging.}
 }
+\value{
+An integer vector corresponding to unique \code{id}s, giving group number
+assignments.
+}
 \description{
-If only one start, a random assignment is done. If more than one start, 
-picks tps fit with best deviance after one iteration among random starts. 
-Choosing from samples increases diversity of fits (sum of distances between 
+If only one start, a random assignment is done. If more than one start,
+picks tps fit with smallest deviance after one iteration among random starts.
+Choosing from samples increases diversity of fits (sum of distances between
 group fits). Then classifies all ids based on fit from best sample.
 }

@@ -13,9 +13,9 @@ allpair_RandIndex(results)
 }
 \value{
 A data frame with \code{\link[MixSim]{RandIndex}} for all pairs from
-trajectories results. The data frame names and format is intended to be the
-input for \code{\link{rand_plot}}. Note that all pairs means lower triangle
-plus diagonal of an all-pairs symmetric matrix.
+trajectories results. The data frame names and its format is intended to be
+the input for \code{\link{rand_plot}}. Note that all pairs is the lower
+triangle plus diagonal of an all-pairs symmetric matrix.
 }
 \description{
 Runs \code{\link[MixSim]{RandIndex}} for all pairs of cluster results in its
