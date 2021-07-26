@@ -120,9 +120,10 @@ rand_plot = function(rand_pairs, name = NULL) {
   wd = 6.5
   ht = 6
   if(is.character(name)) pdf(name, width = wd, height = ht, bg = bg)
-    par(bg = bg, fg = fg, col = fg, col.axis = fg,
-        col.lab = fg, col.main = fg, col.sub = fg,
-        fig = c(0, ht/wd, 0, 1),
+    oldpar <- par(no.readonly = TRUE)
+    on.exit(par(oldpar)) # restore old par when exit
+    par(bg = bg, fg = fg, col = fg, col.axis = fg, col.lab = fg, col.main = fg,
+        col.sub = fg, fig = c(0, ht/wd, 0, 1),
         mar = par()$mar + c(0, 1, 0, -0.5))
     image(x, y, z, zlim, lim, rev(lim), col = var.col, axes = FALSE,
           xlab = "Number of Clusters", ylab = "Number of Clusters",
@@ -133,9 +134,8 @@ rand_plot = function(rand_pairs, name = NULL) {
     axis(2, at = ((0:(K.len - 1)) + 0.5) * R.max, labels = K.vec)
     box()
 
-    par(bg = bg, fg = fg, col = fg, col.axis = fg,
-        col.lab = fg, col.main = fg, col.sub = fg, mar = c(5, 0, 4, 2),
-        fig = c(ht/wd, 1, 0, .9), new = TRUE)
+    par(bg = bg, fg = fg, col = fg, col.axis = fg, col.lab = fg, col.main = fg,
+        col.sub = fg, mar = c(5, 0, 4, 2), fig = c(ht/wd, 1, 0, .9), new = TRUE)
     z.label = seq(zlim[1], zlim[2], length = n.col)
     image(1, z.label, matrix(z.label, nrow = 1), zlim, c(1, 1), zlim,
           col = var.col, axes = FALSE, xlab = "", ylab = "")
