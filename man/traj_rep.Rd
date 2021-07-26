@@ -13,9 +13,12 @@ traj_rep(group, data, k, maxdf, iter)
 
 \item{k}{Integer number of clusters.}
 
-\item{maxdf}{Fitting parameters. See \code{link{trajectories}}.}
+\item{maxdf}{Fitting parameters. See \code{\link{trajectories}}.}
 
-\item{iter}{Fitting parameters. See \code{link{trajectories}}.}
+\item{iter}{Fitting parameters. See \code{\link{trajectories}}.}
+}
+\value{
+See return of {\code{\link{trajectories}}}.
 }
 \description{
 Function to run trajectories inside mclapply with one core.

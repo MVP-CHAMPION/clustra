@@ -4,19 +4,19 @@ author: "George Ostrouchov, Hanna Gerlovin, and David Gagnon"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{clustra}
+  %\VignetteIndexEntry{clustra: clustering trajectories}
   %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+  \VignetteEncoding[UTF-8]{inputenc}
 ---
 
-```{r, setup}
+```{r, setup, echo = FALSE}
 knitr::opts_knit$set(
   collapse = TRUE,
   comment = "#>"
 )
 start_knit = proc.time()
 ```
-The **clustra** package was built to **clu**ster medical **tra**jectories (time series) related by an intervention. For example, a number of individuals are started on a specific drug regimen and their blood pressure data is collected for a varying amount of time before and after the start of the medication. Time is recorded as negative before the start and positive after the start, meaning that the trajectories are aligned at zero, irrespective of any reference to calendar time. Time units can be anything (days, weeks, hours, minutes, etc.) as long as they are the same across all patients. Observations can be unequally spaced.  
+The **clustra** package was built to **clus**ter medical **tra**jectories (time series) related by an intervention. For example, a number of individuals are started on a specific drug regimen and their blood pressure data is collected for a varying amount of time before and after the start of the medication. Time is recorded as negative before the start and positive after the start, meaning that the trajectories are aligned at zero, irrespective of any reference to calendar time. Time units can be anything (days, weeks, hours, minutes, etc.) as long as they are the same across all patients. Observations can be unequally spaced.  
 
 Clustering proceeds by an EM algorithm that iterates switching between fitting a bspline to combined responses within each cluster (M-step) and reassigning cluster membership based on nearest fitted bspline (E-step). Initial cluster assignments are random. The fitting is done with the *mgcv* package function *bam*, which scales well to very large data sets.
 
@@ -26,7 +26,6 @@ We also set *RNGkind* and *seed* for reproducibility. Code below generates the d
 ```{r}
 library(clustra)
 mc = 1
-rng_prev = RNGkind("L'Ecuyer-CMRG")
 set.seed(1234567)
 data = gen_traj_data(n_id = c(500, 1000, 2000), m_obs = 25, 
                      s_range = c(-365, -14), e_range = c(0.5*365, 2*365),
@@ -134,8 +133,6 @@ rand_plot(ran)
 ```
 The plot shows Adjusted Rand Index similarity level between all pairs of 30 clusterings (10 random starts for each of 2, 3, and 4 clusters). The ten random starts agree the most for *k*=3. From the deviance results shown during iterations, we also see that all of the *k*=3 clusters are near the best deviance attainable even with *k* = 4. Three of the *k* = 4 results also collapse to 3 clusters ("zerocluster" convergence note) and show the same cluster counts as the *k* = 3 cluster results. Further two agree on two cluster counts (1983 and 532) and split the third into two parts.
 ```{r}
-## restore RNG
-RNGkind(rng_prev[1])
-cat("clustra knit run time:\n")
+cat("clustra vignette run time:\n")
 print(proc.time() - start_knit)
 ```

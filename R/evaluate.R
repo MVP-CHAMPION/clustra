@@ -1,19 +1,22 @@
-#' allpair_RandIndex is used internally by \code{\link{clustra_rand}} and
-#' provides its return value.
+#' allpair_RandIndex: helper for replicated cluster comparison
 #' 
 #' Runs \code{\link[MixSim]{RandIndex}} for all pairs of cluster results in its
 #' list input and produces a matrix for use by \code{\link{rand_plot}}.
+#' Understands replicates within `k` values.
 #' 
 #' @param results
 #' A list with each element packed internally by the
-#' \code{\link{clustra_rand}} function.
+#' \code{\link{clustra_rand}} function with elements: 
+#' * `k` - number of clusters
+#' * `rep` - replicate number
+#' * `deviance` - final deviance
+#' * `group` - integer cluster assignments
 #' 
 #' @return A data frame with \code{\link[MixSim]{RandIndex}} for all pairs from
 #' trajectories results. The data frame names and its format is intended to be 
 #' the input for \code{\link{rand_plot}}. Note that all pairs is the lower
 #' triangle plus diagonal of an all-pairs symmetric matrix.
 #' 
-#' @export
 allpair_RandIndex = function(results) {
   nr = length(results)
   rand_pairs = vector("list", nr*(nr - 1)/2 + nr)
@@ -211,9 +214,12 @@ clustra_sil = function(data, k, mccores, save = FALSE, verbose = FALSE) {
 #' @param k
 #' Integer number of clusters.
 #' @param maxdf
-#' Fitting parameters. See \code{link{trajectories}}.
+#' Fitting parameters. See \code{\link{trajectories}}.
 #' @param iter
-#' Fitting parameters. See \code{link{trajectories}}.
+#' Fitting parameters. See \code{\link{trajectories}}.
+#' 
+#' @return
+#' See return of {\code{\link{trajectories}}}.
 #' 
 traj_rep = function(group, data, k, maxdf, iter) {
   id = ..group = NULL
@@ -221,6 +227,8 @@ traj_rep = function(group, data, k, maxdf, iter) {
   trajectories(data, k, group, maxdf, iter, 1, verbose = FALSE)
 }
 
+#' clustra_rand: Rand Index cluster evaluation
+#' 
 #' Performs \code{\link{trajectories}} runs for several *k* and several random
 #' start replicates within *k*. Returns a data frame with a Rand Index
 #' comparison between all pairs of clusterings. This data frame is typically
@@ -244,7 +252,7 @@ traj_rep = function(group, data, k, maxdf, iter) {
 #' @param verbose
 #' Logical. When TRUE, information about each run of clustra is printed.
 #' 
-#' @return See \code{\link{allpair_RandIndex}}
+#' @return See \code{\link{allpair_RandIndex}}.
 #' 
 #' @export
 clustra_rand = function(data, k, mccores, replicates = 10, maxdf = 30,
@@ -279,8 +287,9 @@ clustra_rand = function(data, k, mccores, replicates = 10, maxdf = 30,
                                                deviance = f[[i]]$deviance,
                                                group = f[[i]]$group)
       if(verbose) 
-        cat(kj, i, "it =", f[[i]]$iterations, "dev =", f[[i]]$deviance,
-                      "err =", f[[i]]$try_errors, "ch =", f[[i]]$changes, "\n")
+        cat(kj, i, "iters =", f[[i]]$iterations, "deviance =", f[[i]]$deviance,
+            "err =", f[[i]]$try_errors, "counts =", f[[i]]$counts, "changes =",
+            f[[i]]$changes, "\n")
     }
     rm(f)
     gc()

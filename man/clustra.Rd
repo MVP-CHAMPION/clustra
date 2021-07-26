@@ -41,7 +41,7 @@ A list returned by \code{\link{trajectories}}.
 }
 \description{
 Most users will run the wrapper \code{\link{clustra}} function, which takes
-care of starting values. See vignette("clustra_basic.Rmd") for
+care of starting values. See vignette("clustra_vignette.Rmd") for
 more details.
 }
 \examples{

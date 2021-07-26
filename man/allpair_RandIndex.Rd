@@ -2,14 +2,19 @@
 % Please edit documentation in R/evaluate.R
 \name{allpair_RandIndex}
 \alias{allpair_RandIndex}
-\title{allpair_RandIndex is used internally by \code{\link{clustra_rand}} and
-provides its return value.}
+\title{allpair_RandIndex: helper for replicated cluster comparison}
 \usage{
 allpair_RandIndex(results)
 }
 \arguments{
 \item{results}{A list with each element packed internally by the
-\code{\link{clustra_rand}} function.}
+\code{\link{clustra_rand}} function with elements:
+\itemize{
+\item \code{k} - number of clusters
+\item \code{rep} - replicate number
+\item \code{deviance} - final deviance
+\item \code{group} - integer cluster assignments
+}}
 }
 \value{
 A data frame with \code{\link[MixSim]{RandIndex}} for all pairs from
@@ -20,4 +25,5 @@ triangle plus diagonal of an all-pairs symmetric matrix.
 \description{
 Runs \code{\link[MixSim]{RandIndex}} for all pairs of cluster results in its
 list input and produces a matrix for use by \code{\link{rand_plot}}.
+Understands replicates within \code{k} values.
 }

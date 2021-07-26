@@ -397,7 +397,7 @@ xit_report = function(cl, maxdf, iter) {
 #' Cluster trajectories
 #'
 #' Most users will run the wrapper \code{\link{clustra}} function, which takes
-#' care of starting values. See vignette("clustra_basic.Rmd") for
+#' care of starting values. See vignette("clustra_vignette.Rmd") for
 #' more details.
 #'
 #' @param data

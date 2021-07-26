@@ -2,11 +2,7 @@
 % Please edit documentation in R/evaluate.R
 \name{clustra_rand}
 \alias{clustra_rand}
-\title{Performs \code{\link{trajectories}} runs for several \emph{k} and several random
-start replicates within \emph{k}. Returns a data frame with a Rand Index
-comparison between all pairs of clusterings. This data frame is typically
-input to \code{\link{rand_plot}} to produce a heat map with the Adjusted
-Rand Index results.}
+\title{clustra_rand: Rand Index cluster evaluation}
 \usage{
 clustra_rand(
   data,
@@ -37,7 +33,7 @@ clustra_rand(
 \item{verbose}{Logical. When TRUE, information about each run of clustra is printed.}
 }
 \value{
-See \code{\link{allpair_RandIndex}}
+See \code{\link{allpair_RandIndex}}.
 }
 \description{
 Performs \code{\link{trajectories}} runs for several \emph{k} and several random
