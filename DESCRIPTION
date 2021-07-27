@@ -7,7 +7,8 @@ Authors@R: c(person("George", "Ostrouchov", role = c("aut", "cre"), email =
         person("David", "Gagnon", role = "aut"),
         person("Hanna", "Gerlovin", role = "aut"),
         person("Chen", "Wei-Chen", role = "ctb"),
-        person("Schmidt", "Drew", role = "ctb"))
+        person("Schmidt", "Drew", role = "ctb"),
+        person("Oak Ridge National Laboratory", role="cph"))
 Depends:
     R (>= 3.5.0)
 Imports:
