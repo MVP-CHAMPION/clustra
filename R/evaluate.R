@@ -288,7 +288,7 @@ clustra_rand = function(data, k, mccores, replicates = 10, maxdf = 30,
                                                group = f[[i]]$group)
       if(verbose) 
         cat(kj, i, "iters =", f[[i]]$iterations, "deviance =", f[[i]]$deviance,
-            "err =", f[[i]]$try_errors, "counts =", f[[i]]$counts, "changes =",
+            "xit =", fer[[i]], "counts =", f[[i]]$counts, "changes =",
             f[[i]]$changes, "\n")
     }
     rm(f)

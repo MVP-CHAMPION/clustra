@@ -16,7 +16,7 @@ knitr::opts_knit$set(
 )
 start_knit = proc.time()
 ```
-The **clustra** package was built to **clus**ter medical **tra**jectories (time series) related by an intervention. For example, a number of individuals are started on a specific drug regimen and their blood pressure data is collected for a varying amount of time before and after the start of the medication. Time is recorded as negative before the start and positive after the start, meaning that the trajectories are aligned at zero, irrespective of any reference to calendar time. Time units can be anything (days, weeks, hours, minutes, etc.) as long as they are the same across all patients. Observations can be unequally spaced.  
+The **clustra** package was built to **clus**ter medical **tra**jectories (time series) related by an intervention time. For example, a number of individuals are started on a specific drug regimen and their blood pressure data is collected for a varying amount of time before and after the start of the medication. Time is recorded as negative before the start and positive after the start, meaning that the trajectories are aligned at zero, irrespective of any reference to calendar time. Time units can be anything (days, weeks, hours, minutes, etc.) as long as they are the same across all patients. Observations can be unequally spaced.  
 
 Clustering proceeds by an EM algorithm that iterates switching between fitting a bspline to combined responses within each cluster (M-step) and reassigning cluster membership based on nearest fitted bspline (E-step). Initial cluster assignments are random. The fitting is done with the *mgcv* package function *bam*, which scales well to very large data sets.
 
@@ -25,7 +25,7 @@ For this vignette, we begin by generating a data set with the *gen_traj_data()* 
 We also set *RNGkind* and *seed* for reproducibility. Code below generates the data, looks at a few observations of the generated data, and writes the data to a csv file in our working directory. The *mc* variable sets core use and will be assigned to *mccores* parameter through the rest of the vignette. By default, 1 core is assigned. Parallel sections are implemented with *parallel::mclappy()*, so on unix and Mac platforms it is recommended to use the full number of cores available for faster performance.
 ```{r}
 library(clustra)
-mc = 1
+mc = 1 # If running on a unix or a Mac platform, change to number of cores
 set.seed(1234567)
 data = gen_traj_data(n_id = c(500, 1000, 2000), m_obs = 25, 
                      s_range = c(-365, -14), e_range = c(0.5*365, 2*365),
@@ -131,7 +131,20 @@ ran = clustra_rand(data, k = c(2, 3, 4), mccores = mc, replicates = 10,
                    verbose = TRUE)
 rand_plot(ran)
 ```
-The plot shows Adjusted Rand Index similarity level between all pairs of 30 clusterings (10 random starts for each of 2, 3, and 4 clusters). The ten random starts agree the most for *k*=3. From the deviance results shown during iterations, we also see that all of the *k*=3 clusters are near the best deviance attainable even with *k* = 4. Three of the *k* = 4 results also collapse to 3 clusters ("zerocluster" convergence note) and show the same cluster counts as the *k* = 3 cluster results. Further two agree on two cluster counts (1983 and 532) and split the third into two parts.
+The plot shows Adjusted Rand Index similarity level between all pairs of 30 clusterings (10 random starts for each of 2, 3, and 4 clusters). The ten random starts agree the most for *k*=3. From the deviance results shown during iterations, we also see that all of the *k*=3 clusters are near the best deviance attainable even with *k* = 4. Among the *k* = 4 results, in each replicate, two of four clusters also show the same cluster counts as the *k* = 3 cluster results and split a third cluster into two parts.
+
+Another possible evaluation of the number of clusters is to first ask clustra for a large number of clusters, evaluate the cluster centers on a common set of time points, and feed the resulting matrix to a hierarchical clustering function. Below, we ask for 40 clusters on the *data2* data set but actually get back only 26 because several become empty or too small for *maxdf*. Below, the *hclust()* function clusters the 26 resulting cluster means, each evaluated on 100 time points.
+```{r fig.width = 7, fig.height = 7}
+set.seed(12347)
+cl = clustra(data2, k = 40, maxdf = 30, iter = 10, mccores = mc, verbose = TRUE)
+gpred = function(tps, newdata) 
+  as.numeric(mgcv::predict.bam(tps, newdata, type = "response",
+                               newdata.guaranteed = TRUE))
+resp = do.call(rbind, lapply(cl$tps, gpred, newdata = data.frame(
+  time = seq(min(data2$time), max(data2$time), length.out = 100))))
+plot(hclust(dist(resp)))
+```
+The cluster dendrogram clearly indicates there are only three clusters. Making the cut at a height of roughly 300 groups the 26 clusters into only three.
 ```{r}
 cat("clustra vignette run time:\n")
 print(proc.time() - start_knit)
