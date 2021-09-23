@@ -8,7 +8,10 @@ Authors@R: c(person("George", "Ostrouchov", role = c("aut", "cre"), email =
         person("Hanna", "Gerlovin", role = "aut"),
         person("Chen", "Wei-Chen", role = "ctb"),
         person("Schmidt", "Drew", role = "ctb"),
-        person("Oak Ridge National Laboratory", role="cph"))
+        person("Oak Ridge National Laboratory", role="cph"),
+        person("U.S. Department of Veteran's Affairs", role="fnd",
+        comment="Project: Million Veteran Program Data Core")
+        )
 Depends:
     R (>= 3.5.0)
 Imports:
