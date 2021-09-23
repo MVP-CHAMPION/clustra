@@ -40,5 +40,5 @@ License: BSD 2-clause License + file LICENSE
 Encoding: UTF-8
 Maintainer: George Ostrouchov <ostrouchovg@ornl.gov>
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 VignetteBuilder: knitr
