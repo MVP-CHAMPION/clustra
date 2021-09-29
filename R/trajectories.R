@@ -1,6 +1,36 @@
 # Make sure data.table knows we know we're using it
 .datatable.aware = TRUE
 
+#' data.prep
+#'
+#' Internal function to check data and extract a minimal data.table with
+#' standardized variable names according to the model.
+#'
+#' @param data
+#' A data.frame or data.table.
+#' @param model
+#' See \code{\link{clustra}} description.
+#' @return 
+#' Returns a data.table with variables id, response, and time based on the 
+#' model specification.
+#' 
+data.prep = function(data, model) {
+  ## check if variables are present in data, then replace with standard
+  ## names (id, response, time) and return data.table with only these
+  if(!is.data.frame(data)) stop("clustra: Expecting a data frame.")
+  
+  model.vec = c(model$resp, model$time, model$id)
+  if(!all(model.vec %in% names(data))) 
+    stop(paste0("clustra: Expecting (", paste0(model.vec, collapse = ","),
+                ") in data."))
+  if(!data.table::is.data.table(data)) data = data.table::as.data.table(data)
+  
+  newdat = data.table::copy(data[, ..model.vec])
+  data.table::setnames(newdat, 
+                       old = model.vec, new = c("response", "time", "id"))
+  return(newdat)
+}
+
 #' Fits a thin plate spline to a single group with
 #' \code{\link[mgcv]{bam}}. 
 #' 
@@ -406,6 +436,9 @@ xit_report = function(cl, maxdf, iter) {
 #' Other variables are ignored.
 #' @param k
 #' Number of clusters
+#' @param model
+#' A list with components id, response, and time. Specifies clustering
+#' variables in data as strings. 
 #' @param starts
 #' A vector of length two. See \code{\link{start_groups}}.
 #' @param group
@@ -433,17 +466,13 @@ xit_report = function(cl, maxdf, iter) {
 #' tabulate(data$true_group)
 #'
 #' @export
-clustra = function(data, k, starts = c(1, 0), group = NULL, maxdf = 30,
-                   iter = 10, mccores = 1, verbose = FALSE) {
+clustra = function(data, k, 
+                   model = list(id = "id", resp = c("response"), time = "time"),
+                   starts = c(1, 0), group = NULL, maxdf = 30, iter = 10,
+                   mccores = 1, verbose = FALSE) {
   id = .GRP = ..group = NULL # for data.table R CMD check
-  
-  ## check for required variables in data
-  vnames = c("id", "time", "response")
-  if(!is.data.frame(data)) stop("Expecting a data frame.")
-  if(!data.table::is.data.table(data)) data = data.table::as.data.table(data)
-  if(!all(vnames %in% names(data))) 
-    stop(paste0("Expecting (", paste0(vnames, collapse = ","), ") in data."))
-  
+  data = data.prep(data, model)
+ 
   ## replace id's to be sequential
   data[, id:=.GRP, by=id] 
   n_id = data[, data.table::uniqueN(id)]

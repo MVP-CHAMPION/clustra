@@ -146,7 +146,8 @@ rand_plot = function(rand_pairs, name = NULL) {
   invisible(name)
 }
 
-#' clustra_sil:
+#' clustra_sil
+#' 
 #' Performs \code{\link{clustra}} runs for several k and makes silhouette plots.
 #' Computes a proxy silhouette index based on distances to cluster
 #' centers rather than trajectory pairs. The cost is essentially that of
@@ -157,6 +158,8 @@ rand_plot = function(rand_pairs, name = NULL) {
 #' The data (see \code{\link{clustra}} description).
 #' @param k
 #' Vector of k values to try.
+#' @param model
+#' See \code{\link{clustra}}.
 #' @param mccores
 #' See \code{\link{trajectories}}.
 #' @param save
@@ -169,7 +172,9 @@ rand_plot = function(rand_pairs, name = NULL) {
 #' `silhouette`. This list of matrices can be used to draw a silhouette plot.
 #' 
 #' @export
-clustra_sil = function(data, k, mccores, save = FALSE, verbose = FALSE) {
+clustra_sil = function(data, k, 
+                       model = list(id = "id", resp = c("response"), time = "time"),
+                       mccores, save = FALSE, verbose = FALSE) {
   sil = function(x) {
     ord = order(x)
     ck = ord[1]
@@ -183,7 +188,7 @@ clustra_sil = function(data, k, mccores, save = FALSE, verbose = FALSE) {
     kj = k[j]
     a_0 = deltime()
 
-    f = clustra(data, kj, mccores = mccores, verbose = verbose)
+    f = clustra(data, kj, model, mccores = mccores, verbose = verbose)
 
     ## prepare data for silhouette plot
     smat = as.data.frame(t(apply(f$loss, 1, sil)))
@@ -239,6 +244,8 @@ traj_rep = function(group, data, k, maxdf, iter) {
 #' The data (see \code{\link{clustra}} description).
 #' @param k
 #' Vector of k values to try.
+#' @param model
+#' See \code{\link{clustra}},
 #' @param mccores
 #' Number of cores for replicate parallelism via mclapply.
 #' @param replicates
@@ -255,17 +262,14 @@ traj_rep = function(group, data, k, maxdf, iter) {
 #' @return See \code{\link{allpair_RandIndex}}.
 #' 
 #' @export
-clustra_rand = function(data, k, mccores, replicates = 10, maxdf = 30,
+clustra_rand = function(data, k, 
+                        model = list(id = "id", resp = c("response"), time = "time"),
+                        mccores, replicates = 10, maxdf = 30,
                         iter = 10, save = FALSE, verbose = FALSE) {
   id = .GRP = ..group = NULL # for data.table R CMD check
   results = vector("list", replicates*length(k))
   
-  ## check for required variables in data
-  vnames = c("id", "time", "response")
-  if(!is.data.frame(data)) stop("Expecting class data frame and data.table.")
-  if(!data.table::is.data.table(data)) data = data.table::as.data.table(data)
-  if(!all(vnames %in% names(data))) 
-    stop(paste0("Expecting (", paste0(vnames, collapse = ","), ") in data."))
+  data = data.prep(data, model)
   
   data[, id:=.GRP, by=id] # replace group ids to be sequential
   

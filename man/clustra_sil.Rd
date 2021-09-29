@@ -2,19 +2,23 @@
 % Please edit documentation in R/evaluate.R
 \name{clustra_sil}
 \alias{clustra_sil}
-\title{clustra_sil:
-Performs \code{\link{clustra}} runs for several k and makes silhouette plots.
-Computes a proxy silhouette index based on distances to cluster
-centers rather than trajectory pairs. The cost is essentially that of
-running clustra for several k as this information is
-available directly from clustra.}
+\title{clustra_sil}
 \usage{
-clustra_sil(data, k, mccores, save = FALSE, verbose = FALSE)
+clustra_sil(
+  data,
+  k,
+  model = list(id = "id", resp = c("response"), time = "time"),
+  mccores,
+  save = FALSE,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{data}{The data (see \code{\link{clustra}} description).}
 
 \item{k}{Vector of k values to try.}
+
+\item{model}{See \code{\link{clustra}}.}
 
 \item{mccores}{See \code{\link{trajectories}}.}
 
@@ -28,7 +32,6 @@ a matrix with \code{nrow(data)} rows and three columns \code{cluster}, \code{nei
 \code{silhouette}. This list of matrices can be used to draw a silhouette plot.
 }
 \description{
-clustra_sil:
 Performs \code{\link{clustra}} runs for several k and makes silhouette plots.
 Computes a proxy silhouette index based on distances to cluster
 centers rather than trajectory pairs. The cost is essentially that of

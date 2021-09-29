@@ -7,6 +7,7 @@
 clustra(
   data,
   k,
+  model = list(id = "id", resp = c("response"), time = "time"),
   starts = c(1, 0),
   group = NULL,
   maxdf = 30,
@@ -21,6 +22,9 @@ response per observation. Required variables are (id, time, response).
 Other variables are ignored.}
 
 \item{k}{Number of clusters}
+
+\item{model}{A list with components id, response, and time. Specifies clustering
+variables in data as strings.}
 
 \item{starts}{A vector of length two. See \code{\link{start_groups}}.}
 

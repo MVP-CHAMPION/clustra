@@ -7,6 +7,7 @@
 clustra_rand(
   data,
   k,
+  model = list(id = "id", resp = c("response"), time = "time"),
   mccores,
   replicates = 10,
   maxdf = 30,
@@ -19,6 +20,8 @@ clustra_rand(
 \item{data}{The data (see \code{\link{clustra}} description).}
 
 \item{k}{Vector of k values to try.}
+
+\item{model}{See \code{\link{clustra}},}
 
 \item{mccores}{Number of cores for replicate parallelism via mclapply.}
 

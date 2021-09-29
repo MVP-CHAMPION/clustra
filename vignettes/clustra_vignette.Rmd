@@ -41,7 +41,9 @@ ggplot(data[id %in% sample(unique(data[, id]), 9)],
 Next, cluster the trajectories. Set *k=3*, spline max degrees of freedom to 30, and maximum iterations to 10. *mccores* sets the number of cores to use in various components of the code. Note that this does not work on Windows operating systems, where it should be left at 1. In the code that follows, we use verbose output to get information from each iteration.
 ```{r}
 set.seed(1234737)
-cl = clustra(data, k = 3, maxdf = 30, iter = 10, mccores = mc, verbose = TRUE)
+cl = clustra(data, k = 3, 
+             model = list(id = "id", resp = c("response"), time = "time"),
+             maxdf = 30, iter = 10, mccores = mc, verbose = TRUE)
 ```
 
 Next, plot the resulting fit with a sample of data, colored by the cluster value.
@@ -81,7 +83,9 @@ iplot = sample(unique(data2$id), 9)
 sampobs = match(data2$id, iplot, nomatch = 0) > 0
 ggplot(data2[sampobs], aes(x = time, y = response)) + 
   facet_wrap(~ id) + geom_point()
-cl = clustra(data2, k = 3, maxdf = 30, iter = 10, mccores = mc, verbose = TRUE)
+cl = clustra(data2, k = 3, 
+             model = list(id = "id", resp = c("response"), time = "time"),
+             maxdf = 30, iter = 10, mccores = mc, verbose = TRUE)
 MixSim::RandIndex(cl$data_group, data2[, true_group])
 ```
 The result is less perfect but still pretty good score. Now the plot:
@@ -112,7 +116,9 @@ ggplot(pdata, aes(x = time, y = pred, color = group)) +
 Average silhouette value is a way to select the number of clusters and a silhouette plot provides a way for a deeper evaluation (Rouseeuw 1986). As silhouette requires distances between trajectories, this is not possible due to unequal trajectory sampling without fitting a separate model for each id. As a proxy for distance between points, we use point distances to cluster means in the *clustra_sil()* function. The structure returned from the *clustra()* function contains the matrix *loss*, which has all the information needed to construct these proxy silhouette plots. The function *clustra_sil()* performs clustering for a number of *k* values and outputs information for the silhouette plot that is displayed next. We use the first data set with *noise = c(0, 5)*.
 ```{r fig.width = 7}
 set.seed(1234737)
-sil = clustra_sil(data, k = c(2, 3, 4), mccores = mc, verbose = TRUE)
+sil = clustra_sil(data, k = c(2, 3, 4), 
+                  model = list(id = "id", resp = c("response"), time = "time"),
+                  mccores = mc, verbose = TRUE)
 plot_sil = function(x) {
   msil = round(mean(x$silhouette), 2)
   ggplot(x, aes(id, silhouette, color = cluster, fill = cluster)) + geom_col() +
@@ -127,8 +133,9 @@ The plots show that 3 clusters give the best Average Width.
 Another way to select the number of clusters is the Rand Index comparing different random starts and different numbers of clusters. When we replicate clustering with different random seeds, the "replicability" is an indicator of how stable the results are for a given k, the number of clusters. For this demonstration, we look at *k = c(2, 3, 4)*, and 10 replicates for each *k*.
 ```{r fig.width = 7, fig.height=7}
 set.seed(1234737)
-ran = clustra_rand(data, k = c(2, 3, 4), mccores = mc, replicates = 10,
-                   verbose = TRUE)
+ran = clustra_rand(data, k = c(2, 3, 4),
+                   model = list(id = "id", resp = c("response"), time = "time"),
+                   mccores = mc, replicates = 10, verbose = TRUE)
 rand_plot(ran)
 ```
 The plot shows Adjusted Rand Index similarity level between all pairs of 30 clusterings (10 random starts for each of 2, 3, and 4 clusters). The ten random starts agree the most for *k*=3. From the deviance results shown during iterations, we also see that all of the *k*=3 clusters are near the best deviance attainable even with *k* = 4. Among the *k* = 4 results, in each replicate, two of four clusters also show the same cluster counts as the *k* = 3 cluster results and split a third cluster into two parts.
