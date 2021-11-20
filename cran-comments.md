@@ -1,6 +1,7 @@
 ## Test environments
-* local x86_64-apple-darwin17.0 (64-bit), OS X 10.15.7, R 4.1.0
+* local x86_64-apple-darwin17.0 (64-bit), OS X 10.16.1, R 4.1.1
 * win-builder (release and devel)
+* R-hub builder (Fedora Linux, R-devel, clang, gfortran)
 
 ## R CMD check results
 There were no ERRORs or WARNINGs. 
@@ -22,5 +23,6 @@ This is a resubmission. In this version, the following are my changes and explan
 * All .Rd files now have a `\value` field.  
 * `on.exit()` now added to prevent user `par()` changes in `R/evaluate.R`.
 * Oak Ridge National Laboratory added as `"cph"` in `Author@R`
+* U.S. Department of Veteran's Affairs added as `"fnd"` in `Author@R`
 
 Many thanks for your help that now results in a far better documented package!

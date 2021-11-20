@@ -1,6 +1,6 @@
 Package: clustra
 Version: 0.1.5
-Date: 2021-07-27
+Date: 2021-11-19
 Title: Clustering Trajectories Anchored at Intervention Time
 Authors@R: c(person("George", "Ostrouchov", role = c("aut", "cre"), email = 
         "ostrouchovg@ornl.gov"),
@@ -18,7 +18,6 @@ Imports:
     data.table,
     graphics,
     grDevices,
-    iotools,
     methods,
     mgcv,
     MixSim,
@@ -29,16 +28,16 @@ Suggests:
     knitr,
     rmarkdown
 Description: Clusters medical trajectories (unequally spaced and unequal 
-    lengths) aligned by an intervention time. Performs k-means clustering,
-    where each mean is a thin plate spline fit to all points in a cluster. 
-    Distance is MSE across trajectory points to cluster spline. Provides
-    silhouette plots and Adjusted Rand Index evaluations of the number of
-    clusters. Scales well to large data with multicore parallelism available
+    length time series) aligned by an intervention time. Performs k-means 
+    clustering, where each mean is a thin plate spline fit to all points in 
+    a cluster. Distance is MSE across trajectory points to cluster spline.
+    Provides silhouette plots and Adjusted Rand Index evaluations of the number
+    of clusters. Scales well to large data with multicore parallelism available
     to speed computation.
 LazyLoad: yes
 License: BSD 2-clause License + file LICENSE
 Encoding: UTF-8
 Maintainer: George Ostrouchov <ostrouchovg@ornl.gov>
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 VignetteBuilder: knitr
