@@ -159,6 +159,10 @@ rand_plot = function(rand_pairs, name = NULL) {
 #' Vector of k values to try.
 #' @param mccores
 #' See \code{\link{trajectories}}.
+#' @param maxdf
+#' Fitting parameters. See \code{\link{trajectories}}.
+#' @param iter
+#' Fitting parameters. See \code{\link{trajectories}}.
 #' @param save
 #' Logical. When TRUE, save all results as file `clustra_sil.Rdata`.
 #' @param verbose
@@ -169,7 +173,8 @@ rand_plot = function(rand_pairs, name = NULL) {
 #' `silhouette`. This list of matrices can be used to draw a silhouette plot.
 #' 
 #' @export
-clustra_sil = function(data, k, mccores, save = FALSE, verbose = FALSE) {
+clustra_sil = function(data, k, mccores, maxdf = 30, iter = 10,
+                       save = FALSE, verbose = FALSE) {
   sil = function(x) {
     ord = order(x)
     ck = ord[1]
@@ -183,7 +188,8 @@ clustra_sil = function(data, k, mccores, save = FALSE, verbose = FALSE) {
     kj = k[j]
     a_0 = deltime()
 
-    f = clustra(data, kj, mccores = mccores, verbose = verbose)
+    f = clustra(data, kj, mccores = mccores, maxdf = maxdf, iter = iter,
+                verbose = verbose)
 
     ## prepare data for silhouette plot
     smat = as.data.frame(t(apply(f$loss, 1, sil)))

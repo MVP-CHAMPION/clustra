@@ -9,7 +9,15 @@ centers rather than trajectory pairs. The cost is essentially that of
 running clustra for several k as this information is
 available directly from clustra.}
 \usage{
-clustra_sil(data, k, mccores, save = FALSE, verbose = FALSE)
+clustra_sil(
+  data,
+  k,
+  mccores,
+  maxdf = 30,
+  iter = 10,
+  save = FALSE,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{data}{The data (see \code{\link{clustra}} description).}
@@ -17,6 +25,10 @@ clustra_sil(data, k, mccores, save = FALSE, verbose = FALSE)
 \item{k}{Vector of k values to try.}
 
 \item{mccores}{See \code{\link{trajectories}}.}
+
+\item{maxdf}{Fitting parameters. See \code{\link{trajectories}}.}
+
+\item{iter}{Fitting parameters. See \code{\link{trajectories}}.}
 
 \item{save}{Logical. When TRUE, save all results as file \code{clustra_sil.Rdata}.}
 
