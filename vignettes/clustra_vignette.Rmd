@@ -26,7 +26,7 @@ We also set *RNGkind* and *seed* for reproducibility. Code below generates the d
 ```{r}
 library(clustra)
 mc = 1 # If running on a unix or a Mac platform, change to number of cores
-set.seed(1234567)
+set.seed(12345)
 data = gen_traj_data(n_id = c(400, 800, 1600), m_obs = 25, 
                      s_range = c(-365, -14), e_range = c(0.5*365, 2*365),
                      noise = c(0, 5))
@@ -131,7 +131,7 @@ ran = clustra_rand(data, k = c(2, 3, 4), mccores = mc, replicates = 10,
                    iter = 7, verbose = TRUE)
 rand_plot(ran)
 ```
-The plot shows Adjusted Rand Index similarity level between all pairs of 30 clusterings (10 random starts for each of 2, 3, and 4 clusters). The ten random starts agree the most for *k*=3. From the deviance results shown during iterations, we also see that all of the *k*=3 clusters are near the best deviance attainable even with *k* = 4. Among the *k* = 4 results, five converged to only three clusters that agree with *k*=3 results.
+The plot shows Adjusted Rand Index similarity level between all pairs of 30 clusterings (10 random starts for each of 2, 3, and 4 clusters). The ten random starts agree the most for *k*=3. From the deviance results shown during iterations, we also see that all of the *k*=3 clusters are near the best deviance attainable even with *k* = 4. Among the *k* = 4 results, several converged to only three clusters that agree with *k*=3 results.
 
 Another possible evaluation of the number of clusters is to first ask clustra for a large number of clusters, evaluate the cluster centers on a common set of time points, and feed the resulting matrix to a hierarchical clustering function. Below, we ask for 40 clusters on the *data2* data set but actually get back only 26 because several become empty or too small for *maxdf*. Below, the *hclust()* function clusters the 26 resulting cluster means, each evaluated on 100 time points.
 ```{r fig.width = 7, fig.height = 7}
