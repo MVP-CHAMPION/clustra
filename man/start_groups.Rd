@@ -4,7 +4,7 @@
 \alias{start_groups}
 \title{Function to assign starting groups.}
 \usage{
-start_groups(data, k, starts, maxdf, iter, mccores = 1, verbose = FALSE)
+start_groups(data, k, starts, maxdf, conv, mccores = 1, verbose = FALSE)
 }
 \arguments{
 \item{data}{Data.table with response measurements, one per observation.
@@ -24,7 +24,7 @@ pairwise distances between models on a time grid of \code{2*maxdf} points.}
 
 \item{maxdf}{Fitting parameters. See \code{\link{trajectories}}.}
 
-\item{iter}{Fitting parameters. See \code{\link{trajectories}}.}
+\item{conv}{Fitting parameters. See \code{\link{trajectories}}.}
 
 \item{mccores}{See \code{\link{trajectories}}.}
 

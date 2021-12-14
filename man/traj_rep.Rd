@@ -4,7 +4,7 @@
 \alias{traj_rep}
 \title{Function to run trajectories inside mclapply with one core.}
 \usage{
-traj_rep(group, data, k, maxdf, iter)
+traj_rep(group, data, k, maxdf, conv)
 }
 \arguments{
 \item{group}{Vector of starting group values for unique id's.}
@@ -15,7 +15,7 @@ traj_rep(group, data, k, maxdf, iter)
 
 \item{maxdf}{Fitting parameters. See \code{\link{trajectories}}.}
 
-\item{iter}{Fitting parameters. See \code{\link{trajectories}}.}
+\item{conv}{Fitting parameters. See \code{\link{trajectories}}.}
 }
 \value{
 See return of {\code{\link{trajectories}}}.

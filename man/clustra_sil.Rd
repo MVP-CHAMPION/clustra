@@ -2,33 +2,31 @@
 % Please edit documentation in R/evaluate.R
 \name{clustra_sil}
 \alias{clustra_sil}
-\title{clustra_sil:
-Performs \code{\link{clustra}} runs for several k and makes silhouette plots.
-Computes a proxy silhouette index based on distances to cluster
-centers rather than trajectory pairs. The cost is essentially that of
-running clustra for several k as this information is
-available directly from clustra.}
+\title{clustra_sil: Prepare silhouette plot data for several k or for a previous
+clustra run}
 \usage{
 clustra_sil(
   data,
-  k,
-  mccores,
+  k = NULL,
+  mccores = 1,
   maxdf = 30,
-  iter = 10,
+  conv = c(10, 0),
   save = FALSE,
   verbose = FALSE
 )
 }
 \arguments{
-\item{data}{The data (see \code{\link{clustra}} description).}
+\item{data}{Either a data.frame (\code{data} parameter of \code{\link{trajectories}})
+or the output from a \code{clustra} run. See Details.}
 
-\item{k}{Vector of k values to try.}
+\item{k}{Vector of k values to try. If output from \code{clustra} is the \code{data} parameter,
+\code{k} can be left NULL or set to the number of clusters used.}
 
 \item{mccores}{See \code{\link{trajectories}}.}
 
 \item{maxdf}{Fitting parameters. See \code{\link{trajectories}}.}
 
-\item{iter}{Fitting parameters. See \code{\link{trajectories}}.}
+\item{conv}{Fitting parameters. See \code{\link{trajectories}}.}
 
 \item{save}{Logical. When TRUE, save all results as file \code{clustra_sil.Rdata}.}
 
@@ -40,10 +38,18 @@ a matrix with \code{nrow(data)} rows and three columns \code{cluster}, \code{nei
 \code{silhouette}. This list of matrices can be used to draw a silhouette plot.
 }
 \description{
-clustra_sil:
-Performs \code{\link{clustra}} runs for several k and makes silhouette plots.
-Computes a proxy silhouette index based on distances to cluster
+Performs \code{\link{clustra}} runs for several k and prepares silhouette
+plot data. Computes a proxy silhouette index based on distances to cluster
 centers rather than trajectory pairs. The cost is essentially that of
-running clustra for several k as this information is
-available directly from clustra.
+running clustra for several k as this information is available directly from
+clustra. Can also reuse a previous clustra run and produce data for a single
+silhouette plot.
+}
+\details{
+When given the raw data as the first parameter (input \code{data} parameter of
+\code{\link{trajectories}}), \code{k} can also specify a vector of cluster numbers
+to run \code{clustra} and then produce silhouette plots for each of them.
+Alternatively, the input can be the output from a \code{clustra} run, in which
+case data for a single silhouette plot will be made without rerunning
+\code{clustra}.
 }

@@ -4,7 +4,15 @@
 \alias{trajectories}
 \title{Cluster longitudinal trajectories of a response variable.}
 \usage{
-trajectories(data, k, group, maxdf, iter, mccores, verbose = FALSE)
+trajectories(
+  data,
+  k,
+  group,
+  maxdf,
+  conv = c(10, 0),
+  mccores = 1,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{data}{Data frame with response measurements, one per observation. Column
@@ -19,7 +27,10 @@ numbers to \code{id}s.}
 \item{maxdf}{Integer. Basis dimension of smooth term. See \code{\link[mgcv]{s}} function
 parameter \code{k}, in package \code{mgcv}.}
 
-\item{iter}{Integer. Maximum number of EM iterations.}
+\item{conv}{A vector of length two, \code{c(iter, minchange)}, where \code{iter} is the maximum
+number of EM iterations and \code{minchange} is the minimum percentage of subjects
+changing group to continue iterations. Setting \code{minchange} to zero continues
+iterations until no more changes occur or \code{maxiter} is reached.}
 
 \item{mccores}{Integer number of cores to use by \code{mclapply} sections. Parallelization is
 over \code{k}, the number of clusters.}

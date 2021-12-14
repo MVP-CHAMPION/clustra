@@ -10,7 +10,7 @@ clustra(
   starts = c(1, 0),
   group = NULL,
   maxdf = 30,
-  iter = 10,
+  conv = c(10, 0),
   mccores = 1,
   verbose = FALSE
 )
@@ -30,7 +30,7 @@ Normally, this is NULL and good starts are provided by
 
 \item{maxdf}{Fitting parameters. See \code{\link{trajectories}}.}
 
-\item{iter}{Fitting parameters. See \code{\link{trajectories}}.}
+\item{conv}{Fitting parameters. See \code{\link{trajectories}}.}
 
 \item{mccores}{See \code{\link{trajectories}}.}
 
@@ -48,7 +48,7 @@ more details.
 set.seed(13)
 data = gen_traj_data(n_id = c(50, 100), m_obs = 20, s_range = c(-365, -14),
               e_range = c(0.5*365, 2*365))
-cl = clustra(data, k = 2, maxdf = 20, iter = 5, verbose = TRUE)
+cl = clustra(data, k = 2, maxdf = 20, conv = c(5, 0), verbose = TRUE)
 tabulate(data$group)
 tabulate(data$true_group)
 

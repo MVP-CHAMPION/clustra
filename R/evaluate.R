@@ -146,35 +146,49 @@ rand_plot = function(rand_pairs, name = NULL) {
   invisible(name)
 }
 
-#' clustra_sil:
-#' Performs \code{\link{clustra}} runs for several k and makes silhouette plots.
-#' Computes a proxy silhouette index based on distances to cluster
+#' clustra_sil: Prepare silhouette plot data for several k or for a previous 
+#' clustra run
+#' 
+#' Performs \code{\link{clustra}} runs for several k and prepares silhouette
+#' plot data. Computes a proxy silhouette index based on distances to cluster
 #' centers rather than trajectory pairs. The cost is essentially that of
-#' running clustra for several k as this information is
-#' available directly from clustra.
+#' running clustra for several k as this information is available directly from
+#' clustra. Can also reuse a previous clustra run and produce data for a single
+#' silhouette plot.
 #' 
 #' @param data
-#' The data (see \code{\link{clustra}} description).
+#' Either a data.frame (`data` parameter of \code{\link{trajectories}}) 
+#' or the output from a `clustra` run. See Details.
 #' @param k
-#' Vector of k values to try.
+#' Vector of k values to try. If output from `clustra` is the `data` parameter,
+#' `k` can be left NULL or set to the number of clusters used.
 #' @param mccores
 #' See \code{\link{trajectories}}.
 #' @param maxdf
 #' Fitting parameters. See \code{\link{trajectories}}.
-#' @param iter
+#' @param conv
 #' Fitting parameters. See \code{\link{trajectories}}.
 #' @param save
 #' Logical. When TRUE, save all results as file `clustra_sil.Rdata`.
 #' @param verbose
 #' Logical. When TRUE, information about each run of clustra is printed.
 #' 
+#' @details 
+#' When given the raw data as the first parameter (input `data` parameter of
+#' \code{\link{trajectories}}), `k` can also specify a vector of cluster numbers
+#' to run `clustra` and then produce silhouette plots for each of them. 
+#' Alternatively, the input can be the output from a `clustra` run, in which
+#' case data for a single silhouette plot will be made without rerunning 
+#' `clustra`.
+#' 
 #' @return Invisibly returns a list of length `length(k)`, where each element is
 #' a matrix with `nrow(data)` rows and three columns `cluster`, `neighbor`, 
 #' `silhouette`. This list of matrices can be used to draw a silhouette plot.
 #' 
 #' @export
-clustra_sil = function(data, k, mccores, maxdf = 30, iter = 10,
+clustra_sil = function(data, k = NULL, mccores = 1, maxdf = 30, conv = c(10, 0),
                        save = FALSE, verbose = FALSE) {
+
   sil = function(x) {
     ord = order(x)
     ck = ord[1]
@@ -182,14 +196,40 @@ clustra_sil = function(data, k, mccores, maxdf = 30, iter = 10,
     s = (x[nk] - x[ck])/max(x[ck], x[nk])
     c(ck, nk, s)
   }
+
+  ## verify data and k agreement
+  if(is.data.frame(data) && is.null(k)) {
+    cat("clustra_sil: error: must specify k \n")
+    return(NULL)
+  } else if(is.matrix(data$loss)) {
+      if(is.null(k)) {
+        k = ncol(data$loss)
+      } else if(k != ncol(data$loss)) {
+        cat("clustra: misspecified k")
+        return()
+      }
+  } else if(is.data.frame(data)) {
+    if(length(k) < 1) {
+      cat("clustra: misspecified k")
+      return(NULL)
+    }
+  } else {
+    cat("clustra_sil: error: Expecting data.frame or output from clustra.\n")
+    return(NULL)
+  }
+  
   results = vector("list", length(k))
   
   for(j in 1:length(k)) {
     kj = k[j]
     a_0 = deltime()
 
-    f = clustra(data, kj, mccores = mccores, maxdf = maxdf, iter = iter,
+    if(is.data.frame(data)) {
+      f = clustra(data, kj, mccores = mccores, maxdf = maxdf, conv = conv,
                 verbose = verbose)
+    } else {
+      f = list(loss = data$loss)
+    }
 
     ## prepare data for silhouette plot
     smat = as.data.frame(t(apply(f$loss, 1, sil)))
@@ -199,8 +239,6 @@ clustra_sil = function(data, k, mccores, maxdf = 30, iter = 10,
     smat$cluster = as.factor(smat$cluster)
     results[[j]] = smat
       
-    if(verbose) cat("\nSil:", kj, "Dev:", f$deviance, "Err:", f$try_errors, "LCh:",
-                    f$changes, "\n")
     rm(f, smat)
     gc()
   }
@@ -221,16 +259,16 @@ clustra_sil = function(data, k, mccores, maxdf = 30, iter = 10,
 #' Integer number of clusters.
 #' @param maxdf
 #' Fitting parameters. See \code{\link{trajectories}}.
-#' @param iter
+#' @param conv
 #' Fitting parameters. See \code{\link{trajectories}}.
 #' 
 #' @return
 #' See return of {\code{\link{trajectories}}}.
 #' 
-traj_rep = function(group, data, k, maxdf, iter) {
+traj_rep = function(group, data, k, maxdf, conv) {
   id = ..group = NULL
   data[, group:=..group[id]] # expand group to all data
-  trajectories(data, k, group, maxdf, iter, 1, verbose = FALSE)
+  trajectories(data, k, group, maxdf, conv, 1, verbose = FALSE)
 }
 
 #' clustra_rand: Rand Index cluster evaluation
@@ -251,7 +289,7 @@ traj_rep = function(group, data, k, maxdf, iter) {
 #' Number of replicates for each k.
 #' @param maxdf
 #' Fitting parameters. See \code{link{trajectories}}.
-#' @param iter
+#' @param conv
 #' Fitting parameters. See \code{link{trajectories}}.
 #' @param save
 #' Logical. When TRUE, save all results as file \code{results.Rdata}.
@@ -262,7 +300,7 @@ traj_rep = function(group, data, k, maxdf, iter) {
 #' 
 #' @export
 clustra_rand = function(data, k, mccores, replicates = 10, maxdf = 30,
-                        iter = 10, save = FALSE, verbose = FALSE) {
+                        conv = c(10, 0), save = FALSE, verbose = FALSE) {
   id = .GRP = ..group = NULL # for data.table R CMD check
   results = vector("list", replicates*length(k))
   
@@ -283,10 +321,10 @@ clustra_rand = function(data, k, mccores, replicates = 10, maxdf = 30,
     ## Set starting groups outside parallel section to guarantee reproducibility
     grp = lapply(rep(kj, replicates), sample.int, size = n_id, replace = TRUE)
     f = parallel::mclapply(grp, traj_rep, data = data, k = kj, maxdf = maxdf,
-                           iter = iter, mc.cores = mccores)
-    fer = lapply(f, function(f, maxdf, iter)
-      if(!is.null( (er = xit_report(f, maxdf, iter)) )) {
-        return(er)} else return(NULL), maxdf = maxdf, iter = iter)
+                           conv = conv, mc.cores = mccores)
+    fer = lapply(f, function(f, maxdf, conv)
+      if(!is.null( (er = xit_report(f, maxdf, conv)) )) {
+        return(er)} else return(NULL), maxdf = maxdf, conv = conv)
     for(i in 1:replicates) {
       results[[(j - 1)*replicates + i]] = list(k = as.integer(kj), 
                                                rep = as.integer(i),
