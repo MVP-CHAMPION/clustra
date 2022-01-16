@@ -2,7 +2,7 @@
 % Please edit documentation in R/trajectories.R
 \name{trajectories}
 \alias{trajectories}
-\title{Cluster longitudinal trajectories of a response variable.}
+\title{Cluster longitudinal trajectories over time.}
 \usage{
 trajectories(
   data,
@@ -15,9 +15,9 @@ trajectories(
 )
 }
 \arguments{
-\item{data}{Data frame with response measurements, one per observation. Column
-names are \code{id}, \code{time}, \code{response}, \code{group}. Note that
-\code{id}s must be already sequential starting from 1. This affects expanding group
+\item{data}{Data table or data frame with response measurements, one per observation.
+Column names are \code{id}, \code{time}, \code{response}, \code{group}. Note that
+\code{id}s must be sequential starting from 1. This affects expanding group
 numbers to \code{id}s.}
 
 \item{k}{Number of clusters (groups)}
@@ -63,8 +63,9 @@ the last iteration. This is zero if converged.
 }
 }
 \description{
-Trajectory means are thin plate splines fit to all ids in a cluster.
-Typically, this function is called by \code{\link{clustra}}.
+Performs k-means clustering on continuous \code{response} measured over \code{time},
+where each mean is defined by a thin plate spline fit to all points in a
+cluster. Typically, this function is called by \code{\link{clustra}}.
 }
 \author{
 George Ostrouchov and David Gagnon

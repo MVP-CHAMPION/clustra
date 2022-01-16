@@ -2,7 +2,7 @@
 % Please edit documentation in R/trajectories.R
 \name{clustra}
 \alias{clustra}
-\title{Cluster trajectories}
+\title{Cluster longitudinal trajectories over time}
 \usage{
 clustra(
   data,
@@ -37,12 +37,15 @@ Normally, this is NULL and good starts are provided by
 \item{verbose}{Logical to turn on more output during fit iterations.}
 }
 \value{
-A list returned by \code{\link{trajectories}}.
+A list returned by \code{\link{trajectories}} plus one more element \code{ido},
+giving the original id numbers.
 }
 \description{
-Most users will run the wrapper \code{\link{clustra}} function, which takes
-care of starting values. See vignette("clustra_vignette.Rmd") for
-more details.
+The usual top level function for clustering longitudinal trajectories. After
+initial setup, it calls \code{\link{trajectories}} to perform k-means
+clustering on continuous \code{response} measured over \code{time}, where each mean
+is defined by a thin plate spline fit to all points in a cluster. See
+\code{clustra_vignette.Rmd} for examples of use.
 }
 \examples{
 set.seed(13)

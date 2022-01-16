@@ -228,15 +228,16 @@ start_groups = function(data, k, starts, maxdf, conv, mccores = 1,
 }
 
 
-#' Cluster longitudinal trajectories of a response variable.
+#' Cluster longitudinal trajectories over time.
 #'
-#' Trajectory means are thin plate splines fit to all ids in a cluster. 
-#' Typically, this function is called by \code{\link{clustra}}.
+#' Performs k-means clustering on continuous `response` measured over `time`, 
+#' where each mean is defined by a thin plate spline fit to all points in a
+#' cluster. Typically, this function is called by \code{\link{clustra}}.
 #'
 #' @param data
-#' Data frame with response measurements, one per observation. Column
-#' names are `id`, `time`, `response`, `group`. Note that
-#' `id`s must be already sequential starting from 1. This affects expanding group
+#' Data table or data frame with response measurements, one per observation.
+#' Column names are `id`, `time`, `response`, `group`. Note that
+#' `id`s must be sequential starting from 1. This affects expanding group
 #' numbers to `id`s.
 #' @param k
 #' Number of clusters (groups)
@@ -397,11 +398,13 @@ xit_report = function(cl, maxdf, conv) {
   xit
 }
 
-#' Cluster trajectories
+#' Cluster longitudinal trajectories over time
 #'
-#' Most users will run the wrapper \code{\link{clustra}} function, which takes
-#' care of starting values. See vignette("clustra_vignette.Rmd") for
-#' more details.
+#' The usual top level function for clustering longitudinal trajectories. After
+#' initial setup, it calls \code{\link{trajectories}} to perform k-means 
+#' clustering on continuous `response` measured over `time`, where each mean 
+#' is defined by a thin plate spline fit to all points in a cluster. See
+#' `clustra_vignette.Rmd` for examples of use.
 #'
 #' @param data
 #' Data frame or, preferably, also a data.table with response measurements, one
@@ -425,7 +428,8 @@ xit_report = function(cl, maxdf, conv) {
 #' Logical to turn on more output during fit iterations.
 #' 
 #' @return 
-#' A list returned by \code{\link{trajectories}}.
+#' A list returned by \code{\link{trajectories}} plus one more element `ido`,
+#' giving the original id numbers.
 #' 
 #' @examples
 #' set.seed(13)
@@ -438,7 +442,7 @@ xit_report = function(cl, maxdf, conv) {
 #' @export
 clustra = function(data, k, starts = c(1, 0), group = NULL, maxdf = 30,
                    conv = c(10, 0), mccores = 1, verbose = FALSE) {
-  id = .GRP = ..group = NULL # for data.table R CMD check
+  id = .GRP = .SD = ..group = NULL # for data.table R CMD check
   
   ## check for required variables in data
   vnames = c("id", "time", "response")
@@ -447,8 +451,11 @@ clustra = function(data, k, starts = c(1, 0), group = NULL, maxdf = 30,
   if(!all(vnames %in% names(data))) 
     stop(paste0("Expecting (", paste0(vnames, collapse = ","), ") in data."))
   
-  ## replace id's to be sequential
-  data[, id:=.GRP, by=id] 
+  ## replace id's to be sequential for faster cluster to data expansions
+  ##   keep old id numbers in `ido`
+  ido = data[, .SD[1], id][, id]
+  data[, id:=.GRP, by=id]
+  
   n_id = data[, data.table::uniqueN(id)]
   
   ## get initial group assignments
@@ -468,6 +475,7 @@ clustra = function(data, k, starts = c(1, 0), group = NULL, maxdf = 30,
   cl = trajectories(data, k, group, maxdf, conv, mccores, verbose = verbose)
   er = xit_report(cl, maxdf, conv)
   if(verbose && !is.null(er)) cat(" ", er, "\n")
+  cl$ido = ido
 
   cl
 }
