@@ -25,18 +25,24 @@
 #' An `n_obs` by 4 matrix with columns `id`, `time`, `response`, `true_group`.
 #' 
 oneid = function(id, n_obs, type, start, end, smin, emax, reference, noise) {
+  type = combn(3,2)[, type]
   id = rep(id, n_obs)
   true_group = rep(type, n_obs)
   time = c(start, sort(floor(runif(n_obs - 3, min = start, max = end))), end)
   time = c(time[time <= 0], 0, time[time > 0]) # insert 0
   
   ## TODO add user supplied functions
-  response = switch(type, # 1 = constant, 2 = sin, 3 = sigmoid
+  response1 = switch(type[1], # 1 = constant, 2 = sin, 3 = sigmoid
                     rep(reference, length(time)), # constant
                     reference*sin(pi/2 + pi*time/emax), # part of sin curve
                     reference*(1 - 1/(1 + exp(-time/emax*5))) # 1 - sigmoid
   ) + rnorm(n_obs, mean = noise[1], sd = noise[2])
-  cbind(id, time, response, true_group)
+  response2 = switch(type[2], # 1 = constant, 2 = sin, 3 = sigmoid
+                     rep(reference, length(time)), # constant
+                     reference*sin(pi/2 + pi*time/emax), # part of sin curve
+                     reference*(1 - 1/(1 + exp(-time/emax*5))) # 1 - sigmoid
+  ) + rnorm(n_obs, mean = noise[1], sd = noise[2])
+  cbind(id, time, response1, response2, true_group)
 }
 
 #' gendata
@@ -127,8 +133,10 @@ gendata = function(n_id, m_obs, s_range, e_range, min_obs, reference, noise) {
 #' 
 #' @importFrom stats dist rnorm rpois runif
 #' @export
-gen_traj_data = function(n_id, m_obs, s_range, e_range, reference = 100,
-                         noise = c(0, abs(reference/20)), min_obs = 3)
+gen_traj_data = function(n_id, m_obs, s_range, e_range, 
+                         reference = c(80, 120),
+                         ##TODO fix noise for more responses
+                         noise = c(0, abs(mean(reference)/20)), min_obs = 3)
 {
   if(length(n_id) > 3) stop("Don't know how to generate more than 3 clusters")
   id_list = gendata(n_id, m_obs, s_range, e_range, min_obs, reference, noise)
