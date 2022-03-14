@@ -25,7 +25,7 @@
 #' An `n_obs` by 4 matrix with columns `id`, `time`, `response`, `true_group`.
 #' 
 oneid = function(id, n_obs, type, start, end, smin, emax, reference, noise) {
-  type = combn(3,2)[, type]
+  type = combn(3,2)[ , type]
   id = rep(id, n_obs)
   true_group = rep(type, n_obs)
   time = c(start, sort(floor(runif(n_obs - 3, min = start, max = end))), end)
