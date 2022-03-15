@@ -25,19 +25,19 @@
 #' An `n_obs` by 4 matrix with columns `id`, `time`, `response`, `true_group`.
 #' 
 oneid = function(id, n_obs, type, start, end, smin, emax, reference, noise) {
-  lines = combn(3,2)[, type]
+  responses = combn(3,2)[, type]
   id = rep(id, n_obs)
   true_group = rep(type, n_obs)
   time = c(start, sort(floor(runif(n_obs - 3, min = start, max = end))), end)
   time = c(time[time <= 0], 0, time[time > 0]) # insert 0
   
   ## TODO add user supplied functions
-  response1 = switch(lines[1], # 1 = constant, 2 = sin, 3 = sigmoid
+  response1 = switch(responses[1], # 1 = constant, 2 = sin, 3 = sigmoid
                     rep(reference, length(time)), # constant
                     reference*sin(pi/2 + pi*time/emax), # part of sin curve
                     reference*(1 - 1/(1 + exp(-time/emax*5))) # 1 - sigmoid
   ) + rnorm(n_obs, mean = noise[1], sd = noise[2])
-  response2 = switch(lines[2], # 1 = constant, 2 = sin, 3 = sigmoid
+  response2 = switch(responses[2], # 1 = constant, 2 = sin, 3 = sigmoid
                      rep(reference, length(time)), # constant
                      reference*sin(pi/2 + pi*time/emax), # part of sin curve
                      reference*(1 - 1/(1 + exp(-time/emax*5))) # 1 - sigmoid
