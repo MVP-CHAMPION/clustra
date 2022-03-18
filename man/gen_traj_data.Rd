@@ -4,7 +4,16 @@
 \alias{gen_traj_data}
 \title{Data Generators}
 \usage{
-gen_traj_data(vars, clusters, m_obs, s_range, e_range, min_obs = 3, cv = 0.1)
+gen_traj_data(
+  vars,
+  clusters,
+  m_obs,
+  s_range,
+  e_range,
+  min_obs = 3,
+  cv = 0.1,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{vars}{A character vecor of variable names}

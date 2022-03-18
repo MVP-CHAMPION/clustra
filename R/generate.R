@@ -136,7 +136,7 @@ gendata = function(vars, clusters, m_obs, s_range, e_range, min_obs) {
 #' @importFrom stats dist rnorm rpois runif
 #' @export
 gen_traj_data = function(vars, clusters, m_obs, s_range, e_range, min_obs = 3,
-                         cv = 0.1)
+                         cv = 0.1, verbose = FALSE)
 {
   if(is.numeric(clusters)) {
     if(length(clusters) == 1) {
@@ -158,6 +158,7 @@ gen_traj_data = function(vars, clusters, m_obs, s_range, e_range, min_obs = 3,
       stop("gen_traj_data: clusters parameter invalid class")
     }
   }
+  if(verbose) print(clusters)
 
   id_list = gendata(vars, clusters, m_obs, s_range, e_range, min_obs)
   id_mat = do.call(rbind, id_list)

@@ -7,7 +7,7 @@
 clustra(
   data,
   k,
-  model = list(id = "id", resp = c("response"), time = "time"),
+  model,
   starts = c(1, 0),
   group = NULL,
   maxdf = 30,

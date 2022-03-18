@@ -16,7 +16,7 @@
 #' 
 data.prep = function(data, model) {
   ## check if variables are present in data, then replace with standard
-  ## names (id, response, time) and return data.table with only these
+  ## names (id, time, response) and return data.table with only these
   if(!is.data.frame(data)) stop("clustra: Expecting a data frame.")
   
   model.vec = c(model$resp, model$time, model$id)
@@ -473,8 +473,7 @@ xit_report = function(cl, maxdf, conv) {
 #' tabulate(data$true_group)
 #'
 #' @export
-clustra = function(data, k, 
-                   model = list(id = "id", resp = c("response"), time = "time"),
+clustra = function(data, k, model,
                    starts = c(1, 0), group = NULL, maxdf = 30,
                    conv = c(10, 0), mccores = 1, verbose = FALSE) {
   id = .GRP = .SD = ..group = NULL # for data.table R CMD check
