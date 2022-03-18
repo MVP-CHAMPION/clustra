@@ -43,7 +43,7 @@ Next, cluster the trajectories. Set *k=3*, spline max degrees of freedom to 30, 
 ```{r}
 set.seed(1234737)
 cl = clustra(data, k = 4, 
-             model = list(id = "id", time = "time", resp = c("sys")),
+             model = list(id = "id", time = "time", resp = vars),
              maxdf = 30, conv = c(10, 1), mccores = mc, verbose = TRUE)
 ```
 
