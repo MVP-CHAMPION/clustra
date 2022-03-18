@@ -176,7 +176,7 @@ check_df = function(group, loss, data, maxdf) {
 #' pairwise distances between models on a time grid of `2*maxdf` points.
 #' @param maxdf
 #' Fitting parameters. See \code{\link{trajectories}}.
-#' @param iter
+#' @param conv
 #' Fitting parameters. See \code{\link{trajectories}}.
 #' @param mccores
 #' See \code{\link{trajectories}}.
@@ -188,7 +188,7 @@ check_df = function(group, loss, data, maxdf) {
 #'
 #' @importFrom methods is
 #' @export
-start_groups = function(data, k, starts, maxdf, iter, mccores = 1,
+start_groups = function(data, k, starts, maxdf, conv, mccores = 1,
                         verbose = FALSE) {
   time = response = id = .GRP = ..group = NULL # for data.table R CMD check
   
@@ -217,10 +217,10 @@ start_groups = function(data, k, starts, maxdf, iter, mccores = 1,
   for(i in 1:starts[1]) {
     data_start[, group:=..group[id]] # replicate group numbers to ids
 
-    iter = 1  # use single fit iteration for starts
-    f = trajectories(data_start, k, group, maxdf, iter, mccores = mccores,
+    conv = c(1, 0)  # use single fit iteration for starts
+    f = trajectories(data_start, k, group, maxdf, conv, mccores = mccores,
                      verbose = verbose)
-    er = xit_report(f, maxdf, iter)
+    er = xit_report(f, maxdf, conv)
     if(verbose && !is.null((er))) cat(" ", er)
 
     diversity = sum(dist( # compute diversity of fit across test data
@@ -258,15 +258,16 @@ start_groups = function(data, k, starts, maxdf, iter, mccores = 1,
 }
 
 
-#' Cluster longitudinal trajectories of a response variable.
+#' Cluster longitudinal trajectories over time.
 #'
-#' Trajectory means are thin plate splines fit to all ids in a cluster. 
-#' Typically, this function is called by \code{\link{clustra}}.
+#' Performs k-means clustering on continuous `response` measured over `time`, 
+#' where each mean is defined by a thin plate spline fit to all points in a
+#' cluster. Typically, this function is called by \code{\link{clustra}}.
 #'
 #' @param data
-#' Data frame with response measurements, one per observation. Column
-#' names are `id`, `time`, `response`, `group`. Note that
-#' `id`s must be already sequential starting from 1. This affects expanding group
+#' Data table or data frame with response measurements, one per observation.
+#' Column names are `id`, `time`, `response`, `group`. Note that
+#' `id`s must be sequential starting from 1. This affects expanding group
 #' numbers to `id`s.
 #' @param k
 #' Number of clusters (groups)
@@ -275,8 +276,11 @@ start_groups = function(data, k, starts, maxdf, iter, mccores = 1,
 #' @param maxdf
 #' Integer. Basis dimension of smooth term. See \code{\link[mgcv]{s}} function
 #' parameter `k`, in package `mgcv`.
-#' @param iter
-#' Integer. Maximum number of EM iterations.
+#' @param conv
+#' A vector of length two, `c(iter, minchange)`, where `iter` is the maximum
+#' number of EM iterations and `minchange` is the minimum percentage of subjects
+#' changing group to continue iterations. Setting `minchange` to zero continues
+#' iterations until no more changes occur or `maxiter` is reached.
 #' @param mccores
 #' Integer number of cores to use by `mclapply` sections. Parallelization is 
 #' over `k`, the number of clusters.
@@ -311,7 +315,7 @@ start_groups = function(data, k, starts, maxdf, iter, mccores = 1,
 #' @author George Ostrouchov and David Gagnon
 #'
 #' @export
-trajectories = function(data, k, group, maxdf, iter, mccores, verbose = FALSE) {
+trajectories = function(data, k, group, maxdf, conv = c(10, 0), mccores = 1, verbose = FALSE) {
   if(verbose) a = a_0 = deltime(a)
 
   time = response = id = ..new_group = ..group = NULL # for data.table R CMD check
@@ -326,7 +330,7 @@ trajectories = function(data, k, group, maxdf, iter, mccores, verbose = FALSE) {
   ## EM algorithm to cluster ids into k groups
   ## iterates fitting a thin plate spline (tps) center to each group (M-step)
   ##      regroups each id to nearest tps center (E-step)
-  for(i in 1:iter) {
+  for(i in 1:conv[1]) {
     if(verbose) cat("\n", i, "")
     gc() # Tighten up memory use in each
     ##
@@ -387,7 +391,7 @@ trajectories = function(data, k, group, maxdf, iter, mccores, verbose = FALSE) {
     counts_df = data[, tabulate(group)]
 
     ## break if converged
-    if(changes == 0) break
+    if(100*changes/sum(counts) <= conv[2]) break
   }
 
   if(verbose) deltime(a_0, "\n Total time: ")
@@ -406,29 +410,31 @@ trajectories = function(data, k, group, maxdf, iter, mccores, verbose = FALSE) {
 #' Output structure from \code{\link{trajectories}} function
 #' @param maxdf
 #' Fitting parameters. See \code{\link{trajectories}}.
-#' @param iter
+#' @param conv
 #' Fitting parameters. See \code{\link{trajectories}}.
 #' @return 
 #' NULL or a character vector of exit criteria satisfied.
 #' 
-xit_report = function(cl, maxdf, iter) {
+xit_report = function(cl, maxdf, conv) {
   xit = NULL
   if(!is.null(cl$counts_df) && any(cl$counts_df < maxdf))
     xit = c(xit, "undermaxdf")
   if(cl$k_cl < cl$k)
     xit = c(xit, "zerocluster")
-  if(!is.null(cl$changes) && cl$changes == 0)
+  if(!is.null(cl$changes) && 100*cl$changes/sum(cl$counts) <= conv[2])
     xit = c(xit, "converged")
-  if(cl$iterations >= iter && iter != 1)
+  if(cl$iterations >= conv[1] && conv[1] != 1)
     xit = c(xit, "max-iter")
   xit
 }
 
-#' Cluster trajectories
+#' Cluster longitudinal trajectories over time
 #'
-#' Most users will run the wrapper \code{\link{clustra}} function, which takes
-#' care of starting values. See vignette("clustra_vignette.Rmd") for
-#' more details.
+#' The usual top level function for clustering longitudinal trajectories. After
+#' initial setup, it calls \code{\link{trajectories}} to perform k-means 
+#' clustering on continuous `response` measured over `time`, where each mean 
+#' is defined by a thin plate spline fit to all points in a cluster. See
+#' `clustra_vignette.Rmd` for examples of use.
 #'
 #' @param data
 #' Data frame or, preferably, also a data.table with response measurements, one
@@ -447,7 +453,7 @@ xit_report = function(cl, maxdf, iter) {
 #' \code{\link{start_groups}}.
 #' @param maxdf
 #' Fitting parameters. See \code{\link{trajectories}}.
-#' @param iter
+#' @param conv
 #' Fitting parameters. See \code{\link{trajectories}}.
 #' @param mccores
 #' See \code{\link{trajectories}}. 
@@ -455,32 +461,36 @@ xit_report = function(cl, maxdf, iter) {
 #' Logical to turn on more output during fit iterations.
 #' 
 #' @return 
-#' A list returned by \code{\link{trajectories}}.
+#' A list returned by \code{\link{trajectories}} plus one more element `ido`,
+#' giving the original id numbers.
 #' 
 #' @examples
 #' set.seed(13)
 #' data = gen_traj_data(n_id = c(50, 100), m_obs = 20, s_range = c(-365, -14),
 #'               e_range = c(0.5*365, 2*365))
-#' cl = clustra(data, k = 2, maxdf = 20, iter = 5, verbose = TRUE)
+#' cl = clustra(data, k = 2, maxdf = 20, conv = c(5, 0), verbose = TRUE)
 #' tabulate(data$group)
 #' tabulate(data$true_group)
 #'
 #' @export
 clustra = function(data, k, 
                    model = list(id = "id", resp = c("response"), time = "time"),
-                   starts = c(1, 0), group = NULL, maxdf = 30, iter = 10,
-                   mccores = 1, verbose = FALSE) {
-  id = .GRP = ..group = NULL # for data.table R CMD check
+                   starts = c(1, 0), group = NULL, maxdf = 30,
+                   conv = c(10, 0), mccores = 1, verbose = FALSE) {
+  id = .GRP = .SD = ..group = NULL # for data.table R CMD check
   data = data.prep(data, model)
- 
-  ## replace id's to be sequential
-  data[, id:=.GRP, by=id] 
+  
+  ## replace id's to be sequential for faster cluster to data expansions
+  ##   keep old id numbers in `ido`
+  ido = data[, .SD[1], id][, id]
+  data[, id:=.GRP, by=id]
+  
   n_id = data[, data.table::uniqueN(id)]
   
   ## get initial group assignments
   if(is.null(group)) {
     if(starts[1] > 1) {
-      group = start_groups(data, k, starts, maxdf, iter, mccores,
+      group = start_groups(data, k, starts, maxdf, conv, mccores,
                            verbose = verbose)
     } else {
       group = sample(k, n_id, replace = TRUE) # random groups
@@ -491,9 +501,10 @@ clustra = function(data, k,
   data[, group:=..group[id]] 
   
   ## Perform k-means iteration for groups
-  cl = trajectories(data, k, group, maxdf, iter, mccores, verbose = verbose)
-  er = xit_report(cl, maxdf, iter)
+  cl = trajectories(data, k, group, maxdf, conv, mccores, verbose = verbose)
+  er = xit_report(cl, maxdf, conv)
   if(verbose && !is.null(er)) cat(" ", er, "\n")
+  cl$ido = ido
 
   cl
 }

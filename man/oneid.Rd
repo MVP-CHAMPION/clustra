@@ -4,7 +4,7 @@
 \alias{oneid}
 \title{Generates data for one \code{id}}
 \usage{
-oneid(id, n_obs, type, start, end, smin, emax, reference, noise)
+oneid(vars, clusters, id, n_obs, type, start, end, smin, emax)
 }
 \arguments{
 \item{id}{A unique integer.}
@@ -22,14 +22,10 @@ portion.}
 
 \item{emax}{The largest possible \code{end} value among all \code{id}s. Used to scale sin and
 sigmoid support.}
-
-\item{reference}{A response value for constant response. Also used to scale sin and sigmoid
-responses.}
-
-\item{noise}{Standard deviation of zero mean Gaussian noise added to response functions.}
 }
 \value{
-An \code{n_obs} by 4 matrix with columns \code{id}, \code{time}, \code{response}, \code{true_group}.
+An \code{n_obs} by \code{3 + length(vars)} matrix with columns \code{id}, \code{true_group},
+\code{time}, and responses \code{vars}.
 }
 \description{
 Generates data for one \code{id}

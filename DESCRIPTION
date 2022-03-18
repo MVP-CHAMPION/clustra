@@ -1,7 +1,7 @@
 Package: clustra
-Version: 0.1.5
-Date: 2021-07-27
-Title: Clustering Trajectories Anchored at Intervention Time - Multivariate
+Version: 0.1.6
+Date: 2022-01-15
+Title: Clustering Longitudinal Trajectories
 Authors@R: c(person("George", "Ostrouchov", role = c("aut", "cre"), email = 
         "ostrouchovg@ornl.gov"),
         person("David", "Gagnon", role = "aut"),
@@ -18,7 +18,6 @@ Imports:
     data.table,
     graphics,
     grDevices,
-    iotools,
     methods,
     mgcv,
     MixSim,
@@ -28,12 +27,14 @@ Suggests:
     ggplot2,
     knitr,
     rmarkdown
-Description: Clusters medical trajectories (unequally spaced and unequal 
-    lengths) aligned by an intervention time. Performs k-means clustering,
-    where each mean is a thin plate spline fit to all points in a cluster. 
-    Distance is MSE across trajectory points to cluster spline. Provides
-    silhouette plots and Adjusted Rand Index evaluations of the number of
-    clusters. Scales well to large data with multicore parallelism available
+Description: Clusters longitudinal trajectories over time (can be unequally 
+    spaced, unequal length time series and/or partially overlapping series) on
+    a common time axis. Performs k-means clustering on a single continuous 
+    variable measured over time, where each mean is defined by a thin plate 
+    spline fit to all points in a cluster. Distance is MSE across trajectory 
+    points to cluster spline. Provides graphs of derived cluster splines, 
+    silhouette plots, and Adjusted Rand Index evaluations of the number
+    of clusters. Scales well to large data with multicore parallelism available
     to speed computation.
 LazyLoad: yes
 License: BSD 2-clause License + file LICENSE

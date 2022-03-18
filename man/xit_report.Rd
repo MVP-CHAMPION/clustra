@@ -4,14 +4,14 @@
 \alias{xit_report}
 \title{xit_report}
 \usage{
-xit_report(cl, maxdf, iter)
+xit_report(cl, maxdf, conv)
 }
 \arguments{
 \item{cl}{Output structure from \code{\link{trajectories}} function}
 
 \item{maxdf}{Fitting parameters. See \code{\link{trajectories}}.}
 
-\item{iter}{Fitting parameters. See \code{\link{trajectories}}.}
+\item{conv}{Fitting parameters. See \code{\link{trajectories}}.}
 }
 \value{
 NULL or a character vector of exit criteria satisfied.

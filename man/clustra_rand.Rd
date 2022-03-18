@@ -11,7 +11,7 @@ clustra_rand(
   mccores,
   replicates = 10,
   maxdf = 30,
-  iter = 10,
+  conv = c(10, 0),
   save = FALSE,
   verbose = FALSE
 )
@@ -29,7 +29,7 @@ clustra_rand(
 
 \item{maxdf}{Fitting parameters. See \code{link{trajectories}}.}
 
-\item{iter}{Fitting parameters. See \code{link{trajectories}}.}
+\item{conv}{Fitting parameters. See \code{link{trajectories}}.}
 
 \item{save}{Logical. When TRUE, save all results as file \code{results.Rdata}.}
 

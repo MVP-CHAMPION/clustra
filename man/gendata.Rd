@@ -4,10 +4,12 @@
 \alias{gendata}
 \title{gendata}
 \usage{
-gendata(n_id, m_obs, s_range, e_range, min_obs, reference, noise)
+gendata(vars, clusters, m_obs, s_range, e_range, min_obs)
 }
 \arguments{
-\item{n_id}{See parameters of {\code{\link{gen_traj_data}}}.}
+\item{vars}{See parameters of {\code{\link{gen_traj_data}}}.}
+
+\item{clusters}{See parameters of {\code{\link{gen_traj_data}}}.}
 
 \item{m_obs}{See parameters of {\code{\link{gen_traj_data}}}.}
 

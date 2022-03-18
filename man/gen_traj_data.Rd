@@ -4,19 +4,14 @@
 \alias{gen_traj_data}
 \title{Data Generators}
 \usage{
-gen_traj_data(
-  n_id,
-  m_obs,
-  s_range,
-  e_range,
-  reference = 100,
-  noise = c(0, abs(reference/20)),
-  min_obs = 3
-)
+gen_traj_data(vars, clusters, m_obs, s_range, e_range, min_obs = 3, cv = 0.1)
 }
 \arguments{
-\item{n_id}{Vector whose length is the number of clusters, giving the number of id's to
-generate in each cluster.}
+\item{vars}{A character vecor of variable names}
+
+\item{clusters}{A matrix or a data frame with \code{length(vars)} rows and \code{2 + 2*length(vars)}
+columns giving cluster size, noise coefficient of variation (defaults to 1),
+variable means, and variable curve types (1 to 3), in that order.}
 
 \item{m_obs}{Mean number of observation per id. Provides \code{lambda} parameter in
 \code{\link[stats]{rpois}}.}
@@ -27,16 +22,14 @@ start observation time.}
 \item{e_range}{A vector of length 2, giving the min and max limits of uniformly generated
 end observation time.}
 
-\item{reference}{A nominal response value (for example, blood pressure is near 100, which
-is the default)}
-
-\item{noise}{Vector of length 2 giving the \emph{mean} and \emph{sd} of added N(mean, sd) noise.}
-
 \item{min_obs}{Minimum number of observations in addition to zero time observation.}
+
+\item{cv}{Coefficient of variation on generated data. If \code{clusters} is supplied as a
+matrix of data.frame, it will override this parameter.}
 }
 \value{
-A data table with one response per row and four columns:
-\code{id}, \code{time}, \code{response}, and \code{true_group}.
+A data table with one response per row and \code{3 + length(vars)}
+columns: \code{id}, \code{true_group}, \code{time}, and a column for each of vars.
 }
 \description{
 Generates a collection of longitudinal responses with possibly varying
