@@ -25,7 +25,7 @@ For this vignette, we begin by generating a data set with the *gen_traj_data()* 
 We also set *RNGkind* and *seed* for reproducibility. Code below generates the data and looks at a few observations of the generated data. The *mc* variable sets core use and will be assigned to *mccores* parameter through the rest of the vignette. By default, 1 core is assigned. Parallel sections are implemented with *parallel::mclappy()*, so on unix and Mac platforms it is recommended to use the full number of cores available for faster performance.
 ```{r}
 library(clustra)
-mc = 4 # If running on a unix or a Mac platform, increase up to 2x # cores
+mc = 1 # If running on a unix or a Mac platform, increase up to 2x # cores
 set.seed(12345)
 vars = c("sys", "dia")
 data = gen_traj_data(vars, clusters = c(400, 800, 1600, 3200), m_obs = 25, 

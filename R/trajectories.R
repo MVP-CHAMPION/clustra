@@ -19,7 +19,7 @@ data.prep = function(data, model) {
   ## names (id, time, response) and return data.table with only these
   if(!is.data.frame(data)) stop("clustra: Expecting a data frame.")
   
-  model.vec = c(model$resp, model$time, model$id)
+  model.vec = c(model$time, model$id, model$resp)
   if(!all(model.vec %in% names(data))) 
     stop(paste0("clustra: Expecting (", paste0(model.vec, collapse = ","),
                 ") in data."))
@@ -27,7 +27,7 @@ data.prep = function(data, model) {
   
   newdat = data.table::copy(data[, ..model.vec])
   data.table::setnames(newdat, 
-                       old = model.vec, new = c("response", "time", "id"))
+                       old = model.vec, new = c("time", "id", model$resp))
   return(newdat)
 }
 
