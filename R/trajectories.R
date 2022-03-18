@@ -170,6 +170,10 @@ start_groups = function(data, k, starts, maxdf, conv, mccores = 1,
                                         length.out = 2*maxdf), times = k),
                          response = rep(NA, k*2*maxdf),
                          group = rep(1:k, each = 2*maxdf))
+  ##TODO consider start values according to partition of last values per id or 
+  ## an average of last year?.
+  ## Makes sense from a clinical viewpoint of where patients end up. A predictive
+  ## viewpoint.
 
   ## Sample a subset of the data (for speed and increased diversity of starts)
   max_div = 0
