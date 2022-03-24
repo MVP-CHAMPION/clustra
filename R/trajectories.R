@@ -345,6 +345,10 @@ trajectories = function(data, k, group, maxdf, conv = c(10, 0), mccores = 1, ver
     nz = which(sapply(datg, nrow) > 0) # nonzero groups
     k_cl = length(nz) # reset number of clusters to nonzeros only
     if(verbose) cat("2")
+    
+    xx=list("sys", "dia") ### this will need to be changed
+    myTPSlist <- list() ##added - create an empty list to put the results in 
+    
     tps = parallel::mclapply(nz, tps_g, data = datg, maxdf = maxdf,
                              mc.cores = mccores, nthreads = 1)
     if(verbose && any(sapply(tps, is.null))) cat("*F*")
