@@ -53,11 +53,11 @@ data.prep = function(data, model) {
 #' @return 
 #' Returns an object of class "gam". See \code{\link[mgcv]{bam}} value. 
 #' If group data has zero rows, NULL is returned instead.
-tps_g = function(g, data, maxdf, nthreads,xx) {
+tps_g = function(g, data, maxdf, nthreads) {
   xx=list("sys", "dia") ### this will need to be changed
   myTPSlist <- list() ##added - create an empty list to put the results in 
   if(nrow(data[[g]]) > 0) {
-    return(mgcv::bam(out ~ s(time, k = maxdf),list(out=as.name(xx[[i]])), data = data[[g]],
+    return(mgcv::bam(xx[[i]] ~ s(time, k = maxdf), data = data[[g]],
                      discrete = TRUE, nthreads = nthreads))
   } else {
     return(NULL)
