@@ -55,12 +55,13 @@ data.prep = function(data, model) {
 #' If group data has zero rows, NULL is returned instead.
 tps_g = function(g, data, maxdf, nthreads) {
   if(nrow(data[[g]]) > 0) {
-    return(mgcv::bam(response ~ s(time, k = maxdf), data = data[[g]],
-                  discrete = TRUE, nthreads = nthreads))
+    return(mgcv::bam(out ~ s(time, k = maxdf),list(out=as.name(xx[[i]])), data = data[[g]],
+                     discrete = TRUE, nthreads = nthreads))
   } else {
     return(NULL)
   }
 }
+
 
 #' Function to predict for new data based on fitted gam object.
 #'
@@ -349,8 +350,14 @@ trajectories = function(data, k, group, maxdf, conv = c(10, 0), mccores = 1, ver
     xx=list("sys", "dia") ### this will need to be changed
     myTPSlist <- list() ##added - create an empty list to put the results in 
     
-    tps = parallel::mclapply(nz, tps_g, data = datg, maxdf = maxdf,
-                             mc.cores = mccores, nthreads = 1)
+    
+    for (i in length(xx)){
+      myTPSlist[[i]] = parallel::mclapply(nz, tps_g, data = datg, maxdf = maxdf,
+                                          mc.cores = mccores, nthreads = 1)
+    }  ### added in a loop
+    
+    
+    
     if(verbose && any(sapply(tps, is.null))) cat("*F*")
     if(verbose) a = deltime(a, "3)")
 
