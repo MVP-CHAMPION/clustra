@@ -54,9 +54,8 @@ data.prep = function(data, model) {
 #' Returns an object of class "gam". See \code{\link[mgcv]{bam}} value. 
 #' If group data has zero rows, NULL is returned instead.
 tps_g = function(g, data, maxdf, nthreads) {
-  xx=list("sys", "dia") ### this will need to be changed
-  myTPSlist <- list() ##added - create an empty list to put the results in 
-  if(nrow(data[[g]]) > 0) {
+
+    if(nrow(data[[g]]) > 0) {
     return(mgcv::bam(as.formula(paste(vars[[i]], paste(paste("s(time,k="), 
                                                         maxdf,paste(")")), sep=" ~ ")), data = data,
                       discrete = TRUE, nthreads = 1))
@@ -354,7 +353,7 @@ trajectories = function(data, k, group, maxdf, conv = c(10, 0), mccores = 1, ver
     
     for(i in length(vars)){
       myTPSlist[[i]] = parallel::mclapply(nz, tps_g, data = datg, maxdf = maxdf,
-                                          mc.cores = mccores, nthreads = 1)
+                                          mc.cores = mccores, nthreads = nthreads)
     }  ### added in a loop
     
     
