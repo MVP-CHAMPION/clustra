@@ -57,8 +57,9 @@ tps_g = function(g, data, maxdf, nthreads) {
   xx=list("sys", "dia") ### this will need to be changed
   myTPSlist <- list() ##added - create an empty list to put the results in 
   if(nrow(data[[g]]) > 0) {
-    return(mgcv::bam(xx[[i]] ~ s(time, k = maxdf), data = data[[g]],
-                     discrete = TRUE, nthreads = nthreads))
+    return(mgcv::bam(as.formula(paste(vars[[i]], paste(paste("s(time,k="), 
+                                                        maxdf,paste(")")), sep=" ~ ")), data = data,
+                      discrete = TRUE, nthreads = 1))
   } else {
     return(NULL)
   }
@@ -349,11 +350,9 @@ trajectories = function(data, k, group, maxdf, conv = c(10, 0), mccores = 1, ver
     k_cl = length(nz) # reset number of clusters to nonzeros only
     if(verbose) cat("2")
     
-    xx=list("sys", "dia") ### this will need to be changed
     myTPSlist <- list() ##added - create an empty list to put the results in 
     
-    
-    for (i in 1:2){
+    for(i in length(vars)){
       myTPSlist[[i]] = parallel::mclapply(nz, tps_g, data = datg, maxdf = maxdf,
                                           mc.cores = mccores, nthreads = 1)
     }  ### added in a loop
