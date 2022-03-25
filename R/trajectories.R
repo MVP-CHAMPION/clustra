@@ -352,8 +352,8 @@ trajectories = function(data, k, group, maxdf, conv = c(10, 0), mccores = 1, ver
     
  
 
-    myTPSlist = parallel::mclapply(nz, tps_g, data = datg, maxdf = maxdf,
-                                          mc.cores = mccores, nthreads = nthreads)
+    myTPSlist = parallel::mclapply(nz, tps_g, data = datg, maxdf = maxdf, nthreads = nthreads,
+                                          mc.cores = mccores)
 
     
     
