@@ -75,14 +75,17 @@ tps_g = function(g, data, maxdf, nthreads) {
 #' @return 
 #' A numeric vector of predicted values corresponding to rows of newdata. 
 #' If gam object is NULL, NULL is returned instead.
-pred_g = function(tps, newdata) {
-  if(is.null(tps)) {
-    return(NULL)
-  } else {
-    return(as.vector(mgcv::predict.bam(object = tps, newdata = newdata, type = "response",
+pred_g = function(myTPSlist, newdata) {
+  myPREDlist <- rep(list(NULL),length(vars)) ##added - create a list of nulls to put the results in 
+    if(is.null(myTPSlist)=FALSE){
+      for(i in 1:length(vars)){
+        (as.vector(mgcv::predict.bam(object = myTPSlist, newdata = newdata, type = vars,
                              newdata.guaranteed = TRUE)))
   }
 }
+return(myPREDlist)
+}
+
 
 #' Loss functions
 #'
@@ -358,7 +361,7 @@ trajectories = function(data, k, group, maxdf, conv = c(10, 0), mccores = 1, ver
     
     
     
-    if(verbose && any(sapply(tps, is.null))) cat("*F*")
+    if(verbose && any(sapply(unlist(myTPSlist,recursive=false), is.null))) cat("*F*")
     if(verbose) a = deltime(a, "3)")
 
     ##
@@ -366,8 +369,9 @@ trajectories = function(data, k, group, maxdf, conv = c(10, 0), mccores = 1, ver
     ##   predict each id's trajectory with each model
     if(verbose) cat(" (E-step ")
     newdata = force(as.data.frame(data[, list(time, response)]))
-    pred = parallel::mclapply(tps, pred_g, newdata = newdata, 
+    myPREDlist = parallel::mclapply(myTPSlist, pred_g, newdata = newdata, 
                               mc.cores = mccores)
+    
     if(verbose && any(sapply(pred, is.null))) cat("*P*")
     if(verbose) cat("1")
     rm(newdata)
