@@ -77,7 +77,7 @@ tps_g = function(g, data, maxdf, nthreads) {
 #' If gam object is NULL, NULL is returned instead.
 pred_g = function(myTPSlist, newdata) {
   myPREDlist <- rep(list(NULL),length(vars)) ##added - create a list of nulls to put the results in 
-    if(is.null(myTPSlist)=FALSE){
+    if(!is.null(myTPSlist)){
       for(i in 1:length(vars)){
         (as.vector(mgcv::predict.bam(object = myTPSlist, newdata = newdata, type = vars,
                              newdata.guaranteed = TRUE)))
