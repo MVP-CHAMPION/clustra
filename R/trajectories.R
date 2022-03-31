@@ -361,7 +361,7 @@ trajectories = function(data, k, group, maxdf, conv = c(10, 0), mccores = 1, ver
     
     
     
-    if(verbose && any(sapply(unlist(myTPSlist,recursive=false), is.null))) cat("*F*")
+    if(verbose && any(sapply(unlist(myTPSlist,recursive=FALSE), is.null))) cat("*F*")
     if(verbose) a = deltime(a, "3)")
 
     ##
