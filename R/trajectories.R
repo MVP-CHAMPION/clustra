@@ -258,7 +258,7 @@ start_groups = function(data, k, starts, maxdf, conv, mccores = 1,
   ## compute loss for each id wrt model of each cluster
   loss = parallel::mclapply(pred, mse_g,
                             id = force(data[, id]),
-                            response = force(data[, response]),
+                            response = force(data[, ..vars]),
                             mc.cores = mccores)
   loss = do.call(cbind, loss) # combine list into matrix columns
   group = apply(loss, 1, which.min) # set group as closest cluster mean
