@@ -108,7 +108,7 @@ mse_g = function(myPREDlist, id, response) {
   {
     for(i in 1:length(vars)){
       if(!is.null(myPREDlist[[i]]))
-        esq[[i]] = (response[i] - myPREDlist[[i]])^2
+        esqlist[[i]] = (response[i] - myPREDlist[[i]])^2
 
     DT = data.table::data.table(esq[[i]], id)
     tt = as.numeric(unlist(DT[, mean(esq[[i]]), by=id][, 2]))
