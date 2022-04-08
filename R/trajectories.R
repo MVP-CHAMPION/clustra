@@ -370,7 +370,7 @@ trajectories = function(data, k, group, maxdf, conv = c(10, 0), mccores = 1, ver
     ## E-step:
     ##   predict each id's trajectory with each model
     if(verbose) cat(" (E-step ")
-    newdata = force(as.data.frame(data[, list(time, response)]))
+    newdata = force(as.data.frame(data[, list(time, vars)]))
     myPREDlist = parallel::mclapply(myTPSlist, pred_g, newdata = newdata, 
                               mc.cores = mccores)
     
