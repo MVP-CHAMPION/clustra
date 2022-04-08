@@ -372,7 +372,7 @@ trajectories = function(data, k, group, maxdf, conv = c(10, 0), mccores = 1, ver
     if(verbose) cat(" (E-step ")
     varlist = data[,..vars]
     
-    newdata = force(as.data.frame(data[, .(time,varlist)]))
+    newdata = force(as.data.frame(data[, .(time,varlist))]))
     myPREDlist = parallel::mclapply(myTPSlist, pred_g, newdata = newdata, 
                               mc.cores = mccores)
     
