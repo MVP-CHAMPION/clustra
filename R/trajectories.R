@@ -110,9 +110,9 @@ mse_g = function(myPREDlist, id, response) {
       if(!is.null(myPREDlist[[i]]))
         esqlist[[i]] = (response[i] - myPREDlist[[i]])^2
 
-    DT = data.table::data.table(esq[[i]], id)
-    tt = as.numeric(unlist(DT[, mean(esq[[i]]), by=id][, 2]))
-    return(tt)
+    DT = data.table::data.table(esqlist[[i]], id)
+    tt[i] = as.numeric(unlist(DT[, mean(esqlist[[i]]), by=id][, 2]))
+    return(tt[i])
     }
   }
 }
