@@ -54,7 +54,7 @@ data.prep = function(data, model) {
 #' Returns an object of class "gam". See \code{\link[mgcv]{bam}} value. 
 #' If group data has zero rows, NULL is returned instead.
 tps_g = function(g, data, maxdf, nthreads) {
-  myTPSlist <- rep(list(NULL),length(vars)) ##added - create a list of nulls to put the results in 
+  myTPSlist = rep(list(NULL),length(vars)) ##added - create a list of nulls to put the results in 
   
   if(nrow(data[[g]]) > 0) {
     for(i in 1:length(vars)){
@@ -76,7 +76,7 @@ tps_g = function(g, data, maxdf, nthreads) {
 #' A numeric vector of predicted values corresponding to rows of newdata. 
 #' If gam object is NULL, NULL is returned instead.
 pred_g = function(myTPSlist, newdata) {
-  myPREDlist <- rep(list(NULL),length(vars)) ##added - create a list of nulls to put the results in 
+  myPREDlist = rep(list(NULL),length(vars)) ##added - create a list of nulls to put the results in 
     if(!is.null(myTPSlist)){
       for(i in 1:length(vars)){
         myPREDlist[[i]]=(as.vector(mgcv::predict.bam(object = myTPSlist[[i]], newdata = newdata, type = vars,
@@ -102,14 +102,19 @@ return(myPREDlist)
 #' A numeric value. For mse_g(), returns the mean-squared error. 
 #' For mxe_g(), returns the
 #' maximum absolute error.
-mse_g = function(pred, id, response) {
-  if(is.null(pred)) {
-    return(NULL)
-  } else {
-    esq = (response - pred)^2
+mse_g = function(myPREDlist, id, response) {
+  if(!is.null(myPREDlist)) {
+    for(i in 1:length(vars)){
+    esq = (response - myPREDlist[[i]])^2
+  
+    
+    
+    
+    
     DT = data.table::data.table(esq, id)
     tt = as.numeric(unlist(DT[, mean(esq), by=id][, 2]))
     return(tt)
+    }
   }
 }
 #' @rdname mse_g
@@ -353,13 +358,9 @@ trajectories = function(data, k, group, maxdf, conv = c(10, 0), mccores = 1, ver
     k_cl = length(nz) # reset number of clusters to nonzeros only
     if(verbose) cat("2")
     
- 
 
     myTPSlist = parallel::mclapply(nz, tps_g, data = datg, maxdf = maxdf, nthreads = 1,
                                           mc.cores = mccores)
-
-    
-    
     
     if(verbose && any(sapply(unlist(myTPSlist,recursive=FALSE), is.null))) cat("*F*")
     if(verbose) a = deltime(a, "3)")
@@ -372,18 +373,18 @@ trajectories = function(data, k, group, maxdf, conv = c(10, 0), mccores = 1, ver
     myPREDlist = parallel::mclapply(myTPSlist, pred_g, newdata = newdata, 
                               mc.cores = mccores)
     
-    if(verbose && any(sapply(pred, is.null))) cat("*P*")
+    if(verbose && any(sapply(unlist(myPREDlist,recursive=FALSE), is.null))) cat("*P*")
     if(verbose) cat("1")
     rm(newdata)
     gc() # tighten up memory before next mclapply
     ##   compute loss of all id's to all groups (models)
     ##   TODO better parallel balance by skipping empty groups
     if(verbose) cat("2")
-    loss = parallel::mclapply(pred, mse_g,
+    loss = parallel::mclapply(myPREDlist, mse_g,
                              id = force(data[, id]),
                              response = force(data[, response]),
                              mc.cores = mccores)
-    rm(pred)
+    rm(myPREDlist)
     if(verbose && any(sapply(loss, is.null))) cat("*E*")
     if(verbose) cat("3")
     loss = do.call(cbind, loss) # NULL loss elements go away (removes 0 groups)
