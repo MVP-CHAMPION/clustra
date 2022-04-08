@@ -104,14 +104,14 @@ return(myPREDlist)
 #' For mxe_g(), returns the
 #' maximum absolute error.
 mse_g = function(myPREDlist, id, response) {
-  esqlist = rep(list(NULL),length(vars))
+ ## esqlist = rep(list(NULL),length(vars))
   {
     for(i in 1:length(vars)){
       if(!is.null(myPREDlist[[i]]))
-        esqlist[[i]] = (response[i] - myPREDlist[[i]])^2
+        esq = (response[i] - myPREDlist[[i]])^2
 
-    DT = data.table::data.table(esqlist[[i]], id)
-    tt[i] = as.numeric(unlist(DT[, mean(esqlist[[i]]), by=id][, 2]))
+    DT = data.table::data.table(esq, id)
+    tt[i] = as.numeric(unlist(DT[, mean(esq), by=id][, 2]))
     return(tt[i])
     }
   }
