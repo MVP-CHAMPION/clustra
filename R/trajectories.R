@@ -104,20 +104,19 @@ return(myPREDlist)
 #' For mxe_g(), returns the
 #' maximum absolute error.
 mse_g = function(myPREDlist, id, response) {
-  if(!is.null(myPREDlist)) {
+  esqlist = rep(list(NULL),length(vars))
+  {
     for(i in 1:length(vars)){
-    esq = (response - myPREDlist[[i]])^2
-  
-    
-    
-    
-    
-    DT = data.table::data.table(esq, id)
-    tt = as.numeric(unlist(DT[, mean(esq), by=id][, 2]))
+      if(!is.null(myPREDlist[[i]]))
+        esq[[i]] = (response[i] - myPREDlist[[i]])^2
+
+    DT = data.table::data.table(esq[[i]], id)
+    tt = as.numeric(unlist(DT[, mean(esq[[i]]), by=id][, 2]))
     return(tt)
     }
   }
 }
+
 #' @rdname mse_g
 mxe_g = function(pred, id, response) { # maximum error
   if(is.null(pred)) {
@@ -384,7 +383,7 @@ trajectories = function(data, k, group, maxdf, conv = c(10, 0), mccores = 1, ver
     if(verbose) cat("2")
     loss = parallel::mclapply(myPREDlist, mse_g,
                              id = force(data[, id]),
-                             response = force(data[, response]),
+                             response = force(data[, ..vars]),
                              mc.cores = mccores)
     rm(myPREDlist)
     if(verbose && any(sapply(loss, is.null))) cat("*E*")
