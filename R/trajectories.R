@@ -106,9 +106,9 @@ return(myPREDlist)
 mse_g = function(myPREDlist, id, response) {
  ## esqlist = rep(list(NULL),length(vars))
   {
-    for(i in 1:length(vars)){
-      if(!is.null(myPREDlist[[i]]))
-        esq = (response[i] - myPREDlist[[i]])^2
+    
+      if(!is.null(myPREDlist))
+        esq = (response - myPREDlist)^2
 
     DT = data.table::data.table(esq, id)
     DT
@@ -116,7 +116,7 @@ mse_g = function(myPREDlist, id, response) {
     return(tt)
     }
   }
-}
+
 
 #' @rdname mse_g
 mxe_g = function(pred, id, response) { # maximum error
