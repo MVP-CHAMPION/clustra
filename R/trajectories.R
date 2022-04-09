@@ -110,7 +110,7 @@ mse_g = function(myPREDlist, id, response) {
   {
     for(i in 1:length(vars)){
       if(!is.null(myPREDlist[[i]]))
-        esq = (response - myPREDlist[[i]])^2
+        esq = (response[[i]] - myPREDlist[[i]])^2
         esq = esq + esq
     }
     
