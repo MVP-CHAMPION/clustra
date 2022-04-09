@@ -104,20 +104,18 @@ return(myPREDlist)
 #' For mxe_g(), returns the
 #' maximum absolute error.
 mse_g = function(myPREDlist, id, response) {
- ## esqlist = rep(list(NULL),length(vars))
-  esq = 0 ##added - create a list of nulls to put the results in 
+
+  esq = 0 ## set to 0 since need to add across the responses
   
   {
     for(i in 1:length(vars)){
       if(!is.null(myPREDlist[[i]]))
-        esq = (response[[i]] - myPREDlist[[i]])^2
-        esq = esq + esq
+        esq = esq+(response[[i]] - myPREDlist[[i]])^2
     }
     
     rtesq=sqrt(esq)
 
     DT = data.table::data.table(rtesq)
-    DT
     tt = as.numeric(unlist(DT[, mean(rtesq), by=id][, 2]))
     return(tt)
     }
@@ -125,15 +123,16 @@ mse_g = function(myPREDlist, id, response) {
 
 
 #' @rdname mse_g
-mxe_g = function(pred, id, response) { # maximum error
-  if(is.null(pred)) {
-    return(NULL)
-  } else {
-    eabs = abs(response - pred)
+mxe_g = function(myPREDlist, id, response) { # maximum error
+  eabs=0 ## set to 0 since need to add across the responses
+    for(i in 1:length(vars)){
+      if(!is.null(myPREDlist[[i]]))
+    eabs = eabs + abs(response[[i]] - myPREDlist[[i]])
+    }
+
     DT = data.table::data.table(eabs, id)
     tt = as.numeric(unlist(DT[, max(eabs), by=id][, 2]))
     return(tt)
-  }
 }
 
 
@@ -405,7 +404,7 @@ trajectories = function(data, k, group, maxdf, conv = c(10, 0), mccores = 1, ver
     ## evaluate results and update groups
     changes = sum(new_group != group) # may exaggerate due to renumbering
     counts = tabulate(new_group)
-    deviance = sum(unlist(lapply(1:k_cl, function(g) deviance(tps[[g]]))))
+    deviance = sum(unlist(lapply(1:k_cl, function(g) deviance(myTPSlist[[g]])))) ##4.9.22
     if(verbose)
        cat(" Changes:", changes, "Counts:", counts, "Deviance:", deviance)
     group = new_group
@@ -420,7 +419,7 @@ trajectories = function(data, k, group, maxdf, conv = c(10, 0), mccores = 1, ver
 
   if(verbose) deltime(a_0, "\n Total time: ")
   list(deviance = deviance, group = group, loss = loss, k = k, k_cl = k_cl,
-       data_group = data[, group], tps = tps, iterations = i, counts = counts,
+       data_group = data[, group], myTPSlist = myTPSlist, iterations = i, counts = counts,
        counts_df = counts_df, changes = changes)
 }
 
