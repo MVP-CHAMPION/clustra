@@ -105,14 +105,20 @@ return(myPREDlist)
 #' maximum absolute error.
 mse_g = function(myPREDlist, id, response) {
  ## esqlist = rep(list(NULL),length(vars))
+  esq = 0 ##added - create a list of nulls to put the results in 
+  
   {
+    for(i in 1:length(vars)){
+      if(!is.null(myPREDlist[[i]]))
+        esq = (response - myPREDlist[[i]])^2
+        esq = esq + esq
+    }
     
-      if(!is.null(myPREDlist))
-        esq = (response - myPREDlist)^2
+    rtesq=sqrt(esq)
 
-    DT = data.table::data.table(esq, id)
+    DT = data.table::data.table(rtesq)
     DT
-    tt = as.numeric(unlist(DT[, mean(esq), by=id][, 2]))
+    tt = as.numeric(unlist(DT[, mean(rtesq), by=id][, 2]))
     return(tt)
     }
   }
