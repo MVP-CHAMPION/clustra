@@ -120,7 +120,7 @@ mse_g = function(myPREDlist, id, response) {
     return(tt)
   }
 }
-  }
+  
 
 
 #' @rdname mse_g
