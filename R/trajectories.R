@@ -110,10 +110,11 @@ mse_g = function(myPREDlist, id, response) {
   {
     for(i in 1:length(vars)){
       if(!is.null(myPREDlist[[i]]))
-        esq = esq+(response[[i]] - myPREDlist[[i]])^2
+        esq2 = (response[[i]] - myPREDlist[[i]])^2
+        esq3=esq+esq2
     }
     
-    rtesq=sqrt(esq)
+    rtesq=sqrt(esq3)
 
     DT = data.table::data.table(rtesq)
     tt = as.numeric(unlist(DT[, rtesq, by=id][, 2]))
