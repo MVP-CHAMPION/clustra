@@ -105,7 +105,7 @@ return(myPREDlist)
 #' maximum absolute error.
 mse_g = function(myPREDlist, id, response) {
 
-  esq = 0 ## set to 0 since need to add across the responses
+  esq = replicate(nrow(data),0) ## set to 0 since need to add across the responses
   
   {
     for(i in 1:length(vars)){
