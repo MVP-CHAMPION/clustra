@@ -116,7 +116,7 @@ mse_g = function(myPREDlist, id, response) {
     rtesq=sqrt(esq)
 
     DT = data.table::data.table(rtesq)
-    tt = as.numeric(unlist(DT[, mean(rtesq), by=id][, 2]))
+    tt = as.numeric(unlist(DT[, rtesq, by=id][, 2]))
     return(tt)
     }
   }
