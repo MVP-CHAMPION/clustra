@@ -106,12 +106,13 @@ return(myPREDlist)
 mse_g = function(myPREDlist, id, response) {
 
   esq = replicate(nrow(data),0) ## set to 0 since need to add across the responses
+  esq2=0
   
   {
     for(i in 1:length(vars)){
       if(!is.null(myPREDlist[[i]]))
         esq = esq+(response[[i]])
-        esq = esq -myPREDlist[[i]]
+        esq2 = myPREDlist[[i]]
     }
     
     rtesq=sqrt(esq)
