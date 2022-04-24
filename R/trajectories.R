@@ -334,7 +334,7 @@ start_groups = function(data, k, starts, maxdf, conv, mccores = 1,
 #' @author George Ostrouchov and David Gagnon
 #'
 #' @export
-trajectories = function(data, k, group, maxdf, conv = c(10, 0), mccores = 1, verbose = FALSE) {
+trajectories = function(data, k, group, maxdf, conv = c(20, 0), mccores = 1, verbose = FALSE) {
   if(verbose) a = a_0 = deltime(a)
 
   time = response = id = ..new_group = ..group = NULL # for data.table R CMD check
