@@ -136,7 +136,7 @@ gendata = function(vars, clusters, m_obs, s_range, e_range, min_obs) {
 #' @importFrom stats dist rnorm rpois runif
 #' @export
 gen_traj_data = function(vars, clusters, m_obs, s_range, e_range, min_obs = 3,
-                         cv = 0.1, verbose = FALSE)
+                         cv = 0.05, verbose = FALSE)
 {
   if(is.numeric(clusters)) {
     if(length(clusters) == 1) {
