@@ -30,7 +30,7 @@ set.seed(12345)
 vars = c("sys", "dia")
 data = gen_traj_data(vars, clusters = c(400, 800, 1600, 3200), m_obs = 25, 
                      s_range = c(-365, -90), e_range = c(0.5*365, 2*365),
-                     min_obs = 10, cv = 0.02, verbose = TRUE)
+                     min_obs = 10, cv = 0.01, verbose = TRUE)
 head(data)
 ```
 Select a few random *id*s and print their scatterplots.
@@ -52,24 +52,30 @@ Next, plot the raw data (sample if more than 10,000 points). Then repeat the plo
 sdt = data
 if(nrow(data) > 10000)
   sdt = data[, group:=factor(..cl$data_group)][sample(nrow(data), 10000)]
-ggplot(sdt, aes(x = time, y = sys)) + geom_point(pch = ".")
+
+for(v in 1:length(vars)){
+ggplot(sdt, aes(x = time, y = vars[v])) + geom_point(pch = ".")
 
 np = 100
-k = length(cl$tps)
+k = length(cl$myTPSlist)
 ntime = seq(data[, min(time)], data[, max(time)], length.out = np)
 pdata = expand.grid(time = ntime, group = factor(1:k))
-pdata = subset(pdata, group %in% which(lengths(cl$tps) > 0))
+pdata = subset(pdata, group %in% which(lengths(cl$myTPSlist) > 0))
 pred = vector("list", k)
-for(i in 1:k) 
-  if(is.null(cl$tps[[i]])) {
-    pred[[i]] = NULL
-  } else {
-    pred[[i]] = mgcv::predict.bam(cl$tps[[i]], newdata = list(time = ntime),
-                        type = "response")
-  }
+
+
+    for(i in 1:k) 
+      if(is.null(cl$myTPSlist[[i]][[v]])) {
+        pred[[i]] = NULL
+      } else {
+        pred[[i]] = mgcv::predict.bam(cl$myTPSlist[[i]][[v]], newdata = list(time = ntime),
+                            type = "response")
+      }
 pdata$pred = do.call(c, pred)
-ggplot(pdata, aes(x = time, y = pred, color = group)) + 
-  geom_point(data = sdt, aes(y = sys), pch = ".") + geom_line()
+plots = ggplot(pdata, aes(x = time, y = pred, color = group)) + 
+  geom_point(data = sdt, aes(y = vars[v]), pch = ".") + geom_line()
+print(plots)
+}
 ```
 The Rand index for comparing with true_groups is
 ```{r}
