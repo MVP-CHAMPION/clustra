@@ -117,10 +117,8 @@ mse_g = function(myPREDlist, id, response) {
       avgdis = avgdis+avgclus
     }
     
-    rtesq=avgdis
-    
-    
-    return(tt)
+
+    return(avgdis)
   }
 }
 
