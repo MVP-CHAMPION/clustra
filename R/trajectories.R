@@ -116,8 +116,9 @@ mse_g = function(myPREDlist, id, response) {
       avgclus = as.numeric(unlist(DT[, mean(disum), by=id][, 2]))
       avgdis = avgdis+avgclus
     }
+    tt=avgdis
     
-    return(avgdis)
+    return(tt)
   }
 }
 
