@@ -106,7 +106,7 @@ return(myPREDlist)
 
 mse_g = function(myPREDlist, id, response) {
   
-  avgdis = replicate(nrow(data),0) ## set to 0 since need to add across the responses
+  avgdis = 0 ## set to 0 since need to add across the responses
   
   {
     for(i in 1:length(vars)){
@@ -117,7 +117,6 @@ mse_g = function(myPREDlist, id, response) {
       avgdis = avgdis+avgclus
     }
     
-
     return(avgdis)
   }
 }
