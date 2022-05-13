@@ -104,7 +104,7 @@ return(myPREDlist)
 #' For mxe_g(), returns the
 #' maximum absolute error.
 
-mse_g = function(myPREDlist, id, response) {
+mse_g2 = function(myPREDlist, id, response) {
   
   avgdis = 0 ## set to 0 since need to add across the responses
   
@@ -126,14 +126,16 @@ mse_g = function(myPREDlist, id, response) {
 }
 
 
-mse_g2 = function(myPREDlist, id, response) {
+mse_g = function(myPREDlist, id, response) {
 
   esq = replicate(nrow(data),0) ## set to 0 since need to add across the responses
   
   {
     for(i in 1:length(vars)){
-      if(!is.null(myPREDlist[[i]]))
+      if(!is.null(myPREDlist[[i]])){
         esq = esq+(response[[i]] - myPREDlist[[i]])^2
+        esq = abs(as.numeric(scale(esq)))
+        }
     }
     
     rtesq=sqrt(esq)
