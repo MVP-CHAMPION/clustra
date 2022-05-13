@@ -111,7 +111,7 @@ mse_g = function(myPREDlist, id, response) {
   {
     for(i in 1:length(vars)){
       if(!is.null(myPREDlist[[i]]))
-        disum = (response[[i]] - myPREDlist[[i]])
+        disum = abs((response[[i]] - myPREDlist[[i]]))
       DT = data.table::data.table(disum)
       avgclus = as.numeric(unlist(DT[, mean(disum), by=id][, 2]))
       avgdis = avgdis+avgclus
