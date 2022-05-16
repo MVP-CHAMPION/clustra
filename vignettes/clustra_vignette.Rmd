@@ -26,13 +26,35 @@ We also set *RNGkind* and *seed* for reproducibility. Code below generates the d
 ```{r}
 library(clustra)
 mc = 1 # If running on a unix or a Mac platform, increase up to 2x # cores
-set.seed(12345)
+set.seed(7807868)
 vars = c("sys", "dia")
-data = gen_traj_data(vars, clusters = c(400, 800, 1600, 3200), m_obs = 25, 
+#data = gen_traj_data(vars, clusters = c(400, 800, 1600, 3200), m_obs = 25, 
+#                     s_range = c(-365, -90), e_range = c(0.5*365, 2*365),
+#                     min_obs = 10, cv = 0.001, verbose = TRUE)
+
+
+data = gen_traj_data(vars, clusters = c(800, 1000,1200), m_obs = 25, 
                      s_range = c(-365, -90), e_range = c(0.5*365, 2*365),
-                     min_obs = 10, cv = 0.01, verbose = TRUE)
+                     min_obs = 10, cv = 0.00001, verbose = TRUE)
+data$sys_std <- scale(data$sys)[, 1]
+data$dia_std <- scale(data$dia)[, 1]
+vars = c("sys_std", "dia_std")
+
 head(data)
 ```
+```{r fig.width = 7, fig.height = 9}
+library(ggplot2)
+library(gridExtra)
+psys = ggplot(data, aes(x = time, y = sys, color = as.factor(true_group))) + 
+  geom_point(data = data, aes(y = sys), pch = ".") #+ geom_line()
+
+
+pdys = ggplot(data, aes(x = time, y = dia, color = as.factor(true_group))) + 
+  geom_point(data = data, aes(y = dia), pch = ".")
+      ##+ geom_line(aes(color=as.factor(group)))
+  grid.arrange(psys,pdys)
+```
+
 Select a few random *id*s and print their scatterplots.
 ```{r fig.width = 7, fig.height = 9}
 library(ggplot2)
@@ -41,10 +63,11 @@ ggplot(data[id %in% sample(unique(data[, id]), 9)],
 ```
 Next, cluster the trajectories. Set *k=3*, spline max degrees of freedom to 30, and set `conv` maximum iterations to 10 and convergence when 0 changes occur. *mccores* sets the number of cores to use in various components of the code. Note that this does not work on Windows operating systems, where it should be left at 1. In the code that follows, we use verbose output to get information from each iteration.
 ```{r}
-set.seed(1234737)
-cl = clustra(data, k = 4, 
+set.seed(5242)
+cl = clustra(data, k = 3, 
+# = clustra(data, k = 3, 
              model = list(id = "id", time = "time", resp = vars),
-             maxdf = 30, conv = c(10, 1), mccores = mc, verbose = TRUE)
+             maxdf = 30, conv = c(20, 1), mccores = mc, verbose = TRUE)
 ```
 
 Next, plot the raw data (sample if more than 10,000 points). Then repeat the plot with resulting spline fit, colored by the cluster value.
@@ -77,6 +100,14 @@ plots = ggplot(pdata, aes(x = time, y = pred, color = group)) +
 print(plots)
 }
 ```
+```{r}
+
+attach(data)
+mytable <- table(true_group,group) # A will be rows, B will be columns
+mytable # print table
+#write.csv(data, file="C:/Users/Rachel/Desktop/Dissertation/MV_Data_R_v2.csv")
+```
+
 The Rand index for comparing with true_groups is
 ```{r}
 MixSim::RandIndex(cl$data_group, data[, true_group])
