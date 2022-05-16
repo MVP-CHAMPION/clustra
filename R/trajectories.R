@@ -111,8 +111,8 @@ mse_g = function(myPREDlist, id, response) {
   {
     for(i in 1:length(vars)){
       if(!is.null(myPREDlist[[i]])){
-        disum = (response[[i]] - myPREDlist[[i]])
-        disum = abs(as.numeric(scale(disum)))
+        disum = (response[[i]] - myPREDlist[[i]])^2
+        #disum = abs(as.numeric(scale(disum)))
       }
 
       DT = data.table::data.table(disum)
@@ -134,7 +134,7 @@ mse_g2 = function(myPREDlist, id, response) {
     for(i in 1:length(vars)){
       if(!is.null(myPREDlist[[i]])){
         esq = esq+(response[[i]] - myPREDlist[[i]])^2
-        #esq = abs(as.numeric(scale(esq)))
+        esq = abs(as.numeric(scale(esq)))
         }
     }
     
