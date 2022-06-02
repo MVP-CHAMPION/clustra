@@ -30,7 +30,7 @@ set.seed(12345)
 vars = c("sys", "dia")
 data = gen_traj_data(vars, clusters = c(400, 800, 1600, 3200), m_obs = 25, 
                      s_range = c(-365, -90), e_range = c(0.5*365, 2*365),
-                     min_obs = 10, cv = 0.02, verbose = TRUE)
+                     min_obs = 10, cv = 0.01, verbose = TRUE)
 head(data)
 ```
 Select a few random *id*s and print their scatterplots.
