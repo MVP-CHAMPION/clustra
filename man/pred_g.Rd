@@ -4,12 +4,12 @@
 \alias{pred_g}
 \title{Function to predict for new data based on fitted gam object.}
 \usage{
-pred_g(tps, newdata)
+pred_g(myTPSlist, newdata)
 }
 \arguments{
-\item{tps}{Output structure of \code{\link[mgcv]{bam}}.}
-
 \item{newdata}{See \code{\link{clustra}} description of data parameter.}
+
+\item{tps}{Output structure of \code{\link[mgcv]{bam}}.}
 }
 \value{
 A numeric vector of predicted values corresponding to rows of newdata.

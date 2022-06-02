@@ -9,7 +9,7 @@ trajectories(
   k,
   group,
   maxdf,
-  conv = c(10, 0),
+  conv = c(20, 0),
   mccores = 1,
   verbose = FALSE
 )

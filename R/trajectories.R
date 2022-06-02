@@ -103,14 +103,39 @@ return(myPREDlist)
 #' A numeric value. For mse_g(), returns the mean-squared error. 
 #' For mxe_g(), returns the
 #' maximum absolute error.
+
 mse_g = function(myPREDlist, id, response) {
+  
+  avgdis = 0 ## set to 0 since need to add across the responses
+  
+  {
+    for(i in 1:length(vars)){
+      if(!is.null(myPREDlist[[i]])){
+        disum = (response[[i]] - myPREDlist[[i]])^2
+        #disum = abs(as.numeric(scale(disum)))
+      }
+
+      DT = data.table::data.table(disum)
+      avgclus = as.numeric(unlist(DT[, mean(disum), by=id][, 2]))
+      avgdis = avgdis+avgclus
+    }
+    tt=avgdis
+    
+    return(tt)
+  }
+}
+
+
+mse_g2 = function(myPREDlist, id, response) {
 
   esq = replicate(nrow(data),0) ## set to 0 since need to add across the responses
   
   {
     for(i in 1:length(vars)){
-      if(!is.null(myPREDlist[[i]]))
+      if(!is.null(myPREDlist[[i]])){
         esq = esq+(response[[i]] - myPREDlist[[i]])^2
+        esq = abs(as.numeric(scale(esq)))
+        }
     }
     
     rtesq=sqrt(esq)

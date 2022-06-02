@@ -5,16 +5,16 @@
 \alias{mxe_g}
 \title{Loss functions}
 \usage{
-mse_g(pred, id, response)
+mse_g(myPREDlist, id, response)
 
-mxe_g(pred, id, response)
+mxe_g(myPREDlist, id, response)
 }
 \arguments{
-\item{pred}{Vector of predicted values.}
-
 \item{id}{Integer vector of group assignments.}
 
 \item{response}{Vector of response values.}
+
+\item{pred}{Vector of predicted values.}
 }
 \value{
 A numeric value. For mse_g(), returns the mean-squared error.
