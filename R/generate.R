@@ -139,7 +139,7 @@ gendata = function(vars, clusters, m_obs, s_range, e_range, min_obs) {
 gen_traj_data = function(vars, clusters, m_obs,  meanlist, curvlist, cvlist, s_range, e_range, min_obs = 3,
                          cv = 0.05, verbose = FALSE)
 {
-  Datalist = rep(list(NULL),scen_num)
+  Datalist = rep(list(NULL),length(meanlist))
   for(q in 1:length(meanlist)){
   if(is.numeric(clusters)) {
     if(length(clusters) == 1) {
