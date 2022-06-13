@@ -28,6 +28,7 @@ oneid = function(vars, clusters, id, n_obs, type, start, end, smin, emax) {
   time = c(time[time <= 0], 0, time[time > 0]) # insert 0
   
   response = list(length(vars))
+  responseStd = list(length(vars))
   for(i in 1:length(vars)) {
     line = clusters[type, 1 + length(vars) + length(vars) + i]
     m = clusters[type, 1 + length(vars) + i]
