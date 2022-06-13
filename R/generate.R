@@ -137,10 +137,10 @@ gendata = function(vars, clusters, m_obs, s_range, e_range, min_obs) {
 #' @importFrom stats dist rnorm rpois runif
 #' @export
 gen_traj_data = function(vars, clusters, m_obs,  meanlist, curvlist, cvlist, s_range, e_range, min_obs = 3,
-                         cv = 0.05, verbose = FALSE,scen_num)
+                         cv = 0.05, verbose = FALSE)
 {
   Datalist = rep(list(NULL),scen_num)
-  for(q in 1 to scen_num){
+  for(q in 1:length(meanlist)){
   if(is.numeric(clusters)) {
     if(length(clusters) == 1) {
       n_id = 2^(1:clusters)*500
