@@ -28,7 +28,7 @@ oneid = function(vars, clusters, id, n_obs, type, start, end, smin, emax) {
   time = c(time[time <= 0], 0, time[time > 0]) # insert 0
   
   response = list(length(vars))
-  responseStd = list(length(vars))
+  #responseStd = list(length(vars))
   for(i in 1:length(vars)) {
     line = clusters[type, 1 + length(vars) + length(vars) + i]
     m = clusters[type, 1 + length(vars) + i]
@@ -39,7 +39,7 @@ oneid = function(vars, clusters, id, n_obs, type, start, end, smin, emax) {
                  2 + sin(pi/2 + pi*time/emax), # part of sin curve
                  2 + (1 - 1/(1 + exp(-time/emax*5)))) # 1 - sigmoid
     response[[i]] = m*rsp/mean(rsp) + rnorm(n_obs, mean = 0, sd = m*n_cv)
-    responseStd[[i]]=scale(response[[i]])
+    #responseStd[[i]]=scale(response[[i]])
   }
   dat = cbind(id, true_group, time, do.call(cbind, response), do.call(cbind,responseStd))
   colnames(dat) = c("id", "true_group", "time", vars,varsStd)
