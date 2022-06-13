@@ -41,7 +41,7 @@ oneid = function(vars, clusters, id, n_obs, type, start, end, smin, emax) {
     response[[i]] = m*rsp/mean(rsp) + rnorm(n_obs, mean = 0, sd = m*n_cv)
     #responseStd[[i]]=scale(response[[i]])
   }
-  dat = cbind(id, true_group, time, do.call(cbind, response), do.call(cbind,responseStd))
+  dat = cbind(id, true_group, time, do.call(cbind, response))
   colnames(dat) = c("id", "true_group", "time", vars,varsStd)
   dat
 }
