@@ -29,14 +29,15 @@ oneid = function(vars, clusters, id, n_obs, type, start, end, smin, emax) {
   
   response = list(length(vars))
   for(i in 1:length(vars)) {
-    line = clusters[type, 2 + length(vars) + i]
-    m = clusters[type, 2 + i]
-    noise_cv = clusters[type, 2]
+    line = clusters[type, 1 + length(vars) + length(vars) + i]
+    m = clusters[type, 1 + length(vars) + i]
+    n_cv = clusters[type, 1+i]
     rsp = switch(line, # 1 = constant, 2 = sin, 3 = sigmoid
-                    2 + rep(0, length(time)), # constant
-                    2 + sin(pi/2 + pi*time/emax), # part of sin curve
-                    2 + (1 - 1/(1 + exp(-time/emax*5)))) # 1 - sigmoid
-    response[[i]] = m*rsp/mean(rsp) + rnorm(n_obs, mean = 0, sd = m*noise_cv)
+                 2 + rep(0, length(time)), # constant
+                 2 + time/emax,
+                 2 + sin(pi/2 + pi*time/emax), # part of sin curve
+                 2 + (1 - 1/(1 + exp(-time/emax*5)))) # 1 - sigmoid
+    response[[i]] = m*rsp/mean(rsp) + rnorm(n_obs, mean = 0, sd = m*n_cv)
   }
   dat = cbind(id, true_group, time, do.call(cbind, response))
   colnames(dat) = c("id", "true_group", "time", vars)
@@ -143,12 +144,17 @@ gen_traj_data = function(vars, clusters, m_obs, s_range, e_range, min_obs = 3,
       n_id = 2^(1:clusters)*500
     } else { n_id = clusters }
     d = length(vars)*length(n_id)
-    means = matrix(runif(d, 40, 220), nrow = length(n_id))
-    curv = matrix(sample(1:3, d, replace = TRUE), 
-                  nrow = length(n_id), ncol = length(vars))
-    noise_cv = rep(cv, length(n_id))
+    
+    means=matrix(meanlist,nrow=length(n_id),ncol=length(vars),byrow=TRUE)
+    #means = matrix(runif(d, 40, 220), nrow = length(n_id))
+    #curv = matrix(sample(1:3, d, replace = TRUE), 
+    #              nrow = length(n_id), ncol = length(vars))
+    curv =matrix(curvlist,nrow=length(n_id),ncol=length(vars),byrow=TRUE)
+    #noise_cv = rep(cv, length(n_id))
+    noise_cv = matrix(cvlist,nrow=length(n_id),ncol=2,byrow=TRUE)
+    
     clusters = cbind(n_id, noise_cv, means, curv)
-    colnames(clusters) = c("n_id", "noise_cv", paste0("mean", 1:length(vars)),
+    colnames(clusters) = c("n_id", paste0("noise_cv", 1:length(vars)), paste0("mean", 1:length(vars)),
                            paste0("curve", 1:length(vars)))
   } else {
     if(class(clusters) == "matrix" | class(clusters == "data.frame")) {
@@ -159,8 +165,9 @@ gen_traj_data = function(vars, clusters, m_obs, s_range, e_range, min_obs = 3,
     }
   }
   if(verbose) print(clusters)
-
+  
   id_list = gendata(vars, clusters, m_obs, s_range, e_range, min_obs)
   id_mat = do.call(rbind, id_list)
   data.table::data.table(id_mat)
 }
+
