@@ -102,7 +102,7 @@ ggplot(data[id %in% sample(unique(data[, id]), 9)],
 ```
 Next, cluster the trajectories. Set *k=3*, spline max degrees of freedom to 30, and set `conv` maximum iterations to 10 and convergence when 0 changes occur. *mccores* sets the number of cores to use in various components of the code. Note that this does not work on Windows operating systems, where it should be left at 1. In the code that follows, we use verbose output to get information from each iteration.
 ```{r}
-
+cl = rep(list(NULL),length(meanlist))
  for(s in 1:length(meanlist)){
    set.seed(rs[[s]])
    cl[[s]] = clustra(data[[s]], k = 3, 
