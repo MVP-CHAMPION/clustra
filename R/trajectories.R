@@ -554,5 +554,5 @@ clustra = function(data, k, model,
   if(verbose && !is.null(er)) cat(" ", er, "\n")
   cl$ido = ido
 
-  #cl
+  cl
 }
