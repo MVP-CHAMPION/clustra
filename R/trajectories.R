@@ -429,8 +429,8 @@ trajectories = function(data, k, group, maxdf, conv = c(20, 0), mccores = 1, ver
 
     ## evaluate results and update groups
     changes = sum(new_group != group) # may exaggerate due to renumbering
-    counts = tabulate(new_group)lapply(1:k_cl, function(g) deviance(myTPSlist[[g]]))
-    deviance = sum(unlist()) ##4.9.22
+    counts = tabulate(new_group)
+    deviance = sum(unlist(lapply(1:k_cl, function(g) deviance(myTPSlist[[g]])))) ##4.9.22
     if(verbose)
        cat(" Changes:", changes, "Counts:", counts, "Deviance:", deviance)
     group = new_group
