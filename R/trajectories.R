@@ -556,5 +556,5 @@ clustra = function(data, k, model,
 
   cl
   
-  data=  data[, group:=factor(..cl$data_group)]
+ # data=  data[, group:=factor(..cl$data_group)]
 }
