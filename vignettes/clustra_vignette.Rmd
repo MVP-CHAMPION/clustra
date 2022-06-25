@@ -84,14 +84,17 @@ head(data)
 ```{r fig.width = 7, fig.height = 9}
 library(ggplot2)
 library(gridExtra)
-psys = ggplot(data[[1]], aes(x = time, y = sys, color = as.factor(true_group))) + 
-  geom_point(data = data[[1]], aes(y = sys), pch = ".") #+ geom_line()
+
+ for(s in 1:length(meanlist)){
+psys = ggplot(data[[s]], aes(x = time, y = sys, color = as.factor(true_group))) + 
+  geom_point(data = data[[s]], aes(y = sys), pch = ".") #+ geom_line()
 
 
-pdys = ggplot(data[[1]], aes(x = time, y = dia, color = as.factor(true_group))) + 
-  geom_point(data = data[[1]], aes(y = dia), pch = ".")
+pdys = ggplot(data[[s]], aes(x = time, y = dia, color = as.factor(true_group))) + 
+  geom_point(data = data[[s]], aes(y = dia), pch = ".")
       ##+ geom_line(aes(color=as.factor(group)))
-  grid.arrange(psys,pdys)
+ print(grid.arrange(psys,pdys))
+ }
 ```
 
 Select a few random *id*s and print their scatterplots.
@@ -111,24 +114,29 @@ cl = rep(list(NULL),length(meanlist))
              maxdf = 30, conv = c(2, 1), mccores = mc, verbose = TRUE)
  }
 
-
+for(s in 1:length(meanlist)){
+ ## dat=data[[s]]
+  data[[s]]=  data[[s]][, group:=factor(..cl[[s]]$data_group)]
+}
 ```
 
 Next, plot the raw data (sample if more than 10,000 points). Then repeat the plot with resulting spline fit, colored by the cluster value.
 ```{r fig.width = 7, fig.height = 7}
+#newdata = rep(list(NULL),length(meanlist))
+
 for(s in 1:length(meanlist)){
   sdt = data[[s]]
 if(nrow( data[[s]]) > 10000)
-  sdt =  data[[s]][, group:=factor(..cl$data_group)][sample(nrow( data[[s]]), 10000)]
+  sdt =  data[[s]][sample(nrow(data[[s]]), 10000)]
 
 for(v in 1:length(vars)){
 ggplot(sdt, aes(x = time, y = vars[v])) + geom_point(pch = ".")
 
 np = 100
-k = length(cl[[s]]$myTPSlist)
+k = length(cl[[s]]$myTPSlist[[s]])
 ntime = seq( data[[s]][, min(time)],  data[[s]][, max(time)], length.out = np)
 pdata = expand.grid(time = ntime, group = factor(1:k))
-pdata = subset(pdata, group %in% which(lengths(cl[[s]]$myTPSlist) > 0))
+pdata = subset(pdata, group %in% which(lengths(cl[[s]]$myTPSlist[[s]]) > 0))
 pred = vector("list", k)
 
 
@@ -136,7 +144,7 @@ pred = vector("list", k)
       if(is.null(cl[[s]]$myTPSlist[[i]][[v]])) {
         pred[[i]] = NULL
       } else {
-        pred[[i]] = mgcv::predict.bam(cl[[s]]$myTPSlist[[i]][[v]], newdata[[s]] = list(time = ntime),
+        pred[[i]] = mgcv::predict.bam(cl[[s]]$myTPSlist[[i]][[v]], newdata = list(time = ntime),
                             type = "response")
       }
 pdata$pred = do.call(c, pred)
