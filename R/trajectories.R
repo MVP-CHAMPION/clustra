@@ -555,4 +555,6 @@ clustra = function(data, k, model,
   cl$ido = ido
 
   cl
+  
+  data=  data[, group:=factor(..cl$data_group)]
 }
