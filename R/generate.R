@@ -149,13 +149,13 @@ gen_traj_data = function(vars, clusters, m_obs,  meanlist, curvlist, cvlist, s_r
     } else { n_id = clusters }
     d = length(vars)*length(n_id)
     
-    means=matrix(meanlist,nrow=length(n_id),ncol=length(vars),byrow=TRUE)
+    means=matrix(meanlist,nrow=length(n_id),ncol=length(vars),byrow=FALSE)
     #means = matrix(runif(d, 40, 220), nrow = length(n_id))
     #curv = matrix(sample(1:3, d, replace = TRUE), 
     #              nrow = length(n_id), ncol = length(vars))
-    curv =matrix(curvlist,nrow=length(n_id),ncol=length(vars),byrow=TRUE)
+    curv =matrix(curvlist,nrow=length(n_id),ncol=length(vars),byrow=FALSE)
     #noise_cv = rep(cv, length(n_id))
-    noise_cv = matrix(cvlist,nrow=length(n_id),ncol=2,byrow=TRUE)
+    noise_cv = matrix(cvlist,nrow=length(n_id),ncol=2,byrow=FALSE)
     
     clusters = cbind(n_id, noise_cv, means, curv)
     colnames(clusters) = c("n_id", paste0("noise_cv", 1:length(vars)), paste0("mean", 1:length(vars)),

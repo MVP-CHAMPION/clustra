@@ -33,18 +33,27 @@ varsStd=c("sys_std","dia_std")
 #                     s_range = c(-365, -90), e_range = c(0.5*365, 2*365),
 #                     min_obs = 10, cv = 0.001, verbose = TRUE)
 
- mean1=c(150,70,130,55,120,27)
- mean2=c(150,21,130,30,120,27)
- 
- curv1=c(1,2,2,3,2,4)  
- curv2=c(1,2,1,3,2,4)  
+
+## Curves:
+## 1 constant
+## 2 linear 
+## 3 part of sin
+## 4 1- sigmoid curve
+
+
+ mean1=c(150,130,110,70,55,27)
+ mean2=c(150,130,120,21,30,27)
+
+curv1=c(1,2,2,2,3,4)  
+ curv2=c(1,1,2,2,3,4)  
+
  
  cv1=c(.01,.001,.002,.01,.001,.002)
  cv2=c(.01,.001,.002,.01,.001,.002)
  
-   mean3=c(150,21,130,30,120,27)
-    curv3=c(1,2,2,3,2,4)  
-    cv3=c(.001,.001,.002,.001,.001,.002)
+mean3=c(150,21,130,30,120,27)
+curv3=c(1,2,2,3,2,4)  
+cv3=c(.001,.001,.002,.001,.001,.002)
    
  meanlist=list(mean1, mean2, mean3)
  curvlist=list(curv1, curv2, curv3)
