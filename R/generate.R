@@ -36,6 +36,7 @@ oneid = function(vars, clusters, id, n_obs, type, start, end, smin, emax) {
     rsp = switch(line, # 1 = constant, 2 = sin, 3 = sigmoid
                  2 + rep(0, length(time)), # constant
                  2 + time/emax,
+                 2 - time/emax,
                  2 + sin(pi/2 + pi*time/emax), # part of sin curve
                  2 + (1 - 1/(1 + exp(-time/emax*5)))) # 1 - sigmoid
     response[[i]] = m*rsp/mean(rsp) + rnorm(n_obs, mean = 0, sd = m*n_cv)
