@@ -28,7 +28,7 @@ oneid = function(vars, clusters, id, n_obs, type, start, end, smin, emax) {
   time = c(time[time <= 0], 0, time[time > 0]) # insert 0
   
   dat=as.data.table(cbind(id,true_group,time))
-  line=clusters[type,3]
+  line=clusters[type,2]
   datlist=list(clus1,clus2,clus3,clus4,clus5,clus6,clus7,clus8)
   dat=addColumns(dtDefs = datlist[[line]],dat)
   
@@ -128,7 +128,7 @@ gendata = function(vars, clusters, m_obs, s_range, e_range, min_obs) {
 #' 
 #' @importFrom stats dist rnorm rpois runif
 #' @export
-gen_traj_data = function(vars, clusters, m_obs, curvlist, cvlist, s_range, e_range, min_obs = 3,
+gen_traj_data = function(vars, clusters, m_obs, curvlist, s_range, e_range, min_obs = 3,
                          verbose = FALSE){
 
   if(is.numeric(clusters)) {
@@ -138,12 +138,9 @@ gen_traj_data = function(vars, clusters, m_obs, curvlist, cvlist, s_range, e_ran
     d = length(vars)*length(n_id)
     
     curv =matrix(curvlist,nrow=length(n_id),ncol=1,byrow=FALSE)
-    #noise_cv = rep(cv, length(n_id))
-    noise_cv = matrix(cvlist,nrow=length(n_id),ncol=1,byrow=FALSE)
     
-    clusters = cbind(n_id, noise_cv, curv)
-    colnames(clusters) = c("n_id", paste0("noise_cv"),
-                           paste0("curve"))
+    clusters = cbind(n_id, curv)
+    colnames(clusters) = c("n_id", paste0("curve"))
   } else {
     if(class(clusters) == "matrix" | class(clusters == "data.frame")) {
       if(ncol(clusters) != 2 + 2*nrow(clusters)) 

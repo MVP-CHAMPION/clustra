@@ -59,19 +59,15 @@ clus8<-defDataAdd(clus8,varname="dia",formula="-100+sin(-100+3.14159*time/400)*1
 
 curv1=c(1,2,3) 
 curv2=c(4,7,8)  
-
- cv1=c(.001,.001,.002)
- cv2=c(.001,.001,.002)
  
- curvlist=list(curv1)
- cvlist=list(cv1,cv2)
+ curvlist=list(curv1, curv2)
 
- 
+
 
   data = rep(list(NULL),length(curvlist))
   for(q in 1:length(curvlist)){
 data[[q]] = gen_traj_data(vars, clusters = c(800, 1000,1200), m_obs = 10, 
-                     curvlist=curvlist[[q]], cvlist=cvlist[[q]],
+                     curvlist=curvlist[[q]], 
                      s_range = c(-365, -90), e_range = c(0.5*365, 2*365),
                      min_obs = 10, verbose = TRUE)
 
