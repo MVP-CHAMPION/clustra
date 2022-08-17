@@ -25,56 +25,55 @@ For this vignette, we begin by generating a data set with the *gen_traj_data()* 
 We also set *RNGkind* and *seed* for reproducibility. Code below generates the data and looks at a few observations of the generated data. The *mc* variable sets core use and will be assigned to *mccores* parameter through the rest of the vignette. By default, 1 core is assigned. Parallel sections are implemented with *parallel::mclappy()*, so on unix and Mac platforms it is recommended to use the full number of cores available for faster performance.
 ```{r}
 library(clustra)
+library(simstudy)
+library(data.table)
 mc = 1 # If running on a unix or a Mac platform, increase up to 2x # cores
 set.seed(7807868)
 vars = c("sys", "dia")
 varsStd=c("sys_std","dia_std")
-#data = gen_traj_data(vars, clusters = c(400, 800, 1600, 3200), m_obs = 25, 
-#                     s_range = c(-365, -90), e_range = c(0.5*365, 2*365),
-#                     min_obs = 10, cv = 0.001, verbose = TRUE)
+
+clus1<-defDataAdd(varname="sys",formula="0.0375*time+85",variance=2)
+clus1<-defDataAdd(clus1,varname="dia",formula="95",variance=2)
+
+clus2<-defDataAdd(varname="sys",formula="65",variance=2)
+clus2<-defDataAdd(clus2,varname="dia",formula="0.05*time+65",variance=2)
+
+clus3<-defDataAdd(varname="sys",formula="-0.0375*time+45",variance=2)
+clus3<-defDataAdd(clus3,varname="dia",formula="35",variance=2)
+
+clus4<-defDataAdd(varname="sys",formula="0.0375*time+100",variance=2)
+clus4<-defDataAdd(clus4,varname="dia",formula="60",variance=2)
+
+clus5<-defDataAdd(varname="sys",formula="0.0375*time+65",variance=2)
+clus5<-defDataAdd(clus5,varname="dia",formula="-0.1*time+45",variance=2)
+
+clus6<-defDataAdd(varname="sys",formula="0.0375*time+20",variance=2)
+clus6<-defDataAdd(clus6,varname="dia",formula="20",variance=2)
+
+clus7<-defDataAdd(varname="sys",formula="65",variance=2)
+clus7<-defDataAdd(clus7,varname="dia",formula="80+sin(-100+3.14159*time/300)*10",variance=2)
+
+clus8<-defDataAdd(varname="sys",formula="0.0375*time+85",variance=2)
+clus8<-defDataAdd(clus8,varname="dia",formula="-100+sin(-100+3.14159*time/400)*10",variance=2)
 
 
-## Curves:
-## 1 constant
-## 2 linear 
-## 3 part of sin
-## 4 1- sigmoid curve
+curv1=c(1,2,3) 
+curv2=c(4,7,8)  
 
-
- mean1=c(150,130,110,70,55,27)
- mean2=c(150,130,120,21,30,27)
-
-curv1=c(1,2,5,2,3,4)  
- curv2=c(1,1,2,2,3,4)  
+ cv1=c(.001,.001,.002)
+ cv2=c(.001,.001,.002)
+ 
+ curvlist=list(curv1)
+ cvlist=list(cv1,cv2)
 
  
- cv1=c(.01,.001,.002,.01,.001,.002)
- cv2=c(.01,.001,.002,.01,.001,.002)
- 
-mean3=c(150,21,130,30,120,27)
-curv3=c(1,2,2,3,2,4)  
-cv3=c(.001,.001,.002,.001,.001,.002)
-   
- meanlist=list(mean1, mean2, mean3)
- curvlist=list(curv1, curv2, curv3)
- cvlist=list(cv1,cv2,cv3)
 
- 
- ## random seeds
-  rs = rep(list(NULL),length(meanlist))
- for(q in 1:length(meanlist)){
-   rs[[q]]=runif(1,10000,1000000000)
- }
- 
- 
- #data=rep(list(NULL),3)
-
-  data = rep(list(NULL),length(meanlist))
-  for(q in 1:length(meanlist)){
-data[[q]] = gen_traj_data(vars, clusters = c(800, 1000,1200), m_obs = 25, 
-                     meanlist=meanlist[[q]], curvlist=curvlist[[q]], cvlist=cvlist[[q]],
+  data = rep(list(NULL),length(curvlist))
+  for(q in 1:length(curvlist)){
+data[[q]] = gen_traj_data(vars, clusters = c(800, 1000,1200), m_obs = 10, 
+                     curvlist=curvlist[[q]], cvlist=cvlist[[q]],
                      s_range = c(-365, -90), e_range = c(0.5*365, 2*365),
-                     min_obs = 10, cv = 0.00001, verbose = TRUE)
+                     min_obs = 10, verbose = TRUE)
 
 
 }
