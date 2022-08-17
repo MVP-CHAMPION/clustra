@@ -28,7 +28,7 @@ oneid = function(vars, clusters, id, n_obs, type, start, end, smin, emax) {
   time = c(time[time <= 0], 0, time[time > 0]) # insert 0
   
   dat=as.data.table(cbind(id,true_group,time))
-  line=clsuters[type,3]
+  line=clusters[type,3]
   datlist=list(clus1,clus2,clus3,clus4,clus5,clus6,clus7,clus8)
   dat=addColumns(dtDefs = datlist[[line]],dat)
   
