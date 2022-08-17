@@ -128,28 +128,22 @@ gendata = function(vars, clusters, m_obs, s_range, e_range, min_obs) {
 #' 
 #' @importFrom stats dist rnorm rpois runif
 #' @export
-gen_traj_data = function(vars, clusters, m_obs,  meanlist, curvlist, cvlist, s_range, e_range, min_obs = 3,
-                         cv = 0.05, verbose = FALSE)
-{
-#  Datalist = rep(list(NULL),length(meanlist))
-#  for(q in 1:length(meanlist)){
+gen_traj_data = function(vars, clusters, m_obs, curvlist, cvlist, s_range, e_range, min_obs = 3,
+                         verbose = FALSE){
+
   if(is.numeric(clusters)) {
     if(length(clusters) == 1) {
       n_id = 2^(1:clusters)*500
     } else { n_id = clusters }
     d = length(vars)*length(n_id)
     
-    means=matrix(meanlist,nrow=length(n_id),ncol=length(vars),byrow=FALSE)
-    #means = matrix(runif(d, 40, 220), nrow = length(n_id))
-    #curv = matrix(sample(1:3, d, replace = TRUE), 
-    #              nrow = length(n_id), ncol = length(vars))
-    curv =matrix(curvlist,nrow=length(n_id),ncol=length(vars),byrow=FALSE)
+    curv =matrix(curvlist,nrow=length(n_id),ncol=1,byrow=FALSE)
     #noise_cv = rep(cv, length(n_id))
-    noise_cv = matrix(cvlist,nrow=length(n_id),ncol=2,byrow=FALSE)
+    noise_cv = matrix(cvlist,nrow=length(n_id),ncol=1,byrow=FALSE)
     
-    clusters = cbind(n_id, noise_cv, means, curv)
-    colnames(clusters) = c("n_id", paste0("noise_cv", 1:length(vars)), paste0("mean", 1:length(vars)),
-                           paste0("curve", 1:length(vars)))
+    clusters = cbind(n_id, noise_cv, curv)
+    colnames(clusters) = c("n_id", paste0("noise_cv"),
+                           paste0("curve"))
   } else {
     if(class(clusters) == "matrix" | class(clusters == "data.frame")) {
       if(ncol(clusters) != 2 + 2*nrow(clusters)) 
