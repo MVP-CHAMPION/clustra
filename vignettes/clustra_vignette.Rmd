@@ -54,7 +54,7 @@ clus7<-defDataAdd(varname="sys",formula="65",variance=2)
 clus7<-defDataAdd(clus7,varname="dia",formula="80+sin(-100+3.14159*time/300)*10",variance=2)
 
 clus8<-defDataAdd(varname="sys",formula="0.0375*time+85",variance=2)
-clus8<-defDataAdd(clus8,varname="dia",formula="-100+sin(-100+3.14159*time/400)*10",variance=2)
+clus8<-defDataAdd(clus8,varname="dia",formula="40+sin(-100+3.14159*time/400)*10",variance=2)
 
 
 curv1=c(1,2,3) 
@@ -68,7 +68,7 @@ curv2=c(4,7,8)
   for(q in 1:length(curvlist)){
 data[[q]] = gen_traj_data(vars, clusters = c(800, 1000,1200), m_obs = 10, 
                      curvlist=curvlist[[q]], 
-                     s_range = c(-365, -90), e_range = c(0.5*365, 2*365),
+                     s_range = c(-365, -90), e_range = c(0.5*365, 365),
                      min_obs = 10, verbose = TRUE)
 
 
@@ -77,7 +77,7 @@ data[[q]] = gen_traj_data(vars, clusters = c(800, 1000,1200), m_obs = 10,
  
   ### standardize the outcome variables
   
-  for(s in 1:length(meanlist)){
+  for(s in 1:length(curvlist)){
  data[[s]]$sys_std <- scale(data[[s]]$sys)[, 1]
 data[[s]]$dia_std <- scale(data[[s]]$dia)[, 1]
 }
@@ -89,7 +89,7 @@ head(data)
 library(ggplot2)
 library(gridExtra)
 
- for(s in 1:length(meanlist)){
+ for(s in 1:length(curvlist)){
 psys = ggplot(data[[s]], aes(x = time, y = sys, color = as.factor(true_group))) + 
   geom_point(data = data[[s]], aes(y = sys), pch = ".") #+ geom_line()
 
@@ -109,8 +109,8 @@ ggplot(data[id %in% sample(unique(data[, id]), 9)],
 ```
 Next, cluster the trajectories. Set *k=3*, spline max degrees of freedom to 30, and set `conv` maximum iterations to 10 and convergence when 0 changes occur. *mccores* sets the number of cores to use in various components of the code. Note that this does not work on Windows operating systems, where it should be left at 1. In the code that follows, we use verbose output to get information from each iteration.
 ```{r}
-cl = rep(list(NULL),length(meanlist))
- for(s in 1:length(meanlist)){
+cl = rep(list(NULL),length(curvlist))
+ for(s in 1:length(curvlist)){
    set.seed(rs[[s]])
    cl[[s]] = clustra(data[[s]], k = 3, 
 # = clustra(data, k = 3, 
@@ -118,7 +118,7 @@ cl = rep(list(NULL),length(meanlist))
              maxdf = 30, conv = c(2, 1), mccores = mc, verbose = TRUE)
  }
 
-for(s in 1:length(meanlist)){
+for(s in 1:length(curvlist)){
  ## dat=data[[s]]
   data[[s]]=  data[[s]][, group:=factor(..cl[[s]]$data_group)]
 }
