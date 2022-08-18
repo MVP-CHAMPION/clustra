@@ -44,24 +44,30 @@ clus3<-defDataAdd(clus3,varname="dia",formula="35",variance=2)
 clus4<-defDataAdd(varname="sys",formula="0.0375*time+100",variance=2)
 clus4<-defDataAdd(clus4,varname="dia",formula="60",variance=2)
 
+
 clus5<-defDataAdd(varname="sys",formula="0.0375*time+65",variance=2)
 clus5<-defDataAdd(clus5,varname="dia",formula="-0.1*time+45",variance=2)
 
 clus6<-defDataAdd(varname="sys",formula="0.0375*time+20",variance=2)
-clus6<-defDataAdd(clus6,varname="dia",formula="20",variance=2)
+clus6<-defDataAdd(clus6,varname="dia",formula="30",variance=2)
 
-clus7<-defDataAdd(varname="sys",formula="65",variance=2)
-clus7<-defDataAdd(clus7,varname="dia",formula="80+sin(-100+3.14159*time/300)*10",variance=2)
+clus7<-defDataAdd(varname="sys",formula="0.0375*time+85", variance=10)
+clus7<-defDataAdd(clus7,varname="dia",formula="40+sin(-100+3.14159*time/400)*10",variance=5)
 
-clus8<-defDataAdd(varname="sys",formula="0.0375*time+85",variance=2)
-clus8<-defDataAdd(clus8,varname="dia",formula="40+sin(-100+3.14159*time/400)*10",variance=2)
+clus8<-defDataAdd(varname="sys",formula="0.0375*time+90",variance=10)
+clus8<-defDataAdd(clus8,varname="dia",formula="80+sin(-100+3.14159*time/300)*10",variance=2)
+
+clus9<-defDataAdd(varname="sys",formula="75",variance=10)
+clus9<-defDataAdd(clus9,varname="dia",formula="60",variance=5)
 
 
 curv1=c(1,2,3) 
-curv2=c(4,7,8)  
+curv2=c(4,5,6) 
+curv3=c(7,8,9)
  
- curvlist=list(curv1, curv2)
+ curvlist=list(curv1, curv2,curv3)
 
+  datlist=list(clus1,clus2,clus3,clus4,clus5,clus6,clus7,clus8,clus9)
 
 
   data = rep(list(NULL),length(curvlist))
@@ -111,7 +117,7 @@ Next, cluster the trajectories. Set *k=3*, spline max degrees of freedom to 30, 
 ```{r}
 cl = rep(list(NULL),length(curvlist))
  for(s in 1:length(curvlist)){
-   set.seed(rs[[s]])
+   set.seed(74847103)
    cl[[s]] = clustra(data[[s]], k = 3, 
 # = clustra(data, k = 3, 
              model = list(id = "id", time = "time", resp = vars),
