@@ -60,14 +60,36 @@ clus8<-defDataAdd(clus8,varname="dia",formula="80+sin(-100+3.14159*time/300)*10"
 clus9<-defDataAdd(varname="sys",formula="75",variance=10)
 clus9<-defDataAdd(clus9,varname="dia",formula="60",variance=5)
 
+clus10<-defDataAdd(varname="sys",formula="75",variance=10)
+clus10<-defDataAdd(clus10,varname="dia",formula="60",variance=5)
+#####
+#### changing pairing of first scenario
+clus11<-defDataAdd(varname="sys",formula="0.0375*time+85",variance=2)
+clus11<-defDataAdd(clus11,varname="dia",formula="95",variance=2)
+
+clus12<-defDataAdd(varname="sys",formula="65",variance=2)
+clus12<-defDataAdd(clus12,varname="dia",formula="35" ,variance=2)
+
+clus13<-defDataAdd(varname="sys",formula="-0.0375*time+45",variance=2)
+clus13<-defDataAdd(clus13,varname="dia",formula="0.05*time+65",variance=2)
+
+
+clus14<-defDataAdd(varname="sys",formula="0.0375*time+85",variance=2)
+clus14<-defDataAdd(clus14,varname="dia",formula="35" ,variance=2)
+
+clus15<-defDataAdd(varname="sys",formula="65",variance=2)
+clus15<-defDataAdd(clus15,varname="dia",formula="95" ,variance=2)
+
+clus16<-defDataAdd(varname="sys",formula="-0.0375*time+45",variance=2)
+clus16<-defDataAdd(clus16,varname="dia",formula="0.05*time+65",variance=2)
 
 curv1=c(1,2,3) 
-curv2=c(4,5,6) 
-curv3=c(7,8,9)
+curv2=c(11,12,13) 
+curv3=c(14,15,16)
  
  curvlist=list(curv1, curv2,curv3)
 
-  datlist=list(clus1,clus2,clus3,clus4,clus5,clus6,clus7,clus8,clus9)
+  datlist=list(clus1,clus2,clus3,clus4,clus5,clus6,clus7,clus8,clus9,clus10, clus11,clus12,clus13,clus14,clus15,clus16)
 
 
   data = rep(list(NULL),length(curvlist))
