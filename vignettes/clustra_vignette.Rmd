@@ -32,14 +32,16 @@ set.seed(7807868)
 vars = c("sys", "dia")
 varsStd=c("sys_std","dia_std")
 
-clus1<-defDataAdd(varname="sys",formula="0.0375*time+85",variance=2)
-clus1<-defDataAdd(clus1,varname="dia",formula="95",variance=2)
+clus1<-defDataAdd(varname="sys",formula="(1-(100/(1+2.71828^(-time+300))))+80",variance=1)
 
-clus2<-defDataAdd(varname="sys",formula="65",variance=2)
-clus2<-defDataAdd(clus2,varname="dia",formula="0.05*time+65",variance=2)
+#clus1<-defDataAdd(varname="sys",formula="0.0375*time+85",variance=50)
+clus1<-defDataAdd(clus1,varname="dia",formula="95",variance=50)
 
-clus3<-defDataAdd(varname="sys",formula="-0.0375*time+45",variance=2)
-clus3<-defDataAdd(clus3,varname="dia",formula="35",variance=2)
+clus2<-defDataAdd(varname="sys",formula="65",variance=50)
+clus2<-defDataAdd(clus2,varname="dia",formula="0.05*time+65",variance=50)
+
+clus3<-defDataAdd(varname="sys",formula="-0.0375*time+45",variance=50)
+clus3<-defDataAdd(clus3,varname="dia",formula="35",variance=50)
 
 clus4<-defDataAdd(varname="sys",formula="0.0375*time+100",variance=2)
 clus4<-defDataAdd(clus4,varname="dia",formula="60",variance=2)
@@ -84,10 +86,12 @@ clus16<-defDataAdd(varname="sys",formula="-0.0375*time+45",variance=2)
 clus16<-defDataAdd(clus16,varname="dia",formula="0.05*time+65",variance=2)
 
 curv1=c(1,2,3) 
-curv2=c(11,12,13) 
-curv3=c(14,15,16)
+curv2=c(4,5,6)
+curv3=c(7,8,9)
+#curv2=c(11,12,13) 
+#curv3=c(14,15,16)
  
- curvlist=list(curv1, curv2,curv3)
+ curvlist=list(curv1)
 
   datlist=list(clus1,clus2,clus3,clus4,clus5,clus6,clus7,clus8,clus9,clus10, clus11,clus12,clus13,clus14,clus15,clus16)
 
@@ -96,7 +100,7 @@ curv3=c(14,15,16)
   for(q in 1:length(curvlist)){
 data[[q]] = gen_traj_data(vars, clusters = c(800, 1000,1200), m_obs = 10, 
                      curvlist=curvlist[[q]], 
-                     s_range = c(-365, -90), e_range = c(0.5*365, 365),
+                     s_range = c(-5, -90), e_range = c(0.5*365, 365),
                      min_obs = 10, verbose = TRUE)
 
 
