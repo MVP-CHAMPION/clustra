@@ -29,61 +29,60 @@ library(simstudy)
 library(data.table)
 mc = 1 # If running on a unix or a Mac platform, increase up to 2x # cores
 set.seed(7807868)
-vars = c("sys", "dia")
-varsStd=c("sys_std","dia_std")
+vars = c("eGFR", "V2")
+varsStd=c("eGFR_std","V2_std")
 
-clus1<-defDataAdd(varname="sys",formula="(1-(100/(1+2.71828^(-time+300))))+80",variance=1)
 
+#ydef1 <- defData(varname = "randomEffect", dist = "normal", formula = 0, variance = sqrt(3))
+#ydef2 <- defDataAdd(varname = "Y", dist = "normal", formula = "5 + 2.5*period + 1.5*T + 3.5*period*T + randomEffect", 
+ #   variance = 1)
+
+
+clus1<-defDataAdd(varname="eGFR",formula="-0.02*time+60",variance=1)
+#clus1<-defDataAdd(clus1,varname = "RE", dist = "normal",formula = 0,variance = sqrt(3))
 #clus1<-defDataAdd(varname="sys",formula="0.0375*time+85",variance=50)
-clus1<-defDataAdd(clus1,varname="dia",formula="95",variance=50)
+clus1<-defDataAdd(clus1,varname="V2",formula="0.008*time+28",variance=1)
 
-clus2<-defDataAdd(varname="sys",formula="65",variance=50)
-clus2<-defDataAdd(clus2,varname="dia",formula="0.05*time+65",variance=50)
+clus2<-defDataAdd(varname="eGFR",formula="60*(1-(1/(1+2.71828^(-(time-200)/200*5))))",variance=1)
+#clus2<-defDataAdd(clus2,varname = "RE", dist = "normal",formula = 0,variance = sqrt(3))
+clus2<-defDataAdd(clus2,varname="V2",formula="20+sin(-50+3.14159*time/300)*3",variance=1)
 
-clus3<-defDataAdd(varname="sys",formula="-0.0375*time+45",variance=50)
-clus3<-defDataAdd(clus3,varname="dia",formula="35",variance=50)
+clus3<-defDataAdd(varname="eGFR",formula="60*(1-(1/(1+2.71828^(-(time-300)/300*5))))",variance=1)
+#clus3<-defDataAdd(clus3,varname = "RE", dist = "normal",formula = 0,variance = sqrt(3))
+clus3<-defDataAdd(clus3,varname="V2",formula="-0.02*time+15",variance=1)
 
-clus4<-defDataAdd(varname="sys",formula="0.0375*time+100",variance=2)
-clus4<-defDataAdd(clus4,varname="dia",formula="60",variance=2)
+### second scenario
 
+clus4<-defDataAdd(varname="eGFR",formula="-0.02*time+60",variance=1)
+#clus4<-defDataAdd(clus4,varname="V2",formula="55",variance=1)
+#clus4<-defDataAdd(clus4,varname="V2",formula="25+5*sin(-3.1415926*((time-20)/250)-20)",variance=0.5)
+clus4<-defDataAdd(clus4,varname="V2",formula="25+20*sin(-3.1415926*((time-20)/250)-20)",variance=0.5)
 
-clus5<-defDataAdd(varname="sys",formula="0.0375*time+65",variance=2)
-clus5<-defDataAdd(clus5,varname="dia",formula="-0.1*time+45",variance=2)
-
-clus6<-defDataAdd(varname="sys",formula="0.0375*time+20",variance=2)
-clus6<-defDataAdd(clus6,varname="dia",formula="30",variance=2)
-
-clus7<-defDataAdd(varname="sys",formula="0.0375*time+85", variance=10)
-clus7<-defDataAdd(clus7,varname="dia",formula="40+sin(-100+3.14159*time/400)*10",variance=5)
-
-clus8<-defDataAdd(varname="sys",formula="0.0375*time+90",variance=10)
-clus8<-defDataAdd(clus8,varname="dia",formula="80+sin(-100+3.14159*time/300)*10",variance=2)
-
-clus9<-defDataAdd(varname="sys",formula="75",variance=10)
-clus9<-defDataAdd(clus9,varname="dia",formula="60",variance=5)
-
-clus10<-defDataAdd(varname="sys",formula="75",variance=10)
-clus10<-defDataAdd(clus10,varname="dia",formula="60",variance=5)
-#####
-#### changing pairing of first scenario
-clus11<-defDataAdd(varname="sys",formula="0.0375*time+85",variance=2)
-clus11<-defDataAdd(clus11,varname="dia",formula="95",variance=2)
-
-clus12<-defDataAdd(varname="sys",formula="65",variance=2)
-clus12<-defDataAdd(clus12,varname="dia",formula="35" ,variance=2)
-
-clus13<-defDataAdd(varname="sys",formula="-0.0375*time+45",variance=2)
-clus13<-defDataAdd(clus13,varname="dia",formula="0.05*time+65",variance=2)
+clus5<-defDataAdd(varname="eGFR",formula="60*(1-(1/(1+2.71828^(-(time-200)/200*5))))",variance=1)
+#clus5<-defDataAdd(clus5,varname="V2",formula="35",variance=1)
+clus5<-defDataAdd(clus5,varname="V2",formula="30+5*sin(-3.1415926*((time-30)/300)-34)",variance=0.5)
 
 
-clus14<-defDataAdd(varname="sys",formula="0.0375*time+85",variance=2)
-clus14<-defDataAdd(clus14,varname="dia",formula="35" ,variance=2)
 
-clus15<-defDataAdd(varname="sys",formula="65",variance=2)
-clus15<-defDataAdd(clus15,varname="dia",formula="95" ,variance=2)
+clus6<-defDataAdd(varname="eGFR",formula="60*(1-(1/(1+2.71828^(-(time-300)/300*5))))",variance=1)
+clus6<-defDataAdd(clus6,varname="V2",formula="0.001*time+15",variance=1)
 
-clus16<-defDataAdd(varname="sys",formula="-0.0375*time+45",variance=2)
-clus16<-defDataAdd(clus16,varname="dia",formula="0.05*time+65",variance=2)
+
+
+### Third scenario
+clus7<-defDataAdd(varname="eGFR",formula="-0.02*time+60", variance=1)
+clus7<-defDataAdd(clus7,varname="V2",formula="70+45*sin(-3.1415926*((time-30)/350)-34)",variance=2)
+#clus7<-defDataAdd(clus7,varname="V2",formula="-0.15*time+75",variance=1)
+#clus7<-defDataAdd(clus7,varname="V2",formula="25+sin(-3.1415926*(time-20)/250-20)",variance=1)
+
+clus8<-defDataAdd(varname="eGFR",formula="60*(1-(1/(1+2.71828^(-(time-200)/200*5))))",variance=1)
+clus8<-defDataAdd(clus8,varname="V2",formula="-0.0015*time^2+0.96*time+30",variance=2)
+#clus8<-defDataAdd(clus8,varname="V2",formula="-0.0024*time^2+0.87*time",variance=1)
+
+clus9<-defDataAdd(varname="eGFR",formula="60*(1-(1/(1+2.71828^(-(time-300)/300*5))))",variance=1)
+clus9<-defDataAdd(clus9,varname="V2",formula="50+45*sin(-3.1415926*((time-30)/350)-34)+0.4*time",variance=2)
+#clus9<-defDataAdd(clus9,varname="V2",formula="0.15*time+15",variance=1)
+
 
 curv1=c(1,2,3) 
 curv2=c(4,5,6)
@@ -91,16 +90,16 @@ curv3=c(7,8,9)
 #curv2=c(11,12,13) 
 #curv3=c(14,15,16)
  
- curvlist=list(curv1)
+ curvlist=list(curv1,curv2,curv3)
 
-  datlist=list(clus1,clus2,clus3,clus4,clus5,clus6,clus7,clus8,clus9,clus10, clus11,clus12,clus13,clus14,clus15,clus16)
+  datlist=list(clus1,clus2,clus3,clus4,clus5,clus6,clus7,clus8,clus9)
 
 
   data = rep(list(NULL),length(curvlist))
   for(q in 1:length(curvlist)){
-data[[q]] = gen_traj_data(vars, clusters = c(800, 1000,1200), m_obs = 10, 
+data[[q]] = gen_traj_data(vars, clusters = c(2000, 2000,2000), m_obs = 10, 
                      curvlist=curvlist[[q]], 
-                     s_range = c(-5, -90), e_range = c(0.5*365, 365),
+                     s_range = c(-1, -1), e_range = c(0.5*365, 365),
                      min_obs = 10, verbose = TRUE)
 
 
@@ -110,10 +109,10 @@ data[[q]] = gen_traj_data(vars, clusters = c(800, 1000,1200), m_obs = 10,
   ### standardize the outcome variables
   
   for(s in 1:length(curvlist)){
- data[[s]]$sys_std <- scale(data[[s]]$sys)[, 1]
-data[[s]]$dia_std <- scale(data[[s]]$dia)[, 1]
+ data[[s]]$eGFR_std <- scale(data[[s]]$eGFR)[, 1]
+data[[s]]$V2_std <- scale(data[[s]]$V2)[, 1]
 }
-vars = c("sys_std", "dia_std")
+vars = c("eGFR_std", "V2_std")
 
 head(data)
 ```
@@ -122,15 +121,17 @@ library(ggplot2)
 library(gridExtra)
 
  for(s in 1:length(curvlist)){
-psys = ggplot(data[[s]], aes(x = time, y = sys, color = as.factor(true_group))) + 
-  geom_point(data = data[[s]], aes(y = sys), pch = ".") #+ geom_line()
+psys = ggplot(data[[s]], aes(x = time, y = eGFR, color = as.factor(true_group))) + 
+  geom_point(data = data[[s]], aes(y = eGFR), pch = ".") #+ geom_line()
 
 
-pdys = ggplot(data[[s]], aes(x = time, y = dia, color = as.factor(true_group))) + 
-  geom_point(data = data[[s]], aes(y = dia), pch = ".")
+pdys = ggplot(data[[s]], aes(x = time, y = V2, color = as.factor(true_group))) + 
+  geom_point(data = data[[s]], aes(y = V2), pch = ".")
       ##+ geom_line(aes(color=as.factor(group)))
  print(grid.arrange(psys,pdys))
  }
+
+
 ```
 
 Select a few random *id*s and print their scatterplots.
