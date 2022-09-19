@@ -142,19 +142,17 @@ ggplot(data[id %in% sample(unique(data[, id]), 9)],
 ```
 Next, cluster the trajectories. Set *k=3*, spline max degrees of freedom to 30, and set `conv` maximum iterations to 10 and convergence when 0 changes occur. *mccores* sets the number of cores to use in various components of the code. Note that this does not work on Windows operating systems, where it should be left at 1. In the code that follows, we use verbose output to get information from each iteration.
 ```{r}
-cl = rep(list(NULL),length(curvlist))
+simfun=function(data,model)
  for(s in 1:length(curvlist)){
    set.seed(74847103)
-   cl[[s]] = clustra(data[[s]], k = 3, 
-# = clustra(data, k = 3, 
+   cl = clustra(data[[s]], k = 3, 
              model = list(id = "id", time = "time", resp = vars),
-             maxdf = 30, conv = c(2, 1), mccores = mc, verbose = TRUE)
+             maxdf = 30, conv = c(20, 1), mccores = mc, verbose = TRUE)
+   data[,group:=..cl$data_group]
+   data2=data[,c("true_group","group")]
  }
 
-for(s in 1:length(curvlist)){
- ## dat=data[[s]]
-  data[[s]]=  data[[s]][, group:=factor(..cl[[s]]$data_group)]
-}
+data_2=lapply(data,simfun)
 ```
 
 Next, plot the raw data (sample if more than 10,000 points). Then repeat the plot with resulting spline fit, colored by the cluster value.
