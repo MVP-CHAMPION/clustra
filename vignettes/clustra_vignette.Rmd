@@ -27,95 +27,100 @@ We also set *RNGkind* and *seed* for reproducibility. Code below generates the d
 library(clustra)
 library(simstudy)
 library(data.table)
+library(plyr)
+library("readxl")
+library(WriteXLS)
+
+
+getwd()
+params=read_xlsx("C:/Users/Rachel/Desktop/Dissertation/Simulation_list_p1_v1.xlsx")
+
+pf=sapply(params, is.factor)
+params[pf]=lapply(params[pf],as.character)
+param_l=split(params,seq(nrow(params)))
+
 mc = 1 # If running on a unix or a Mac platform, increase up to 2x # cores
 set.seed(7807868)
-vars = c("eGFR", "V2")
-varsStd=c("eGFR_std","V2_std")
-
-
-#ydef1 <- defData(varname = "randomEffect", dist = "normal", formula = 0, variance = sqrt(3))
-#ydef2 <- defDataAdd(varname = "Y", dist = "normal", formula = "5 + 2.5*period + 1.5*T + 3.5*period*T + randomEffect", 
- #   variance = 1)
-
-
-clus1<-defDataAdd(varname="eGFR",formula="-0.02*time+60",variance=1)
-#clus1<-defDataAdd(clus1,varname = "RE", dist = "normal",formula = 0,variance = sqrt(3))
-#clus1<-defDataAdd(varname="sys",formula="0.0375*time+85",variance=50)
-clus1<-defDataAdd(clus1,varname="V2",formula="0.008*time+28",variance=1)
-
-clus2<-defDataAdd(varname="eGFR",formula="60*(1-(1/(1+2.71828^(-(time-200)/200*5))))",variance=1)
-#clus2<-defDataAdd(clus2,varname = "RE", dist = "normal",formula = 0,variance = sqrt(3))
-clus2<-defDataAdd(clus2,varname="V2",formula="20+sin(-50+3.14159*time/300)*3",variance=1)
-
-clus3<-defDataAdd(varname="eGFR",formula="60*(1-(1/(1+2.71828^(-(time-300)/300*5))))",variance=1)
-#clus3<-defDataAdd(clus3,varname = "RE", dist = "normal",formula = 0,variance = sqrt(3))
-clus3<-defDataAdd(clus3,varname="V2",formula="-0.02*time+15",variance=1)
-
-### second scenario
-
-clus4<-defDataAdd(varname="eGFR",formula="-0.02*time+60",variance=1)
-#clus4<-defDataAdd(clus4,varname="V2",formula="55",variance=1)
-#clus4<-defDataAdd(clus4,varname="V2",formula="25+5*sin(-3.1415926*((time-20)/250)-20)",variance=0.5)
-clus4<-defDataAdd(clus4,varname="V2",formula="25+20*sin(-3.1415926*((time-20)/250)-20)",variance=0.5)
-
-clus5<-defDataAdd(varname="eGFR",formula="60*(1-(1/(1+2.71828^(-(time-200)/200*5))))",variance=1)
-#clus5<-defDataAdd(clus5,varname="V2",formula="35",variance=1)
-clus5<-defDataAdd(clus5,varname="V2",formula="30+5*sin(-3.1415926*((time-30)/300)-34)",variance=0.5)
+set.seed(4865)
+vars = c("outv1", "outv2")
+varsStd=c("outv1_std","outv2_std")
+longrs=rep(list(NULL),10000000)
+for(r in 1:10000000){
+  longrs[[r]]=runif(1,1000,10000000)
+}
 
 
 
-clus6<-defDataAdd(varname="eGFR",formula="60*(1-(1/(1+2.71828^(-(time-300)/300*5))))",variance=1)
-clus6<-defDataAdd(clus6,varname="V2",formula="0.001*time+15",variance=1)
+numit=2
+scen=1
+seedst=1
+
+curvefun=function(paramlist){
+  datlist_2=rep(list(NULL),length(paramlist))
+  for(i in 1:length(paramlist)){
+    clus1<-defDataAdd(varname="outv1",formula = paramlist[[i]][[2]],
+                      variance=paramlist[[i]][[8]])
+    clus1<-defDataAdd(clus1,varname = "outv2", formula = paramlist[[i]][[3]],
+                      variance=paramlist[[i]][[8]])
+    
+    clus2<-defDataAdd(varname="outv1",formula = paramlist[[i]][[4]],
+                      variance=paramlist[[i]][[8]])
+    clus2<-defDataAdd(clus2,varname = "outv2", formula = paramlist[[i]][[5]],
+                      variance=paramlist[[i]][[8]])
+    
+    clus3<-defDataAdd(varname="outv1",formula = paramlist[[i]][[6]],
+                      variance=paramlist[[i]][[8]])
+    clus3<-defDataAdd(clus3,varname = "outv2", formula = paramlist[[i]][[7]],
+                      variance=paramlist[[i]][[8]])
+    datlist_2[[i]]=list(clus1,clus2,clus3)
+  }
+  return(datlist_2)
+}
+
+datlist_f=curvefun(param_l)
 
 
 
-### Third scenario
-clus7<-defDataAdd(varname="eGFR",formula="-0.02*time+60", variance=1)
-clus7<-defDataAdd(clus7,varname="V2",formula="70+45*sin(-3.1415926*((time-30)/350)-34)",variance=2)
-#clus7<-defDataAdd(clus7,varname="V2",formula="-0.15*time+75",variance=1)
-#clus7<-defDataAdd(clus7,varname="V2",formula="25+sin(-3.1415926*(time-20)/250-20)",variance=1)
-
-clus8<-defDataAdd(varname="eGFR",formula="60*(1-(1/(1+2.71828^(-(time-200)/200*5))))",variance=1)
-clus8<-defDataAdd(clus8,varname="V2",formula="-0.0015*time^2+0.96*time+30",variance=2)
-#clus8<-defDataAdd(clus8,varname="V2",formula="-0.0024*time^2+0.87*time",variance=1)
-
-clus9<-defDataAdd(varname="eGFR",formula="60*(1-(1/(1+2.71828^(-(time-300)/300*5))))",variance=1)
-clus9<-defDataAdd(clus9,varname="V2",formula="50+45*sin(-3.1415926*((time-30)/350)-34)+0.4*time",variance=2)
-#clus9<-defDataAdd(clus9,varname="V2",formula="0.15*time+15",variance=1)
-
-
-curv1=c(1,2,3) 
-curv2=c(4,5,6)
-curv3=c(7,8,9)
-#curv2=c(11,12,13) 
-#curv3=c(14,15,16)
- 
- curvlist=list(curv1,curv2,curv3)
-
-  datlist=list(clus1,clus2,clus3,clus4,clus5,clus6,clus7,clus8,clus9)
-
-
-  data = rep(list(NULL),length(curvlist))
-  for(q in 1:length(curvlist)){
-data[[q]] = gen_traj_data(vars, clusters = c(2000, 2000,2000), m_obs = 10, 
-                     curvlist=curvlist[[q]], 
-                     s_range = c(-1, -1), e_range = c(0.5*365, 365),
+  data = rep(list(NULL),numit)
+  for(n in 1:numit){
+    set.seed(longrs[[n+seedst]])
+    datlist=datlist_f[[scen]]
+    data[[n]] = gen_traj_data(vars, clusters = c(param_l[[scen]][[9]],param_l[[scen]][[9]],param_l[[scen]][[9]]), 
+                              m_obs = 10, curvlist=c(1,2,3), 
+                     s_range = c(0, 0), e_range = c(0.5*365, 365),
                      min_obs = 10, verbose = TRUE)
+    data[[n]]$outv1_std = scale(data[[n]]$outv1[,1])
+    data[[n]]$outv2_std = scale(data[[n]]$outv2[,1])
+    }
 
-
-}
- #return(data)
- 
-  ### standardize the outcome variables
-  
-  for(s in 1:length(curvlist)){
- data[[s]]$eGFR_std <- scale(data[[s]]$eGFR)[, 1]
-data[[s]]$V2_std <- scale(data[[s]]$V2)[, 1]
-}
-vars = c("eGFR_std", "V2_std")
+vars = c("outv1_std", "outv2_std")
 
 head(data)
+
+set.seed(84930247, "L'Ecuyer-CMRG")
+simfun=function(data,model)
+ for(s in 1:length(curvlist)){
+   cl = clustra(data[[s]], k = 3, 
+             model = list(id = "id", time = "time", resp = vars),
+             maxdf = 30, conv = c(20, 1), mccores = mc, verbose = TRUE)
+   data[,group:=..cl$data_group]
+   data2=data[,c("true_group","group")]
+ }
+
+data_2=lapply
+
+rand_res=rep(list(NULL),length(data_2))
+
+for(y in 1:length(data_2)){
+  rand_res[[y]]=list("classprop"=MixSim::ClassProp(data_2[[y]]$group, data_2[[y]][,true_group]), "model"=param_l[[scen]][[1]],resp1=longrs[[y+seedst]])
+}
+
+df=ldply(rand_res,data.frame)
+
+setwd("C:/Users/Rachel/Desktop/Dissertation/Project 1 Simulation Output")
+WriteXLS(df, ExcelFileName = paste0(param_l[[scen]][[1]],"_runstart_",seedst,"_nrun",numit,".xlsx"))
 ```
+Next we will graph the data
 ```{r fig.width = 7, fig.height = 9}
 library(ggplot2)
 library(gridExtra)

@@ -24,8 +24,8 @@
 oneid = function(vars, clusters, id, n_obs, type, start, end, smin, emax) {
   id = rep(id, n_obs)
   true_group = rep(type, n_obs)
-  time = c(start, sort(floor(runif(n_obs - 3, min = start, max = end))), end)
-  time = c(time[time <= 0], 0, time[time > 0]) # insert 0
+  time = c(start, sort(floor(runif(n_obs - 2, min = start, max = end))), end)
+  #time = c(time[time <= 0], 0, time[time > 0]) # insert 0
   
   dat=as.data.table(cbind(id,true_group,time))
   line=clusters[type,2]
