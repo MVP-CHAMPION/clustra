@@ -30,7 +30,8 @@ library(data.table)
 library(plyr)
 library("readxl")
 library(WriteXLS)
-
+library(writexl)
+library(mosaic)
 
 getwd()
 params=read_xlsx("C:/Users/Rachel/Desktop/Dissertation/Simulation_list_p1_v1.xlsx")
@@ -52,7 +53,7 @@ for(r in 1:10000000){
 
 
 numit=2
-scen=1
+scen=41
 seedst=1
 
 curvefun=function(paramlist){
@@ -89,25 +90,25 @@ datlist_f=curvefun(param_l)
                               m_obs = 10, curvlist=c(1,2,3), 
                      s_range = c(0, 0), e_range = c(0.5*365, 365),
                      min_obs = 10, verbose = TRUE)
-    data[[n]]$outv1_std = scale(data[[n]]$outv1[,1])
-    data[[n]]$outv2_std = scale(data[[n]]$outv2[,1])
-    }
+    data[[n]]$outv1_std = scale(data[[n]]$outv1)
+    data[[n]]$outv2_std = scale(data[[n]]$outv2)
+  }
 
-vars = c("outv1_std", "outv2_std")
-
+  
+  vars = c("outv1_std", "outv2_std")
+  
 head(data)
 
 set.seed(84930247, "L'Ecuyer-CMRG")
-simfun=function(data,model)
- for(s in 1:length(curvlist)){
-   cl = clustra(data[[s]], k = 3, 
+simfun=function(data,model){
+   cl = clustra(data, k = 3, 
              model = list(id = "id", time = "time", resp = vars),
              maxdf = 30, conv = c(20, 1), mccores = mc, verbose = TRUE)
    data[,group:=..cl$data_group]
    data2=data[,c("true_group","group")]
  }
 
-data_2=lapply
+data_2=lapply(data,simfun)
 
 rand_res=rep(list(NULL),length(data_2))
 
@@ -117,21 +118,21 @@ for(y in 1:length(data_2)){
 
 df=ldply(rand_res,data.frame)
 
-setwd("C:/Users/Rachel/Desktop/Dissertation/Project 1 Simulation Output")
-WriteXLS(df, ExcelFileName = paste0(param_l[[scen]][[1]],"_runstart_",seedst,"_nrun",numit,".xlsx"))
+#setwd("C:/Users/Rachel/Desktop/Dissertation/Project 1 Simulation Output")
+write_xlsx(df, paste0("C:/Users/Rachel/Desktop/Dissertation/Project 1 Simulation Output/",param_l[[scen]][[1]],"_runstart_",seedst,"_nrun",numit,".xlsx"))
 ```
 Next we will graph the data
 ```{r fig.width = 7, fig.height = 9}
 library(ggplot2)
 library(gridExtra)
 
- for(s in 1:length(curvlist)){
-psys = ggplot(data[[s]], aes(x = time, y = eGFR, color = as.factor(true_group))) + 
-  geom_point(data = data[[s]], aes(y = eGFR), pch = ".") #+ geom_line()
+ for(s in 1:numit){
+psys = ggplot(data[[s]], aes(x = time, y = outv1, color = as.factor(true_group))) + 
+  geom_point(data = data[[s]], aes(y = outv1), pch = ".") #+ geom_line()
 
 
-pdys = ggplot(data[[s]], aes(x = time, y = V2, color = as.factor(true_group))) + 
-  geom_point(data = data[[s]], aes(y = V2), pch = ".")
+pdys = ggplot(data[[s]], aes(x = time, y = outv2, color = as.factor(true_group))) + 
+  geom_point(data = data[[s]], aes(y = outv2), pch = ".")
       ##+ geom_line(aes(color=as.factor(group)))
  print(grid.arrange(psys,pdys))
  }
