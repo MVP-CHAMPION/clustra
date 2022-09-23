@@ -50,7 +50,8 @@ for(r in 1:10000000){
   longrs[[r]]=runif(1,1000,10000000)
 }
 
-
+```
+```{r}
 
 numit=2
 scen=41
@@ -80,7 +81,6 @@ curvefun=function(paramlist){
 
 datlist_f=curvefun(param_l)
 
-param_l[[1]]$curv1_out1
 
   data = rep(list(NULL),numit)
   for(n in 1:numit){
@@ -105,7 +105,10 @@ simfun=function(data,model){
              model = list(id = "id", time = "time", resp = vars),
              maxdf = 30, conv = c(20, 1), mccores = mc, verbose = TRUE)
    data[,group:=..cl$data_group]
-   data2=data[,c("true_group","group")]
+   data2=data[,c("id","true_group","group")]
+   ido2=data[, .SD[1],id][,id,true_group]
+   ido3=data[, .SD[1],id][,id,group]
+   ido4=merge(ido2,ido3,by="id")
  }
 
 data_2=lapply(data,simfun)
@@ -119,7 +122,7 @@ for(y in 1:length(data_2)){
 df=ldply(rand_res,data.frame)
 
 #setwd("C:/Users/Rachel/Desktop/Dissertation/Project 1 Simulation Output")
-write_xlsx(df, paste0("C:/Users/Rachel/Desktop/Dissertation/Project 1 Simulation Output/",param_l[[scen]]$Model"_runstart_",seedst,"_nrun",numit,".xlsx"))
+#write_xlsx(df, paste0("C:/Users/Rachel/Desktop/Dissertation/Project 1 Simulation Output/",param_l[[scen]]$Model"_runstart_",seedst,"_nrun",numit,".xlsx"))
 ```
 Next we will graph the data
 ```{r fig.width = 7, fig.height = 9}
