@@ -59,20 +59,20 @@ seedst=1
 curvefun=function(paramlist){
   datlist_2=rep(list(NULL),length(paramlist))
   for(i in 1:length(paramlist)){
-    clus1<-defDataAdd(varname="outv1",formula = paramlist[[i]][[2]],
-                      variance=paramlist[[i]][[8]])
-    clus1<-defDataAdd(clus1,varname = "outv2", formula = paramlist[[i]][[3]],
-                      variance=paramlist[[i]][[8]])
+    clus1<-defDataAdd(varname="outv1",formula = paramlist[[i]]$curv1_out1,
+                      variance=paramlist[[i]]$variance)
+    clus1<-defDataAdd(clus1,varname = "outv2", formula = paramlist[[i]]$curv1_out2,
+                      variance=paramlist[[i]]$variance)
     
-    clus2<-defDataAdd(varname="outv1",formula = paramlist[[i]][[4]],
-                      variance=paramlist[[i]][[8]])
-    clus2<-defDataAdd(clus2,varname = "outv2", formula = paramlist[[i]][[5]],
-                      variance=paramlist[[i]][[8]])
+    clus2<-defDataAdd(varname="outv1",formula = paramlist[[i]]$curv2_out1,
+                      variance=paramlist[[i]]$variance)
+    clus2<-defDataAdd(clus2,varname = "outv2", formula = paramlist[[i]]$curv2_out2,
+                      variance=paramlist[[i]]$variance)
     
-    clus3<-defDataAdd(varname="outv1",formula = paramlist[[i]][[6]],
-                      variance=paramlist[[i]][[8]])
-    clus3<-defDataAdd(clus3,varname = "outv2", formula = paramlist[[i]][[7]],
-                      variance=paramlist[[i]][[8]])
+    clus3<-defDataAdd(varname="outv1",formula = paramlist[[i]]$curv3_out1,
+                      variance=paramlist[[i]]$variance)
+    clus3<-defDataAdd(clus3,varname = "outv2", formula = paramlist[[i]]$curv3_out2,
+                      variance=paramlist[[i]]$variance)
     datlist_2[[i]]=list(clus1,clus2,clus3)
   }
   return(datlist_2)
@@ -80,13 +80,13 @@ curvefun=function(paramlist){
 
 datlist_f=curvefun(param_l)
 
-
+param_l[[1]]$curv1_out1
 
   data = rep(list(NULL),numit)
   for(n in 1:numit){
     set.seed(longrs[[n+seedst]])
     datlist=datlist_f[[scen]]
-    data[[n]] = gen_traj_data(vars, clusters = c(param_l[[scen]][[9]],param_l[[scen]][[9]],param_l[[scen]][[9]]), 
+    data[[n]] = gen_traj_data(vars, clusters = c(param_l[[scen]]$nobs,param_l[[scen]]$nobs,param_l[[scen]]$nobs), 
                               m_obs = 10, curvlist=c(1,2,3), 
                      s_range = c(0, 0), e_range = c(0.5*365, 365),
                      min_obs = 10, verbose = TRUE)
@@ -119,7 +119,7 @@ for(y in 1:length(data_2)){
 df=ldply(rand_res,data.frame)
 
 #setwd("C:/Users/Rachel/Desktop/Dissertation/Project 1 Simulation Output")
-write_xlsx(df, paste0("C:/Users/Rachel/Desktop/Dissertation/Project 1 Simulation Output/",param_l[[scen]][[1]],"_runstart_",seedst,"_nrun",numit,".xlsx"))
+write_xlsx(df, paste0("C:/Users/Rachel/Desktop/Dissertation/Project 1 Simulation Output/",param_l[[scen]]$Model"_runstart_",seedst,"_nrun",numit,".xlsx"))
 ```
 Next we will graph the data
 ```{r fig.width = 7, fig.height = 9}
