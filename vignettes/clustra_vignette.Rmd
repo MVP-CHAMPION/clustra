@@ -34,7 +34,8 @@ library(writexl)
 library(mosaic)
 
 getwd()
-params=read_xlsx("C:/Users/Rachel/Desktop/Dissertation/Simulation_list_p1_v1.xlsx")
+#params=read_xlsx("C:/Users/Rachel/Desktop/Dissertation/Simulation_list_p1_v1.xlsx")
+params=read_xlsx("C:/Users/Ben/Desktop/Project 1/Simulation_list_p1_v1.xlsx")
 
 pf=sapply(params, is.factor)
 params[pf]=lapply(params[pf],as.character)
@@ -121,8 +122,10 @@ for(y in 1:length(data_2)){
 
 df=ldply(rand_res,data.frame)
 
+write_xlsx(df, paste0("C:/Users/Ben/Desktop/Project 1/sim output/",param_l[[scen]]$Model,"_runstart_",seedst,"_nrun",numit,".xlsx"))
+
 #setwd("C:/Users/Rachel/Desktop/Dissertation/Project 1 Simulation Output")
-#write_xlsx(df, paste0("C:/Users/Rachel/Desktop/Dissertation/Project 1 Simulation Output/",param_l[[scen]]$Model"_runstart_",seedst,"_nrun",numit,".xlsx"))
+#write_xlsx(df, paste0("C:/Users/Rachel/Desktop/Dissertation/Project 1 Simulation Output/",param_l[[scen]]$Model,"_runstart_",seedst,"_nrun",numit,".xlsx"))
 ```
 Next we will graph the data
 ```{r fig.width = 7, fig.height = 9}
