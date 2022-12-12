@@ -25,7 +25,7 @@ For this vignette, we begin by generating a data set with the *gen_traj_data()* 
 We also set *RNGkind* and *seed* for reproducibility. Code below generates the data and looks at a few observations of the generated data. The *mc* variable sets core use and will be assigned to *mccores* parameter through the rest of the vignette. By default, 1 core is assigned. Parallel sections are implemented with *parallel::mclappy()*, so on unix and Mac platforms it is recommended to use the full number of cores available for faster performance.
 ```{r}
 library(clustra)
-mc = 1 # If running on a unix or a Mac platform, increase up to 2x # cores
+mc = 4 # If running on a unix or a Mac platform, increase up to 2x # cores
 set.seed(12345)
 data = gen_traj_data(n_id = c(400, 800, 1600), m_obs = 25, 
                      s_range = c(-365, -14), e_range = c(0.5*365, 2*365),
@@ -113,7 +113,7 @@ ggplot(pdata, aes(x = time, y = pred, color = group)) +
 Average silhouette value is a way to select the number of clusters and a silhouette plot provides a way for a deeper evaluation (Rouseeuw 1986). As silhouette requires distances between individual trajectories, this is not possible due to unequal trajectory sampling without fitting a separate model for each id. As a proxy for distance between points, we use trajectory distances to cluster mean spline trajectories in the *clustra_sil()* function. The structure returned from the *clustra()* function contains the matrix *loss*, which has all the information needed to construct these proxy silhouette plots. The function *clustra_sil()* performs clustering for a number of *k* values and outputs information for the silhouette plot that is displayed next. We relax the convergence criterion in `conv` to 1 % of changes (instead of 0 used earlier). We use the first data set with *noise = c(0, 5)*.
 ```{r fig.width = 7}
 set.seed(1234737)
-sil = clustra_sil(data, k = c(2, 3, 4), mccores = mc, conv = c(7, 1),
+sil = clustra_sil(data, kv = c(2, 3, 4), mccores = mc, conv = c(7, 1),
                   verbose = TRUE)
 plot_sil = function(x) {
   msil = round(mean(x$silhouette), 2)

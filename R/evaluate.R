@@ -157,11 +157,12 @@ rand_plot = function(rand_pairs, name = NULL) {
 #' silhouette plot.
 #' 
 #' @param data
-#' Either a data.frame (`data` parameter of \code{\link{trajectories}}) 
-#' or the output from a `clustra` run. See Details.
-#' @param k
-#' Vector of k values to try. If output from `clustra` is the `data` parameter,
-#' `k` can be left NULL or set to the number of clusters used.
+#' A data.frame (see the `data` parameter of \code{\link{trajectories}}).
+#' Alternatively, the output from a completed `clustra` run can be used, in
+#' which case `kv` is left as `NULL`. See Details.
+#' @param kv
+#' Vector of `clustra` `k` values to run. If `data` is the output from a 
+#' completed `clustra` run, leave `kv` as NULL.
 #' @param mccores
 #' See \code{\link{trajectories}}.
 #' @param maxdf
@@ -175,18 +176,20 @@ rand_plot = function(rand_pairs, name = NULL) {
 #' 
 #' @details 
 #' When given the raw data as the first parameter (input `data` parameter of
-#' \code{\link{trajectories}}), `k` can also specify a vector of cluster numbers
-#' to run `clustra` and then produce silhouette plots for each of them. 
-#' Alternatively, the input can be the output from a `clustra` run, in which
-#' case data for a single silhouette plot will be made without rerunning 
+#' \code{\link{trajectories}}), `kv` specifies a vector of `k` parameters for 
+#' `clustra` and produces data for silhouette plots of each of them. 
+#' Alternatively, the input can be the output from a single `clustra` run, in
+#' which case data for a single silhouette plot will be made without running 
 #' `clustra`.
 #' 
-#' @return Invisibly returns a list of length `length(k)`, where each element is
+#' @return Invisibly returns a list of length `length(kv)`, where each element is
 #' a matrix with `nrow(data)` rows and three columns `cluster`, `neighbor`, 
-#' `silhouette`. This list of matrices can be used to draw a silhouette plot.
+#' `silhouette`. The matrix in each element of this list can be used to draw a 
+#' silhouette plot. When the input was a completed `clustra` run, the output is a
+#' list with a single element for a single silhouette plot.
 #' 
 #' @export
-clustra_sil = function(data, k = NULL, mccores = 1, maxdf = 30, conv = c(10, 0),
+clustra_sil = function(data, kv = NULL, mccores = 1, maxdf = 30, conv = c(10, 0),
                        save = FALSE, verbose = FALSE) {
 
   sil = function(x) {
@@ -197,20 +200,20 @@ clustra_sil = function(data, k = NULL, mccores = 1, maxdf = 30, conv = c(10, 0),
     c(ck, nk, s)
   }
 
-  ## verify data and k agreement
-  if(is.data.frame(data) && is.null(k)) {
-    cat("clustra_sil: error: must specify k \n")
+  ## verify data and kv agreement
+  if(is.data.frame(data) && is.null(kv)) {
+    cat("clustra_sil: error: must specify kv \n")
     return(NULL)
   } else if(is.matrix(data$loss)) {
-      if(is.null(k)) {
-        k = ncol(data$loss)
-      } else if(k != ncol(data$loss)) {
-        cat("clustra: misspecified k")
+      if(is.null(kv)) {
+        kv = ncol(data$loss)
+      } else if(kv != ncol(data$loss)) {
+        cat("clustra: misspecified kv")
         return()
       }
   } else if(is.data.frame(data)) {
-    if(length(k) < 1) {
-      cat("clustra: misspecified k")
+    if(length(kv) < 1) {
+      cat("clustra: misspecified kv")
       return(NULL)
     }
   } else {
@@ -218,10 +221,10 @@ clustra_sil = function(data, k = NULL, mccores = 1, maxdf = 30, conv = c(10, 0),
     return(NULL)
   }
   
-  results = vector("list", length(k))
+  results = vector("list", length(kv))
   
-  for(j in 1:length(k)) {
-    kj = k[j]
+  for(j in 1:length(kv)) {
+    kj = kv[j]
     a_0 = deltime()
 
     if(is.data.frame(data)) {
@@ -244,7 +247,7 @@ clustra_sil = function(data, k = NULL, mccores = 1, maxdf = 30, conv = c(10, 0),
   }
   
   ## save object results and parameters
-  if(save) save(results, k, file = "clustra_sil.Rdata")
+  if(save) save(results, kv, file = "clustra_sil.Rdata")
   
   invisible(results)
 }
