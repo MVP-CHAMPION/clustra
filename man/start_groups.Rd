@@ -4,23 +4,16 @@
 \alias{start_groups}
 \title{Function to assign starting groups.}
 \usage{
-start_groups(data, k, starts, maxdf, conv, mccores = 1, verbose = FALSE)
+start_groups(k, data, starts, maxdf, conv, mccores = 1, verbose = FALSE)
 }
 \arguments{
+\item{k}{Number of clusters (groups).}
+
 \item{data}{Data.table with response measurements, one per observation.
 Column names are id, time, response, group. Note that \code{id}s are assumed
 sequential starting from 1. This affects expanding group numbers to ids.}
 
-\item{k}{Number of clusters (groups).}
-
-\item{starts}{A vector of length two, giving the number of start values to try and the
-number of ids per cluster to evaluate the starts (If the number of \code{id}s is
-less than 1, use all data and do not subset data for starts.). The default
-is \code{c(1, 0)}, meaning that one random start is
-used with all the data. The following are experimental at this time:
-If more than one start is requested, the most diverse after one trajectories
-iteration on a sample of data is used. Diversity is measured as sum of
-pairwise distances between models on a time grid of \code{2*maxdf} points.}
+\item{starts}{Type of start groups generated. See \code{\link{clustra}}.}
 
 \item{maxdf}{Fitting parameters. See \code{\link{trajectories}}.}
 
@@ -33,10 +26,18 @@ pairwise distances between models on a time grid of \code{2*maxdf} points.}
 \value{
 An integer vector corresponding to unique \code{id}s, giving group number
 assignments.
+
+For \code{distant}, each sequential selection takes an id that has the largest
+minimum distance from smooth TPS fits (<= 5 deg) of previous selections.
+The distance of an id to a single TPS is the median absolute error across
+the id time points. Distance of an id to a set of TPS is the minumum of
+the individual distances. We pick the id that has the maximum of such
+a minimum of medians.
 }
 \description{
-If only one start, a random assignment is done. If more than one start,
-picks tps fit with smallest deviance after one iteration among random starts.
-Choosing from samples increases diversity of fits (sum of distances between
-group fits). Then classifies all ids based on fit from best sample.
+Either a random assignment of k approximately equal size clusters or a
+FastMap-like algorithm that sequentially selects k distant ids
+from those that have more than the median number of observations. TPS fits
+to these ids are used as cluster centers for a starting group assignment.
+A user supplied starting assignment is also possible.
 }

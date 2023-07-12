@@ -6,17 +6,25 @@
 \usage{
 gen_traj_data(
   n_id,
+  types,
+  intercepts,
   m_obs,
   s_range,
   e_range,
-  reference = 100,
-  noise = c(0, abs(reference/20)),
+  noise = c(0, abs(mean(intercepts)/20)),
   min_obs = 3
 )
 }
 \arguments{
 \item{n_id}{Vector whose length is the number of clusters, giving the number of id's to
 generate in each cluster.}
+
+\item{types}{A vector of integers from \code{c(1, 2, 3)} of same length as n_id, indicating
+curve type: constant, sine portion, sigmoid portion, respectively.}
+
+\item{intercepts}{A vector of first responses at minimum time for the curve base vectors of
+same length as n_id. Each \code{type}-\code{intercept} combination should be unique for
+unique clusters.}
 
 \item{m_obs}{Mean number of observation per id. Provides \code{lambda} parameter in
 \code{\link[stats]{rpois}}.}
@@ -26,9 +34,6 @@ start observation time.}
 
 \item{e_range}{A vector of length 2, giving the min and max limits of uniformly generated
 end observation time.}
-
-\item{reference}{A nominal response value (for example, blood pressure is near 100, which
-is the default)}
 
 \item{noise}{Vector of length 2 giving the \emph{mean} and \emph{sd} of added N(mean, sd) noise.}
 
@@ -53,13 +58,15 @@ at time uniformly distributed in s_range and end at time uniformly
 distributed in e_range. Number of observations in a trajectory is
 Poisson(m_obs). The result is a number of trajectories, all starting at
 time 0, with different time spans, and with independently different numbers
-of observations within the time spans. Each trajectory follows a randomly
-selected response function with added N(mean, sd) error.
+of observations within the time spans. Each trajectory follows one of three
+possible response functions possibly with a different mean and with added
+N(mean, sd) error.
 }
 
 \examples{
-data = gen_traj_data(n_id = c(50, 100), m_obs = 20, s_range = c(-365, -14),
-              e_range = c(0.5*365, 2*365))
+data = gen_traj_data(n_id = c(50, 100), types = c(1, 2), 
+  intercepts = c(100, 80), m_obs = 20, s_range = c(-365, -14), 
+  e_range = c(0.5*365, 2*365))
 head(data)
 tail(data)
 

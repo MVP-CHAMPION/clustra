@@ -7,8 +7,7 @@
 clustra(
   data,
   k,
-  starts = c(1, 0),
-  group = NULL,
+  starts = "random",
   maxdf = 30,
   conv = c(10, 0),
   mccores = 1,
@@ -22,11 +21,19 @@ Other variables are ignored.}
 
 \item{k}{Number of clusters}
 
-\item{starts}{A vector of length two. See \code{\link{start_groups}}.}
-
-\item{group}{A vector of initial cluster assignments for unique id's in data.
-Normally, this is NULL and good starts are provided by
-\code{\link{start_groups}}.}
+\item{starts}{One of c("random", "distant") or an integer vector
+with values 1:k corresponding to unique ids of starting cluster assignments.
+For "random", starting clusters are assigned
+at random.
+For "distant", a FastMap-like algorithm selects k distant ids to
+which TPS models are fit and used as starting cluster centers to which ids
+are classified. Only id with more than median number of time points are
+used. Distance from an id to a TPS model is median absolute difference
+at id time points. Starting with a random id, distant ids are selected
+sequentially as the most distant id from a sum of distances to TPS fits of
+previous selections. The first random selection is discarded and the next k
+selected ids are kept. Their TPS fits become the first cluster centers to
+which all ids are classified.}
 
 \item{maxdf}{Fitting parameters. See \code{\link{trajectories}}.}
 
@@ -49,8 +56,9 @@ is defined by a thin plate spline fit to all points in a cluster. See
 }
 \examples{
 set.seed(13)
-data = gen_traj_data(n_id = c(50, 100), m_obs = 20, s_range = c(-365, -14),
-              e_range = c(0.5*365, 2*365))
+data = gen_traj_data(n_id = c(50, 100), types = c(1, 2), 
+                     intercepts = c(100, 80), m_obs = 20, 
+                     s_range = c(-365, -14), e_range = c(0.5*365, 2*365))
 cl = clustra(data, k = 2, maxdf = 20, conv = c(5, 0), verbose = TRUE)
 tabulate(data$group)
 tabulate(data$true_group)

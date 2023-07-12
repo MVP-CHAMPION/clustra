@@ -4,10 +4,14 @@
 \alias{gendata}
 \title{gendata}
 \usage{
-gendata(n_id, m_obs, s_range, e_range, min_obs, reference, noise)
+gendata(n_id, types, intercepts, m_obs, s_range, e_range, min_obs, noise)
 }
 \arguments{
 \item{n_id}{See parameters of {\code{\link{gen_traj_data}}}.}
+
+\item{types}{See parameters of {\code{\link{gen_traj_data}}}.}
+
+\item{intercepts}{See parameters of {\code{\link{gen_traj_data}}}.}
 
 \item{m_obs}{See parameters of {\code{\link{gen_traj_data}}}.}
 
@@ -16,8 +20,6 @@ gendata(n_id, m_obs, s_range, e_range, min_obs, reference, noise)
 \item{e_range}{See parameters of {\code{\link{gen_traj_data}}}.}
 
 \item{min_obs}{See parameters of {\code{\link{gen_traj_data}}}.}
-
-\item{reference}{See parameters of {\code{\link{gen_traj_data}}}.}
 
 \item{noise}{See parameters of {\code{\link{gen_traj_data}}}.}
 }

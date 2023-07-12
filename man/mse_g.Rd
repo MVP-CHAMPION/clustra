@@ -2,10 +2,16 @@
 % Please edit documentation in R/trajectories.R
 \name{mse_g}
 \alias{mse_g}
+\alias{mae_g}
+\alias{mme_g}
 \alias{mxe_g}
 \title{Loss functions}
 \usage{
 mse_g(pred, id, response)
+
+mae_g(pred, id, response)
+
+mme_g(pred, id, response)
 
 mxe_g(pred, id, response)
 }
@@ -17,11 +23,14 @@ mxe_g(pred, id, response)
 \item{response}{Vector of response values.}
 }
 \value{
-A numeric value. For mse_g(), returns the mean-squared error.
+A numeric value. For mse_g(), returns the mean-squared error. For mae_g(),
+returns mean absolute error. For mme_g(), returns median absolute error.
 For mxe_g(), returns the
 maximum absolute error.
 }
 \description{
-\code{mse_g()} Computes mean-squared error.
+\code{mse_g()} Computes mean squared error.
+\code{mae_g()} Computes mean absolute error.
+\code{mme_g()} Computes median absolute error.
 \code{mxe_g()} Computes maximum absolute error.
 }

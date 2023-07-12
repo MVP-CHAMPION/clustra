@@ -52,7 +52,9 @@ pred_g = function(tps, newdata) {
 
 #' Loss functions
 #'
-#' \code{mse_g()} Computes mean-squared error.
+#' \code{mse_g()} Computes mean squared error.
+#' \code{mae_g()} Computes mean absolute error.
+#' \code{mme_g()} Computes median absolute error.
 #' \code{mxe_g()} Computes maximum absolute error.
 #'
 #' @param pred
@@ -62,7 +64,8 @@ pred_g = function(tps, newdata) {
 #' @param response
 #' Vector of response values.
 #' @return 
-#' A numeric value. For mse_g(), returns the mean-squared error. 
+#' A numeric value. For mse_g(), returns the mean-squared error. For mae_g(),
+#' returns mean absolute error. For mme_g(), returns median absolute error.
 #' For mxe_g(), returns the
 #' maximum absolute error.
 mse_g = function(pred, id, response) {
@@ -72,6 +75,28 @@ mse_g = function(pred, id, response) {
     esq = (response - pred)^2
     DT = data.table::data.table(esq, id)
     tt = as.numeric(unlist(DT[, mean(esq), by=id][, 2]))
+    return(tt)
+  }
+}
+#' @rdname mse_g
+mae_g = function(pred, id, response) {
+  if(is.null(pred)) {
+    return(NULL)
+  } else {
+    esq = abs(response - pred)
+    DT = data.table::data.table(esq, id)
+    tt = as.numeric(unlist(DT[, mean(esq), by=id][, 2]))
+    return(tt)
+  }
+}
+#' @rdname mse_g
+mme_g = function(pred, id, response) {
+  if(is.null(pred)) {
+    return(NULL)
+  } else {
+    esq = abs(response - pred)
+    DT = data.table::data.table(esq, id)
+    tt = as.numeric(unlist(DT[, median(esq), by=id][, 2]))
     return(tt)
   }
 }
@@ -124,10 +149,11 @@ check_df = function(group, loss, data, maxdf) {
 
 #' Function to assign starting groups.
 #' 
-#' If only one start, a random assignment is done. If more than one start, 
-#' picks tps fit with smallest deviance after one iteration among random starts. 
-#' Choosing from samples increases diversity of fits (sum of distances between 
-#' group fits). Then classifies all ids based on fit from best sample.
+#' Either a random assignment of k approximately equal size clusters or a
+#' FastMap-like algorithm that sequentially selects k distant ids
+#' from those that have more than the median number of observations. TPS fits 
+#' to these ids are used as cluster centers for a starting group assignment.
+#' A user supplied starting assignment is also possible.
 #'
 #' @param data 
 #' Data.table with response measurements, one per observation.
@@ -136,14 +162,7 @@ check_df = function(group, loss, data, maxdf) {
 #' @param k 
 #' Number of clusters (groups).
 #' @param starts
-#' A vector of length two, giving the number of start values to try and the
-#' number of ids per cluster to evaluate the starts (If the number of `id`s is 
-#' less than 1, use all data and do not subset data for starts.). The default
-#' is `c(1, 0)`, meaning that one random start is 
-#' used with all the data. The following are experimental at this time: 
-#' If more than one start is requested, the most diverse after one trajectories
-#' iteration on a sample of data is used. Diversity is measured as sum of 
-#' pairwise distances between models on a time grid of `2*maxdf` points.
+#' Type of start groups generated. See \code{\link{clustra}}.
 #' @param maxdf
 #' Fitting parameters. See \code{\link{trajectories}}.
 #' @param conv
@@ -155,82 +174,101 @@ check_df = function(group, loss, data, maxdf) {
 #' @return 
 #' An integer vector corresponding to unique `id`s, giving group number
 #' assignments.
+#' 
+#' For `distant`, each sequential selection takes an id that has the largest
+#' minimum distance from smooth TPS fits (<= 5 deg) of previous selections. 
+#' The distance of an id to a single TPS is the median absolute error across 
+#' the id time points. Distance of an id to a set of TPS is the minumum of 
+#' the individual distances. We pick the id that has the maximum of such 
+#' a minimum of medians.
 #'
 #' @importFrom methods is
-#' @export
-start_groups = function(data, k, starts, maxdf, conv, mccores = 1,
+#' @importFrom stats median
+start_groups = function(k, data, starts, maxdf, conv, mccores = 1,
                         verbose = FALSE) {
   time = response = id = .GRP = ..group = NULL # for data.table R CMD check
+  if(verbose) a = a_0 = deltime(a)
   
-  if(verbose) cat("\nStarts : ")
-
-  ## Prepare test data for diversity criterion
-  test_data = data.frame(id = rep(0, k*2*maxdf),
-                         time = rep(seq(data[, min(time)], data[, max(time)],
-                                        length.out = 2*maxdf), times = k),
-                         response = rep(NA, k*2*maxdf),
-                         group = rep(1:k, each = 2*maxdf))
-  ##TODO consider start values according to partition of last values per id or 
-  ## an average of last year?.
-  ## Makes sense from a clinical viewpoint of where patients end up. A predictive
-  ## viewpoint.
-
-  ## Sample a subset of the data (for speed and increased diversity of starts)
-  max_div = 0
-  if(starts[2] > 0) {
-    start_id = sort(sample(data[, unique(id)], k*starts[2]))
-    data_start = data[id %in% start_id]
-    data_start[, id:=.GRP, by=id] # replace id's to be sequential in the subset
-  } else {
-    data_start = data
-  }
-  n_id = data_start[, data.table::uniqueN(id)]
-  group = sample(k, n_id, replace = TRUE) # first random groups
+  ## get number of unique id
+  n_id = data[, data.table::uniqueN(id)]
   
-  ## evaluate starts on the subset
-  for(i in 1:starts[1]) {
-    data_start[, group:=..group[id]] # replicate group numbers to ids
+  if(starts == "distant") {
+    ## Use a FastMap-like algorithm to generate a starting configuration
+    ## among id's with above-median number of observations
+    sid = vector("integer", k)
+    sfit = vector("list", k)
+    sdata = vector("list", k)
+    tid = tabulate(data$id)
+    if(length(tid) != n_id) print("start_groups: Wrong # ids?!")
+    mtid = median(tid)
+    gmid = which(tid > mtid) # only ids with more than median observations
+    gdata = data[id %in% gmid]
+  
+    ## Start random. No need to remove first random.
+    sid[1] = sample(gmid, 1)
+    sdata[[1]] = gdata[id==sid[1]]
+    sfit[[1]] = mgcv::gam(response ~ s(time), data = sdata[[1]], maxdf = 5)
+    pred = pred_g(sfit[[1]], gdata)
+    loss = mme_g(pred, gdata$id, gdata$response)
 
-    conv = c(1, 0)  # use single fit iteration for starts
-    f = trajectories(data_start, k, group, maxdf, conv, mccores = mccores,
-                     verbose = verbose)
-    er = xit_report(f, maxdf, conv)
-    if(verbose && !is.null((er))) cat(" ", er)
+    ## Replace with farthest from first and remove farthest from available
+    imax = which.max(loss)
+    sid[1] = gmid[imax]
+    gmid = gmid[-imax]
+    sdata[[1]] = gdata[id==sid[1]]
+    sfit[[1]] = mgcv::gam(response ~ s(time), data = sdata[[1]], maxdf = 5)
+    gdata = gdata[id!=sid[1]]
 
-    diversity = sum(dist( # compute diversity of fit across test data
-      do.call(rbind, lapply(parallel::mclapply(f$tps, pred_g,
-                                               newdata = test_data, 
-                                               mc.cores = mccores),
-                            function(x) as.numeric(x$fit)))))
-    if(diversity > max_div) { # record the biggest diversity across starts
-      max_div = diversity
-      tps = f$tps
+    for(i in 2:k) {
+      loss = rep(Inf, length(gmid))
+      for(j in 1:(i - 1)) {
+        pred = pred_g(sfit[[j]], gdata)
+        loss = pmin(loss, mme_g(pred, gdata$id, gdata$response)) 
+        ## minimum mean absolute error to previous selections
+      }
+      imax = which.max(loss)
+      sid[i] = gmid[imax]
+      gmid = gmid[-imax]
+      sdata[[i]] = gdata[id==sid[i]]
+      sfit[[i]] = mgcv::gam(response ~ s(time), data = sdata[[i]], maxdf = 5)
+      gdata = gdata[id!=sid[i]]
     }
-    if(verbose) cat(" Diversity:", round(diversity, 2), "")
-    if(max_div == 0) return(NULL) # all starts failed!
-    group = sample(k, n_id, replace = TRUE) # next random groups
+    
+    ## plot selected ids (undocumented debug verbose)
+    if(verbose > 1) plot_smooths(data, sfit, select.data = sdata)
+     
+    ## now classify all data to the distant subjects
+    newdata = force(as.data.frame(data))
+    pred = parallel::mclapply(sfit, pred_g, newdata = newdata, mc.cores = mccores)
+    rm(newdata, gdata, sdata, sfit)
+    gc()
+
+    ## compute loss for each id wrt model of each cluster
+    loss = parallel::mclapply(pred, mse_g, id = force(data[, id]),
+                              response = force(data[, response]),
+                              mc.cores = mccores)
+    loss = do.call(cbind, loss) # combine list into matrix columns
+    group = apply(loss, 1, which.min) # set group as closest cluster mean
+    
+    if(verbose) cat("\n distant ids: ", sid, "")
+  } else if(starts == "random") {
+    group = sample(k, n_id, replace = TRUE)
+  } else {
+    cat("starts", starts, "invalid. Proceeding with random groups.\n")
+    group = sample(k, n_id, replace = TRUE)
   }
 
-  ## predict from best sample fit to full set of id's
-  newdata = force(as.data.frame(data))
-  pred = parallel::mclapply(tps, pred_g, newdata = newdata, mc.cores = mccores)
-  rm(newdata)
-  gc()
-  
-  ## compute loss for each id wrt model of each cluster
-  loss = parallel::mclapply(pred, mse_g,
-                            id = force(data[, id]),
-                            response = force(data[, response]),
-                            mc.cores = mccores)
-  loss = do.call(cbind, loss) # combine list into matrix columns
-  group = apply(loss, 1, which.min) # set group as closest cluster mean
   data[, group:=..group[id]] # replicate group numbers within ids
-  group = check_df(group, loss, data, maxdf) # check sufficient df
   
-  if(verbose) cat("\nStart counts", tabulate(group, k), "->", max_div, "")
-  group ## report group for each id
+  # Check if sufficient observations. Drop and reassign group if not.
+  group = check_df(group, loss, data, maxdf)
+    
+  if(verbose) {
+    cat("  Start counts", tabulate(group, k), "")
+    deltime(a_0, "  Starts time: ")
+  }
+  group ## return group for each id
 }
-
 
 #' Cluster longitudinal trajectories over time.
 #'
@@ -367,11 +405,20 @@ trajectories = function(data, k, group, maxdf, conv = c(10, 0), mccores = 1, ver
     ## break if converged
     if(100*changes/sum(counts) <= conv[2]) break
   }
+  
+  ## Compute AIC and BIC
+  N = nrow(data)
+  ssq = unlist(lapply(1:k, m = tps, function(i, m) 
+    sum((predict(m[[i]], data[group == i]) - data[group == i]$response)^2)))
+  edf = round(sum(unlist(lapply(tps, function(x) sum(x$edf)))), 2)
+  AIC = round(sum(ssq)/N + 2*edf, 2) 
+  BIC = round(sum(ssq)/N + log(N)*edf, 2)
 
-  if(verbose) deltime(a_0, "\n Total time: ")
+  msg = paste0("\n AIC:", AIC, " BIC:", BIC, ' edf:', edf, "  Total time: ")
+  if(verbose) deltime(a_0, msg)
   list(deviance = deviance, group = group, loss = loss, k = k, k_cl = k_cl,
        data_group = data[, group], tps = tps, iterations = i, counts = counts,
-       counts_df = counts_df, changes = changes)
+       counts_df = counts_df, changes = changes, AIC = AIC, BIC = BIC)
 }
 
 #' xit_report 
@@ -417,11 +464,19 @@ xit_report = function(cl, maxdf, conv) {
 #' @param k
 #' Number of clusters
 #' @param starts
-#' A vector of length two. See \code{\link{start_groups}}.
-#' @param group
-#' A vector of initial cluster assignments for unique id's in data.
-#' Normally, this is NULL and good starts are provided by
-#' \code{\link{start_groups}}.
+#' One of c("random", "distant") or an integer vector 
+#' with values 1:k corresponding to unique ids of starting cluster assignments.
+#' For "random", starting clusters are assigned
+#' at random. 
+#' For "distant", a FastMap-like algorithm selects k distant ids to
+#' which TPS models are fit and used as starting cluster centers to which ids 
+#' are classified. Only id with more than median number of time points are
+#' used. Distance from an id to a TPS model is median absolute difference
+#' at id time points. Starting with a random id, distant ids are selected
+#' sequentially as the most distant id from a sum of distances to TPS fits of
+#' previous selections. The first random selection is discarded and the next k
+#' selected ids are kept. Their TPS fits become the first cluster centers to 
+#' which all ids are classified.
 #' @param maxdf
 #' Fitting parameters. See \code{\link{trajectories}}.
 #' @param conv
@@ -437,15 +492,16 @@ xit_report = function(cl, maxdf, conv) {
 #' 
 #' @examples
 #' set.seed(13)
-#' data = gen_traj_data(n_id = c(50, 100), m_obs = 20, s_range = c(-365, -14),
-#'               e_range = c(0.5*365, 2*365))
+#' data = gen_traj_data(n_id = c(50, 100), types = c(1, 2), 
+#'                      intercepts = c(100, 80), m_obs = 20, 
+#'                      s_range = c(-365, -14), e_range = c(0.5*365, 2*365))
 #' cl = clustra(data, k = 2, maxdf = 20, conv = c(5, 0), verbose = TRUE)
 #' tabulate(data$group)
 #' tabulate(data$true_group)
 #'
 #' @export
-clustra = function(data, k, starts = c(1, 0), group = NULL, maxdf = 30,
-                   conv = c(10, 0), mccores = 1, verbose = FALSE) {
+clustra = function(data, k, starts = "random", maxdf = 30, conv = c(10, 0),
+                   mccores = 1, verbose = FALSE) {
   id = .GRP = .SD = ..group = NULL # for data.table R CMD check
   
   ## check for required variables in data
@@ -462,18 +518,9 @@ clustra = function(data, k, starts = c(1, 0), group = NULL, maxdf = 30,
   
   n_id = data[, data.table::uniqueN(id)]
   
-  ## get initial group assignments
-  if(is.null(group)) {
-    if(starts[1] > 1) {
-      group = start_groups(data, k, starts, maxdf, conv, mccores,
-                           verbose = verbose)
-    } else {
-      group = sample(k, n_id, replace = TRUE) # random groups
-    }
-  }
-  
-  ## Expand group numbers into data within ids
-  data[, group:=..group[id]] 
+  ## Get initial group assignments. Populate into data in-place via data.table
+  group = start_groups(k, data, starts, maxdf, conv, mccores,
+                       verbose = verbose)
   
   ## Perform k-means iteration for groups
   cl = trajectories(data, k, group, maxdf, conv, mccores, verbose = verbose)

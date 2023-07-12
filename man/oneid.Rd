@@ -4,7 +4,7 @@
 \alias{oneid}
 \title{Generates data for one \code{id}}
 \usage{
-oneid(id, n_obs, type, start, end, smin, emax, reference, noise)
+oneid(id, n_obs, type, intercept, start, end, smin, emax, noise)
 }
 \arguments{
 \item{id}{A unique integer.}
@@ -14,17 +14,18 @@ oneid(id, n_obs, type, start, end, smin, emax, reference, noise)
 \item{type}{Response type, 1 is constant, 2 is a sin curve portion, and 3 is a sigmoid
 portion.}
 
+\item{intercept}{Used to set response at \code{smin} time value (not 0) and shift all responses
+accordingly.}
+
 \item{start}{Negative integer giving time of first observation.}
 
 \item{end}{Positive integer giving time of last observation.}
 
-\item{smin}{The smallest possible \code{start} value among all \code{id}s. Currently not used.}
+\item{smin}{The smallest possible \code{start} value among all \code{id}s. Used to align with
+intercept and then dropped.}
 
 \item{emax}{The largest possible \code{end} value among all \code{id}s. Used to scale sin and
 sigmoid support.}
-
-\item{reference}{A response value for constant response. Also used to scale sin and sigmoid
-responses.}
 
 \item{noise}{Standard deviation of zero mean Gaussian noise added to response functions.}
 }

@@ -7,7 +7,8 @@ clustra run}
 \usage{
 clustra_sil(
   data,
-  k = NULL,
+  kv = NULL,
+  starts = "random",
   mccores = 1,
   maxdf = 30,
   conv = c(10, 0),
@@ -16,11 +17,14 @@ clustra_sil(
 )
 }
 \arguments{
-\item{data}{Either a data.frame (\code{data} parameter of \code{\link{trajectories}})
-or the output from a \code{clustra} run. See Details.}
+\item{data}{A data.frame (see the \code{data} parameter of \code{\link{trajectories}}).
+Alternatively, the output from a completed \code{clustra} run can be used, in
+which case \code{kv} is left as \code{NULL}. See Details.}
 
-\item{k}{Vector of k values to try. If output from \code{clustra} is the \code{data} parameter,
-\code{k} can be left NULL or set to the number of clusters used.}
+\item{kv}{Vector of \code{clustra} \code{k} values to run. If \code{data} is the output from a
+completed \code{clustra} run, leave \code{kv} as NULL.}
+
+\item{starts}{See \code{\link{clustra}}.}
 
 \item{mccores}{See \code{\link{trajectories}}.}
 
@@ -33,9 +37,11 @@ or the output from a \code{clustra} run. See Details.}
 \item{verbose}{Logical. When TRUE, information about each run of clustra is printed.}
 }
 \value{
-Invisibly returns a list of length \code{length(k)}, where each element is
+Invisibly returns a list of length \code{length(kv)}, where each element is
 a matrix with \code{nrow(data)} rows and three columns \code{cluster}, \code{neighbor},
-\code{silhouette}. This list of matrices can be used to draw a silhouette plot.
+\code{silhouette}. The matrix in each element of this list can be used to draw a
+silhouette plot. When the input was a completed \code{clustra} run, the output is a
+list with a single element for a single silhouette plot.
 }
 \description{
 Performs \code{\link{clustra}} runs for several k and prepares silhouette
@@ -47,9 +53,9 @@ silhouette plot.
 }
 \details{
 When given the raw data as the first parameter (input \code{data} parameter of
-\code{\link{trajectories}}), \code{k} can also specify a vector of cluster numbers
-to run \code{clustra} and then produce silhouette plots for each of them.
-Alternatively, the input can be the output from a \code{clustra} run, in which
-case data for a single silhouette plot will be made without rerunning
+\code{\link{trajectories}}), \code{kv} specifies a vector of \code{k} parameters for
+\code{clustra} and produces data for silhouette plots of each of them.
+Alternatively, the input can be the output from a single \code{clustra} run, in
+which case data for a single silhouette plot will be made without running
 \code{clustra}.
 }
