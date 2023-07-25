@@ -24,7 +24,6 @@ Imports:
     parallel,
     stats
 Suggests:
-    ggplot2,
     knitr,
     rmarkdown
 Description: Clusters longitudinal trajectories over time (can be unequally 
