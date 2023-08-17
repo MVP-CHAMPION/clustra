@@ -50,12 +50,7 @@ pred_g = function(tps, newdata) {
   }
 }
 
-#' Loss functions
-#'
-#' \code{mse_g()} Computes mean squared error.
-#' \code{mae_g()} Computes mean absolute error.
-#' \code{mme_g()} Computes median absolute error.
-#' \code{mxe_g()} Computes maximum absolute error.
+#' Various Loss functions used internally by clustra
 #'
 #' @param pred
 #' Vector of predicted values.
@@ -170,7 +165,8 @@ check_df = function(group, loss, data, maxdf) {
 #' @param mccores
 #' See \code{\link{trajectories}}.
 #' @param verbose 
-#' Turn on more output for debugging.
+#' Turn on more output for debugging. Values 0, 1, 2, 3 add more output. 2 and
+#' 3 produce graphs during iterations - use carefully!
 #' @return 
 #' An integer vector corresponding to unique `id`s, giving group number
 #' assignments.
@@ -235,7 +231,7 @@ start_groups = function(k, data, starts, maxdf, conv, mccores = 1,
     }
     
     ## plot selected ids (undocumented debug verbose)
-    if(verbose > 1) plot_smooths(data, sfit, select.data = sdata)
+    if(verbose > 2) plot_smooths(data = data, fits = sfit, select.data = sdata)
      
     ## now classify all data to the distant subjects
     newdata = force(as.data.frame(data))
@@ -297,7 +293,8 @@ start_groups = function(k, data, starts, maxdf, conv, mccores = 1,
 #' Integer number of cores to use by `mclapply` sections. Parallelization is 
 #' over `k`, the number of clusters.
 #' @param verbose
-#' Logical, whether to produce debug output.
+#' Logical, whether to produce debug output. A value > 1 will plot tps fit lines
+#' in each iteration.
 #' @return 
 #' A list with components
 #' * `deviance` - The final deviance in each cluster added across clusters.
@@ -327,8 +324,10 @@ start_groups = function(k, data, starts, maxdf, conv, mccores = 1,
 #' @author George Ostrouchov and David Gagnon
 #'
 #' @export
-trajectories = function(data, k, group, maxdf, conv = c(10, 0), mccores = 1, verbose = FALSE) {
+trajectories = function(data, k, group, maxdf, conv = c(10, 0), mccores = 1,
+                        verbose = FALSE, ...) {
   if(verbose) a = a_0 = deltime(a)
+  xargs = list(...)
 
   time = response = id = ..new_group = ..group = NULL # for data.table R CMD check
   
@@ -364,7 +363,7 @@ trajectories = function(data, k, group, maxdf, conv = c(10, 0), mccores = 1, ver
 
     ##
     ## E-step:
-    ##   predict each id's trajectory with each model
+    ##   predict (classify) each id to a model
     if(verbose) cat(" (E-step ")
     newdata = force(as.data.frame(data[, list(time, response)]))
     pred = parallel::mclapply(tps, pred_g, newdata = newdata, 
@@ -401,14 +400,16 @@ trajectories = function(data, k, group, maxdf, conv = c(10, 0), mccores = 1, ver
     group = check_df(group, loss, data, maxdf)
     data[, group:=..group[id]]
     counts_df = data[, tabulate(group)]
+    
+    if(verbose > 1) plot_smooths(data, tps, max.data = 0, ...)
 
     ## break if converged
     if(100*changes/sum(counts) <= conv[2]) break
   }
-  
+
   ## Compute AIC and BIC
   N = nrow(data)
-  ssq = unlist(lapply(1:k, m = tps, function(i, m) 
+  ssq = unlist(lapply(1:k, m = tps, function(i, m)
     sum((predict(m[[i]], data[group == i]) - data[group == i]$response)^2)))
   edf = round(sum(unlist(lapply(tps, function(x) sum(x$edf)))), 2)
   AIC = round(sum(ssq)/N + 2*edf, 2) 
@@ -485,6 +486,9 @@ xit_report = function(cl, maxdf, conv) {
 #' See \code{\link{trajectories}}. 
 #' @param verbose
 #' Logical to turn on more output during fit iterations.
+#' @param ...
+#' Additional parameters of optional plotting under `verbose = 2`. At this time,
+#' only `xlim` and `ylim` are allowed.
 #' 
 #' @return 
 #' A list returned by \code{\link{trajectories}} plus one more element `ido`,
@@ -501,10 +505,15 @@ xit_report = function(cl, maxdf, conv) {
 #'
 #' @export
 clustra = function(data, k, starts = "random", maxdf = 30, conv = c(10, 0),
-                   mccores = 1, verbose = FALSE) {
+                   mccores = 1, verbose = FALSE, ...) {
   id = .GRP = .SD = ..group = NULL # for data.table R CMD check
-  
+
   ## check for required variables in data
+  xargs = list(...)
+  unkn_param = !(names(xargs) %in% c("ylim", "xlim"))
+  if(any(unkn_param))
+    stop(paste("unknown parameter(s) ...:", 
+               paste(names(xargs)[unkn_param], collapse = " ")))
   vnames = c("id", "time", "response")
   if(!is.data.frame(data)) stop("Expecting a data frame.")
   if(!data.table::is.data.table(data)) data = data.table::as.data.table(data)
@@ -523,7 +532,7 @@ clustra = function(data, k, starts = "random", maxdf = 30, conv = c(10, 0),
                        verbose = verbose)
   
   ## Perform k-means iteration for groups
-  cl = trajectories(data, k, group, maxdf, conv, mccores, verbose = verbose)
+  cl = trajectories(data, k, group, maxdf, conv, mccores, verbose = verbose, ...)
   er = xit_report(cl, maxdf, conv)
   if(verbose && !is.null(er)) cat(" ", er, "\n")
   cl$ido = ido

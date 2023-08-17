@@ -3,7 +3,7 @@
 #' @param ltime
 #' Result of last call to deltime. 
 #' @param text 
-#' Text to display along with elapsed time.
+#' Text to display along with elapsed time since \code{ltime}.
 #'
 #' @return
 #' "elapsed" component of current \code{\link{proc.time}}.
@@ -22,20 +22,26 @@ deltime = function(ltime = proc.time()["elapsed"], text = NULL) {
 #' A data frame with a few id trajectories to plot.
 #' @param layout 
 #' The small multiples layout as c(rows, columns).
+#' @param sample
+#' If zero, all data in dat are displayed. If >0 a sample of that many data 
+#' points from dat are displayed.
+#' @param group
+#' If not NULL, a character string giving the variable name in data that should
+#' color the data points.
 #' 
 #' @return 
 #' Invisibly returns the number of trajectories plotted.
 #' 
 #' @importFrom graphics split.screen screen close.screen
 #' @export
-plot_sample = function(dat, layout = c(3,3)) {
+plot_sample = function(dat, layout = c(3,3), sample = prod(layout),
+                       group = NULL) {
   id = NULL # for data.table R CMD check
   
   ids = unique(dat$id)
-  npan = prod(layout)
-  if(length(ids) > npan) {
-    cat("plot_sample: plotting only first", npan, "samples\n")
-    ids = ids[1:npan]
+  if(sample) {
+    ids = sample(ids, sample)
+    dat = dat[id %in% ids]
   }
   xrange = range(dat$time)
   yrange = range(dat$response)
@@ -43,19 +49,30 @@ plot_sample = function(dat, layout = c(3,3)) {
   yat = pretty(yrange)
   
   m = matrix(c(0.1, .95, 0.1, .95), nrow = 1)
-  sc = split.screen(m)
-  screen(1)
-  sc = split.screen(layout)
+  screen = 1
   for(i in 1:length(ids)) {
     idat = dat[id == ids[i]]
-    screen(i + 1)
+    if((screen %% prod(layout)) == 1) { #} && i > prod(layout)) {
+      screen = 1
+      close.screen(all.screens = TRUE)
+      sc = split.screen(m)
+      screen(1)
+      sc = split.screen(layout)
+    }
+    screen((screen = screen + 1))
     opar = par(mar = c(0, 0, 0, 0))
-    plot(idat$time, idat$response, axes = FALSE, type = "p", xlim = xrange,
-         ylim = yrange)
-    text(x = xrange[2], y = yrange[2], labels = sprintf("id=%s", ids[i]), adj = 1)
+    if(is.null(group))
+      plot(idat$time, idat$response, axes = FALSE, type = "p", xlim = xrange,
+           ylim = yrange, pch = 20)
+    else
+      plot(idat$time, idat$response, axes = FALSE, type = "p", xlim = xrange,
+           ylim = yrange, col = idat[[group]] + 1, pch = 20)
+    text(x = xrange[2], y = yrange[2], labels = sprintf("id=%s", ids[i]), 
+         adj = c(1, 1))
     box()
-    if(i %% layout[2] == 1) axis(2, at = yat)
-    if(i > (layout[1] - 1)*layout[2]) axis(1, at = xat)
+    if((screen - 1) %% layout[2] == 1 || layout[2] == 1) axis(2, at = yat)
+    if((screen - 1) > (layout[1] - 1)*layout[2] ||
+       i > (length(ids) - layout[2])) axis(1, at = xat)
   }
   close.screen(all.screens = TRUE)
   invisible(length(ids))
@@ -65,45 +82,57 @@ plot_sample = function(dat, layout = c(3,3)) {
 #' `start_groups`
 #'
 #' @param data
-#' The data. If after `clustra` run, it includes resulting clusters.
+#' The data. If after `clustra` run, it includes resulting clusters as group.
 #' @param fits 
 #' The `cl$tps` component of `clustra` output or internal `start_groups` fits. 
 #' If fits are supplied and `select.data` is NULL, the data is colored by 
 #' clusters. If NULL, or if `select.data` is not NULL, the data is black points.
 #' @param max.data 
 #' The maximum number of data points to plot (defaults to 10,000). If zero,
-#' no points are plotted. Use `Inf` value to plot all points.
+#' no points are plotted (overrides select.data). Use `Inf` value to plot all
+#' points.
 #' @param select.data 
 #' Either NULL or a list of length k, each element a data.frame (like data)
 #' with time and response components. The select.data points will be
 #' highlighted with cluster colors on the plot. This is used internally in
 #' `start_groups` function to show the selected starting points. In this case,
 #' also the fits parameter can contain TPS fits to the starting points.
+#' @param group
+#' Character variable name in `data` to color the clusters. A NULL will produce
+#' a b&w point plot.
 #' 
 #' @importFrom graphics lines points
 #' @export
 plot_smooths = function(data, fits = NULL, max.data = 20000, 
-                        select.data = NULL) {
+                        select.data = NULL, group = "group", ...) {
   k = length(fits)
   xrng = range(data$time)
   ptime = seq(xrng[1], xrng[2], length.out = 100)
   yrng = range(data$response)
   sdt = data
-  if(max.data > 0 && nrow(data) > max.data) # reduce to max.data
+  if(max.data && nrow(data) > max.data) # reduce to max.data
     sdt = data[sample(nrow(data), max.data)]
   
-  if(is.null(fits) || !is.null(select.data)) { # plot bw data
-    plot(sdt$time, sdt$response, pch = ".", xlab = "time", ylab = "response")
-  } else { # plot group colored data (expects group variable in data)
-    plot(sdt$time, sdt$response, pch = ".", col = as.numeric(sdt$group) + 1,
-         xlab = "time", ylab = "response")
+  ## data plotting
+  if(max.data) {  # a zero will skip data plotting
+    if(is.null(group)) {
+      plot(sdt$time, sdt$response, pch = ".",
+           xlab = "time", ylab = "response", ...)
+      } else {
+        plot(sdt$time, sdt$response, pch = ".", 
+             col = as.numeric(sdt[[group]]) + 1,
+             xlab = "time", ylab = "response", ...)
+      }
+    if(!is.null(select.data)) { # big dot color for selected data
+      for(i in 1:length(select.data))
+        points(select.data[[i]]$time, select.data[[i]]$response, pch = 20, 
+               col = i + 1)
+    }
+  } else { # just axes and no data plot
+    plot(x = sdt$time, y = sdt$response, type = "n", ...)
   }
-  
-  if(!is.null(select.data)) { # big dot color selected data
-    points(select.data[[i]]$time, select.data[[i]]$response, pch = 16, 
-           col = i + 1)
-  }
-  
+
+  ## tps plotting  
   if(!is.null(fits)) { # plot color fitted lines
     for(i in 1:k) {
       pred = predict(fits[[i]], newdata = data.frame(time = ptime))
@@ -113,7 +142,8 @@ plot_smooths = function(data, fits = NULL, max.data = 20000,
 }
 
 #' Plots a list item, a silhouette, from the result of `clustra_sil` along 
-#' with the average silhouette value.
+#' with the average silhouette value. Typically used via 
+#' `lapply(list, plot_silhouette)`
 #' @param sil
 #' A data frame that is a list item returned by `clustra_sil`.
 #' 

@@ -267,9 +267,15 @@ clustra_sil = function(data, kv = NULL, starts = "random", mccores = 1,
 traj_rep = function(group, data, k, maxdf, conv) {
   id = ..group = NULL # for data.table R CMD check
   data[, group:=..group[id]] # expand group to all data
-  trajectories(data, k, group, maxdf, conv, 1, verbose = FALSE)
-}
+  o = trajectories(data, k, group, maxdf, conv = conv, mccores = 1,
+                     verbose = FALSE)
 
+  ## reduce output to what's needed downstream (removes big tps and data_group)
+  list(deviance = o$deviance, group = o$group, k = o$k, k_cl = o$k_cl,
+       iterations = o$iterations, counts = o$counts, 
+       counts_df = o$counts_df, changes = o$changes)
+}
+  
 #' clustra_rand: Rand Index cluster evaluation
 #' 
 #' Performs \code{\link{trajectories}} runs for several *k* and several random
@@ -295,7 +301,8 @@ traj_rep = function(group, data, k, maxdf, conv) {
 #' @param save
 #' Logical. When TRUE, save all results as file \code{results.Rdata}.
 #' @param verbose
-#' Logical. When TRUE, information about each run of clustra is printed.
+#' Logical. When TRUE, information about each run of clustra (but not iterations
+#' within) is printed.
 #' 
 #' @return See \code{\link{allpair_RandIndex}}.
 #' 
@@ -319,33 +326,39 @@ clustra_rand = function(data, k, starts, mccores, replicates = 10, maxdf = 30,
   for(j in 1:length(k)) {
     kj = k[j]
     
-    ## Set starting groups outside parallel section to guarantee reproducibility
-#    grp = lapply(rep(kj, replicates), sample.int, size = n_id, replace = TRUE)
-    grp = lapply(rep(kj, replicates), start_groups, data = data, starts = starts,
-                 maxdf = maxdf, conv = conv, mccores = 1, verbose = FALSE)
-    f = parallel::mclapply(grp, traj_rep, data = data, k = kj, maxdf = maxdf,
-                           conv = conv, mc.cores = mccores)
-    fer = lapply(f, function(f, maxdf, conv)
-      if(!is.null( (er = xit_report(f, maxdf, conv)) )) {
+    ## Set replicate starts outside parallel section for reproducibility.
+    ## Then run replicates in parallel on mccores. Each replicate is a serial
+    ## run of trajectories() with reduced output.
+    grp = lapply(rep(kj, replicates), start_groups, 
+                 data = data, starts = starts, maxdf = maxdf, conv = conv,
+                 mccores = 1, verbose = FALSE)
+    tr_lst = parallel::mclapply(grp, traj_rep, data = data, k = kj, 
+                                maxdf = maxdf, conv = conv, mc.cores = mccores)
+    
+    ## generate exit report for each replicate
+    xit = lapply(tr_lst, function(x, maxdf, conv)
+      if(!is.null( (er = xit_report(x, maxdf, conv)) )) {
         return(er)} else return(NULL), maxdf = maxdf, conv = conv)
+
+    ## package replicates into results for Rand Index computation   
     for(i in 1:replicates) {
       results[[(j - 1)*replicates + i]] = list(k = as.integer(kj), 
                                                rep = as.integer(i),
-                                               deviance = f[[i]]$deviance,
-                                               group = f[[i]]$group)
+                                               deviance = tr_lst[[i]]$deviance,
+                                               group = tr_lst[[i]]$group)
       if(verbose) 
-        cat(kj, i, "iters =", f[[i]]$iterations, "deviance =", f[[i]]$deviance,
-            "xit =", fer[[i]], "counts =", f[[i]]$counts, "changes =",
-            f[[i]]$changes, "\n")
+        cat(kj, i, "iters =", tr_lst[[i]]$iterations, "deviance =", 
+            tr_lst[[i]]$deviance, "xit =", xit[[i]], "counts =", 
+            tr_lst[[i]]$counts, "changes =", tr_lst[[i]]$changes, "\n")
     }
-    rm(f)
+    rm(tr_lst)
     gc()
   }
   
   ## save object results and parameters
   if(save) save(results, k, replicates, file = "clustra_rand.Rdata")
   
-  ## compute and return Rand Index evaluation
+  ## compute and return Rand Index evaluations
   ret = allpair_RandIndex(results)
 
   ret
