@@ -1,0 +1,310 @@
+---
+title: "clustra: clustering trajectories"
+author: "Nimish Adhikari, George Ostrouchov, Hanna Gerlovin, and David Gagnon"
+date: "`r Sys.Date()`"
+output: html_vignette
+vignette: >
+  %\VignetteIndexEntry{clustra: clustering trajectories}
+  %\VignetteEngine{knitr::rmarkdown}
+  \VignetteEncoding[UTF-8]{inputenc}
+---
+
+```{r, setup, echo = FALSE}
+knitr::opts_knit$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+The **clustra** package was built to **clus**ter medical **tra**jectories (time series) related by an intervention time. This vignette main purpose is to reproduce the figures in the paper "clustra: A multi-platform k-means clustering algorithm for analysis of longitudinal trajectories in large electronic health records data." It also produces additional plots to explain the methodology and examine the data.
+
+We start by loading the necessary R packages and grabbing the data that was generated for this example.
+```{r, LibsData, warning=FALSE}
+library(clustra)
+start_knit = deltime()
+library(data.table); library(magrittr);library(ggplot2); library(ggpubr)
+library(haven); library(parallel);  library(dplyr)
+library(mgcv)
+#library(clusteval)
+mc = 1
+# If running on a unix or a Mac platform, change to number of cores (up to 2x cores on Intel chips with hyperthreading)
+# mc = detectCores()
+print(paste("Number of cores being used: mc parameter =", mc))
+data <- fread('~/Git/mvp-champion/sas-trajectories-macros/Simulated Data/simulated_data_27June2023.csv')
+data <- data.table(data)
+setnames(data, 'group', 'true_group')
+head(data)
+plot_path <- "~/Git/go-ski/clustra/vignettes/" # output path for plots
+```
+
+Select a few random *id*s and print their scatterplots colored by *true_group*. This only displays 9 individuals, and the data was generated based on five clusters. As the data used to simulate this synthetic dataset is extremely noisy, it would be difficult to ascertain any patterns by looking at a few subjects.
+```{r, plot_true, fig.width = 7, fig.height = 9}
+set.seed(12345)
+plot_sample(data, layout = c(3, 3), group = "true_group")
+```
+
+Now plot a 20,000 sample of the raw data. Use the true or simulated group assignment for coloring. As we can see, there is a lot of noise and it would be difficult to identify the clusters of trajectories by looking at the individual points, alone. A greater density of points is seen at time 0, where all trajectories have a data point.
+```{r, plotraw, fig.width = 7, fig.height = 7}
+plot_smooths(data, fits = NULL, max.data = 20000, group = "true_group")
+```
+
+Next, cluster the trajectories. Set *k=5*, spline max degrees of freedom to 30, and maximum iterations to 20. Initial cluster assignments are the default "random". We print out full information for the iterations, including the elapsed time.
+```{r, run5}
+set.seed(12345)
+cl = clustra(data, k = 5, maxdf = 30, conv = c(20, 0.5), mccores = mc, verbose = TRUE)
+
+# What happens if we cut the iterations at 5 maximum?
+set.seed(12345)
+cl.v2 = clustra(data, k = 5, maxdf = 30, conv = c(5, 0.5), mccores = mc, verbose = FALSE)
+```
+
+Setting the option `verbose = 2` produces plots of the cluster spline centers at every iteration. We also pass the *ylim* parameter because the yaxis extent of the data is much wider than the models.
+```{r, iterplots, fig.width=7, fig.height=7}
+set.seed(12345)
+png(filename = paste0(plot_path, "R_iter%02d_plot.png"))
+  cla = clustra(data, k = 5, maxdf = 30, conv = c(10, 0.5), mccores = mc, verbose = 2, ylim = c(110, 170))
+dev.off()
+knitr::include_graphics(paste0(plot_path, "R_iter01_plot.png"))
+knitr::include_graphics(paste0(plot_path, "R_iter02_plot.png"))
+knitr::include_graphics(paste0(plot_path, "R_iter03_plot.png"))
+knitr::include_graphics(paste0(plot_path, "R_iter04_plot.png"))
+knitr::include_graphics(paste0(plot_path, "R_iter05_plot.png"))
+knitr::include_graphics(paste0(plot_path, "R_iter06_plot.png"))
+knitr::include_graphics(paste0(plot_path, "R_iter07_plot.png"))
+knitr::include_graphics(paste0(plot_path, "R_iter08_plot.png"))
+knitr::include_graphics(paste0(plot_path, "R_iter08_plot.png"))
+```
+
+Test producing two side-by-side plots.
+```{r, plot5, fig.width = 8, fig.height = 5, warnings=FALSE}
+plot_smooths(data, fits = cl$tps, max.data = 30000)
+m = matrix(c(0.1, .95, 0.1, .95), nrow = 1)
+sc = split.screen(m)
+screen(1)
+  sc = split.screen(c(1, 2))
+  screen(2)
+    plot_smooths(data, fits = cl$tps, max.data = 0, ylim = c(110, 180))
+  screen(3)
+    plot_smooths(data, fits = cl.v2$tps, max.data = 0, ylim = c(110, 180))
+close.screen(all.screens = TRUE)
+```
+
+This is Figure 1 (now 2) in the paper.
+```{r}
+png("R_cl5_plot.png")
+    plot_smooths(data, fits = cl$tps, max.data = 0, ylim = c(110, 180))
+dev.off()
+knitr::include_graphics(paste0(plot_path, "R_cl5_plot.png"))
+```
+
+Compute the Rand index for comparing with true_groups.
+```{r, comp_true}
+MixSim::RandIndex(cl$data_group, data[, true_group])$AR # compare the 20-max-iterations to true assignemnt
+MixSim::RandIndex(cl.v2$data_group, data[, true_group])$AR # compare the 10-max-iterations to true assignment
+MixSim::RandIndex(cl$data_group, cl.v2$data_group)$AR # compare the 10-max-iterations and the 20-max-iterations assignments
+```
+```{r, echo=FALSE}
+#Save the results to the data
+data$clus5 <- cl$data_group
+data$clus5.v2 <- cl.v2$data_group
+```
+
+Next, we try requesting too many clusters in the noisy data. 
+```{r, run10}
+set.seed(12345)
+t = deltime()
+cl10 = clustra(data, k = 10, maxdf = 30, conv = c(50, 0.5), mccores = mc, verbose = TRUE)
+deltime(t, paste("run time on", mc, "cores "), units = TRUE)
+cat(paste("Number of iterations completed:", cl10$iterations))
+cat(paste("Number of individuals changing groups in last iteration:", cl10$changes))
+```
+
+Next, plot the resulting fit. This is Figure 2(now 3) in the paper.
+```{r, plot10, fig.width = 7, fig.height = 5}
+png("R_cl10_plot.png")
+  plot_smooths(data, cl10$tps, max.data = 0, ylim = c(100, 180))
+dev.off()
+knitr::include_graphics("R_cl10_plot.png")
+
+MixSim::RandIndex(cl10$data_group, data[, true_group])$AR
+data$clus10 <- cl10$data_group # Save the results to the data
+```
+
+Next, we look at what the clusters would look like with 2 groups and plot the result. This is figure 3 (now 4) in the paper.
+```{r, run2, fig.width = 7, fig.height = 5}
+set.seed(12345)
+t = deltime()
+cl2 = clustra(data, k = 2, maxdf = 30, conv = c(20,0.5), mccores=mc, verbose = FALSE)
+deltime(t, paste("Seconds run time on", mc, "cores "), units = TRUE) # (1.2 minutes on 8 cores)
+cat(paste("Number of iterations completed:",cl2$iterations))
+cat(paste("Number of individuals changing groups in last iteration:",cl2$changes))
+png(paste0(plot_path, "R_cl2_plot.png"))
+  plot_smooths(data, cl2$tps, max.data = 0)
+dev.off()
+knitr::include_graphics("R_cl2_plot.png")
+MixSim::RandIndex(cl2$data_group, data[, true_group])$AR
+data$clus2 <- cl2$data_group  # Save the results to the data
+```
+
+Compute the Adjusted Rand Index between the various results.
+```{r rand2, comp.within}
+MixSim::RandIndex(cl$data_group,cl2$data_group)$AR # between 5 and 2 clusters
+MixSim::RandIndex(cl$data_group,cl10$data_group)$AR # between 5 and 10 clusters
+MixSim::RandIndex(cl10$data_group,cl2$data_group)$AR # between 10 and 2 clusters
+```
+
+Average silhouette value is a way to select the number of clusters and a silhouette plot provides a way for a deeper evaluation (Rouseeuw 1986). A true silhouette requires distances between individual trajectories, which is not possible here due to unequal trajectory sampling without fitting a separate model for each id. As a proxy for distance between points, we use trajectory distances to cluster mean spline trajectories in the *clustra_sil()* function. The structure returned from the *clustra()* function contains the matrix *loss*, which has all the information needed to construct these proxy silhouette plots. The function *clustra_sil()* performs clustering for a number of *k* values and outputs information for the silhouette plot that is displayed next. 
+
+These plots are Figure 4 (now 5), 5 (now 6), and 6 (now 7) in the paper.
+```{r, silplot, fig.width = 7, fig.height = 5}
+t = deltime()
+set.seed(12345)
+sil = clustra_sil(cl, mccores = mc, conv=c(20,0.5), verbose = FALSE)
+lapply(sil, plot_silhouette)
+set.seed(12345)
+sil2 = clustra_sil(cl2, mccores = mc, conv=c(20,0.5), verbose = FALSE)
+lapply(sil2, plot_silhouette)
+set.seed(12345)
+sil10 = clustra_sil(cl10, mccores = mc, conv=c(20,0.5), verbose = FALSE)
+lapply(sil10, plot_silhouette)
+t = deltime(t, paste("Seconds silhouettes on", mc, "cores "), units = TRUE)
+```
+
+Here we produce silhouettes directly from the data, which runs clustra internally.
+```{r silplot2, fig.width = 7, fig.height = 5}
+# Example running from the data step
+set.seed(12345)
+sil = clustra_sil(data, k = c(3,4,20), mccores = mc, conv = c(50,0.5), 
+                  verbose = FALSE)
+lapply(sil, plot_silhouette)
+t = deltime(t, paste("Silhouettes and clustra on", mc, "cores "), units = TRUE)
+```
+Another way to select the number of clusters is the Rand Index comparing different random starts and different numbers of clusters. When we replicate clustering with different random seeds, the "replicability" is an indicator of how stable the results are for a given k, the number of clusters. For this demonstration, we look at *k = c(2,3,4,5,6,7,8,9,10)*, and 10 replicates for each *k*.
+```{r, randplot, fig.width = 6.5, fig.height=6, eval = FALSE}
+set.seed(12345)
+t = deltime()
+ran = clustra_rand(data, k = seq(2, 10, 1), starts = "random", mccores = mc, 
+                   replicates = 10, conv=c(40,0.5), verbose = TRUE, save = TRUE)
+t = deltime(t, paste("Seconds clustra_rand on", mc, "cores "), units = TRUE) # 4c-i7 mac 5 cores 3947 seconds
+rand_plot(ran, name = "R_randplot.pdf") # save pdf version
+rand_plot(ran) # render png version
+```
+The plot shows Adjusted Rand Index similarity level between all pairs of 90 clusterings (10 random starts for each of 2 to 10 clusters). The ten random starts agree the most for *k*=2 and *k*=5. 
+
+[From the deviance results shown during iterations, we also see that all of the *k*=3 clusters are near the best deviance attainable even with *k* = 4. Among the *k* = 4 results, several converged to only three clusters that agree with *k*=3 results.
+
+Another possible evaluation of the number of clusters is to first ask clustra for a large number of clusters, evaluate the cluster centers on a common set of time points, and feed the resulting matrix to a hierarchical clustering function. Below, we ask for 40 clusters on the *data2* data set but actually get back only 26 because several become empty or too small for *maxdf*. Below, the *hclust()* function clusters the 26 resulting cluster means, each evaluated on 100 time points.]
+```{r, hclust, fig.width = 7, fig.height = 5, eval = FALSE}
+set.seed(12345)
+t = deltime()
+cl40 = clustra(data, k = 40, maxdf = 30, conv = c(100,0.5), mccores = mc, verbose = TRUE)
+gpred = function(tps, newdata) {
+  as.numeric(mgcv::predict.bam(tps, newdata, type = "response",
+                               newdata.guaranteed = TRUE))
+}
+resp = do.call(rbind, lapply(cl40$tps, gpred, 
+                             newdata = data.frame(time = seq(min(data$time), max(data$time), length.out = 100))))
+plot(hclust(dist(resp)))
+ggsave(filename = "R_hclust_plot.png", path=plot_path)
+deltime(t, paste("clustra k = 40, conv = c(100, 0.5) on", mc, "cores + hclust + dist "), units = TRUE)
+```
+The cluster dendrogram clearly indicates there are only five clusters. Making the cut at a height of roughly 300 groups the 26 clusters into only three.
+
+Write out the file to get the clustering labels between R and SAS:
+```{r, eval = FALSE}
+write.csv(data,paste(plot_path,'-',format(Sys.Date(),'%d%b%Y'),'.csv'))
+```
+
+## Comparison between SAS and R clustering 
+Look at the data output from the SAS clustering analysis. Since SAS and R produce slightly different labels, need to relabel and replot the SAS data output.
+```{r, grab_sas, fig.width=7, fig.height=7, eval = FALSE}
+sas_2outputpath <- "C:/VA Research/Clustra Paper/simulation/SASoutput/2clusters/"
+sas_5outputpath <- "C:/VA Research/Clustra Paper/simulation/SASoutput/5clusters/"
+sas_10outputpath <- "C:/VA Research/Clustra Paper/simulation/SASoutput/10clusters/"
+
+sas.pred2 <- read_sas(paste(sas_2outputpath, "graphout.sas7bdat", sep=""))
+head(sas.pred2)
+ggplot(sas.pred2, aes(x = time, y = pred, color = as.factor(group))) + geom_line() +
+  ylim(110,180)
+# relabel the groups based on order of lines
+sas.pred2$group  = factor(sas.pred2$group, levels = c(2,1), labels=c(1,2))
+ggplot(sas.pred2, aes(x = time, y = pred, color = group)) + geom_line() +
+  ylim(110,180)
+
+sas.pred5 <- read_sas(paste(sas_5outputpath, "graphout.sas7bdat", sep=""))
+head(sas.pred5)
+ggplot(sas.pred5, aes(x = time, y = pred, color = as.factor(group))) + geom_line() +
+  ylim(110,180)
+# relabel the groups based on order of lines
+sas.pred5$group  = factor(sas.pred5$group, levels = c(4,2,3,5,1), labels=c(1,2,3,4,5))
+ggplot(sas.pred5, aes(x = time, y = pred, color = group)) + geom_line() +
+  ylim(110,180)
+
+sas.pred10 <- read_sas(paste(sas_10outputpath, "graphout.sas7bdat", sep=""))
+head(sas.pred10)
+ggplot(sas.pred10, aes(x = time, y = pred, color = as.factor(group))) + geom_line() +
+  ylim(110,180)
+# relabel the groups based on order of lines
+sas.pred10$group  = factor(sas.pred10$group, levels = c(10,6,8,9,5,1,7,3,2,4), labels=seq(1,10,1))
+ggplot(sas.pred10, aes(x = time, y = pred, color = group)) + geom_line() +
+  ylim(110,180)
+
+```
+
+
+Overlay the plots to see how similar the final curves are...
+```{r, SASoverlay, fig.width = 7, fig.height = 7, eval = FALSE}
+# grab the id-specific groupings for the SAS results
+sas.id2 <- read_sas(paste(sas_2outputpath, "graphout.sas7bdat", sep="")) %>%   
+      select(c("id","newgroup")) %>%
+      rename(sas.clus2=newgroup) %>%
+      mutate(id=as.integer(id),
+             sas.clus2=as.integer(factor(sas.clus2, levels = c(2,1), labels=c(1,2)))) 
+sas.id10 <- read_sas(paste(sas_10outputpath, "graphout.sas7bdat", sep="")) %>%   
+      select(c("id","newgroup")) %>%
+      rename(sas.clus10=newgroup) %>%
+      mutate(id=as.integer(id),
+             sas.clus10=as.integer(factor(sas.clus10, levels = c(10,6,8,9,5,1,7,3,2,4), labels=seq(1,10,1)))) 
+sas.id5 <- read_sas(paste(sas_5outputpath, "graphout.sas7bdat", sep="")) %>%   
+      select(c("id","newgroup")) %>%
+      rename(sas.clus5=newgroup) %>%
+      mutate(id=as.integer(id),
+             sas.clus5=as.integer(factor(sas.clus5, levels = c(4,2,3,5,1), labels=c(1,2,3,4,5)))) 
+# grab the id-specific groupings for the R results
+data.new <- distinct(data %>% select(c("id","true_group","clus5","clus5.v2","clus2","clus10"))) 
+
+# combine by id
+data.full <- data.new %>%
+  full_join(.,sas.id2,by="id") %>%
+  full_join(.,sas.id10,by="id") %>%
+  full_join(.,sas.id5,by="id")
+
+with(data.full,MixSim::RandIndex(clus5,sas.clus5))
+with(data.full,addmargins(table(R.result=clus5,SAS.result=sas.clus5,useNA = 'ifany')))
+plot.tps(cl) + geom_line(data=sas.pred5, aes(x = time, y = pred), lty=2)
+ggsave(filename = "R_SAS_cl5_compare.png", path=plot_path)
+
+with(data.full,MixSim::RandIndex(clus2,sas.clus2))
+with(data.full,addmargins(table(R.result=clus2,SAS.result=sas.clus2)))
+plot.tps(cl2) + geom_line(data=sas.pred2, aes(x = time, y = pred), lty=2)
+ggsave(filename = "R_SAS_cl2_compare.png", path=plot_path)
+
+with(data.full,MixSim::RandIndex(clus10,sas.clus10))
+with(data.full,addmargins(table(R.result=clus10,SAS.result=sas.clus10)))
+plot.tps(cl10) + geom_line(data=sas.pred10, aes(x = time, y = pred), lty=2)
+ggsave(filename = "R_SAS_cl10_compare.png", path=plot_path)
+
+```
+**Nearly perfect!**
+The high adjusted rand indices for 2 and 5 clusters indicate that there is great agreement in the classification of clustering between the SAS and R results. This is also evident by the lines that are nearly identical (colors and labels have been remapped to align, while the dashed line indicates results from SAS and solid lines from R). The pattern does not, however, hold for the results from 10 clusters. We see that some of the patterns are consistent for the bounded clusters, however, the middle clusters that fluctuate the most are inconsistent between SAS and R. This is to be expected, as the R algorithm nears convergence to the minimum percent change, but there continues to be some instability in the clustering assignment. Also, we would expect that the rand index would not be quite as strong, since the true underlying cluster number was 5. This is also consistent with the full Rand Index plot results, above.
+
+### Some notes about the SAS execution and results
+************************************************************************
+- Generated using v13 macros
+- Different convergence criteria currently being used (minimum percent change = 0.5% OR max iterations reached)
+- Currently using the method=0 (GAMPL with default optimization, NOT thin plate splines)
+- Mapping the cluster labels requires multiple plots to identify the ordering and manual change
+- No current random seed allocation, thus results may vary between executions/runs (related to the note above, this would require manual updates on next execution)
+
+```{r echo=FALSE}
+deltime(start_knit, "clustra vignette run time ", units = TRUE)
+```
