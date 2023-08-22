@@ -10,7 +10,6 @@ mc = 1
 print(paste("Number of cores being used: mc parameter =", mc))
 data(bp) # get the package bp data set
 data <- bp
-setnames(data, 'group', 'true_group')
 head(data)
 plot_path <- "~/Git/go-ski/clustra/vignettes/" # output path for plots
 
