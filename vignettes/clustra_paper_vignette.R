@@ -8,8 +8,8 @@ mc = 1
 # If running on a unix or a Mac platform, change to number of cores (up to 2x cores on Intel chips with hyperthreading)
 # mc = detectCores()
 print(paste("Number of cores being used: mc parameter =", mc))
-data <- fread('~/Git/mvp-champion/sas-trajectories-macros/Simulated Data/simulated_data_27June2023.csv')
-data <- data.table(data)
+data(bp) # get the package bp data set
+data <- bp
 setnames(data, 'group', 'true_group')
 head(data)
 plot_path <- "~/Git/go-ski/clustra/vignettes/" # output path for plots
