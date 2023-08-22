@@ -30,7 +30,7 @@ assignments.
 For \code{distant}, each sequential selection takes an id that has the largest
 minimum distance from smooth TPS fits (<= 5 deg) of previous selections.
 The distance of an id to a single TPS is the median absolute error across
-the id time points. Distance of an id to a set of TPS is the minumum of
+the id time points. Distance of an id to a set of TPS is the minimum of
 the individual distances. We pick the id that has the maximum of such
 a minimum of medians.
 }

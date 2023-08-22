@@ -343,27 +343,27 @@ trajectories = function(data, k, group, maxdf, conv = c(10, 0), mccores = 1,
   ##      regroups each id to nearest tps center (E-step)
   for(i in 1:conv[1]) {
     if(verbose) cat("\n", i, "")
-    gc() # Tighten up memory use in each
+#    gc() # Tighten up memory use in each
     ##
-    ## M-step: Estimate model parameters for each cluster
+    ## M-step: Estimate model parameters for each cluster ---------------------
     ##   
     if(verbose) cat("(M-step ")
     datg = parallel::mclapply(1:k_cl, 
                               function(g) data.table::copy(data[group == g]),
-                              mc.cores = mccores)
+                              mc.cores = 1)
     if(verbose && any(sapply(datg, is.null))) cat("*C*")
     if(verbose) cat("1")
     nz = which(sapply(datg, nrow) > 0) # nonzero groups
     k_cl = length(nz) # reset number of clusters to nonzeros only
     if(verbose) cat("2")
     tps = parallel::mclapply(nz, tps_g, data = datg, maxdf = maxdf,
-                             mc.cores = mccores, nthreads = 1)
+                             mc.cores = 1, nthreads = 1)
     if(verbose && any(sapply(tps, is.null))) cat("*F*")
     if(verbose) a = deltime(a, "3)")
 
     ##
-    ## E-step:
-    ##   predict (classify) each id to a model
+    ## E-step: predict (classify) each id to a model --------------------------
+    ## 
     if(verbose) cat(" (E-step ")
     newdata = force(as.data.frame(data[, list(time, response)]))
     pred = parallel::mclapply(tps, pred_g, newdata = newdata, 
@@ -371,7 +371,7 @@ trajectories = function(data, k, group, maxdf, conv = c(10, 0), mccores = 1,
     if(verbose && any(sapply(pred, is.null))) cat("*P*")
     if(verbose) cat("1")
     rm(newdata)
-    gc() # tighten up memory before next mclapply
+#    gc() # tighten up memory before next mclapply
     ##   compute loss of all id's to all groups (models)
     ##   TODO better parallel balance by skipping empty groups
     if(verbose) cat("2")
@@ -389,7 +389,9 @@ trajectories = function(data, k, group, maxdf, conv = c(10, 0), mccores = 1,
     new_group = apply(loss, 1, which.min) # already without original zero groups
     if(verbose) a = deltime(a, "5)")
 
-    ## evaluate results and update groups
+    ##
+    ## evaluate results and update groups -------------------------------------
+    ## 
     changes = sum(new_group != group) # may exaggerate due to renumbering
     counts = tabulate(new_group)
     deviance = sum(unlist(lapply(1:k_cl, function(g) deviance(tps[[g]]))))

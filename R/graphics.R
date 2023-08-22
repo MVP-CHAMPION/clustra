@@ -4,15 +4,21 @@
 #' Result of last call to deltime. 
 #' @param text 
 #' Text to display along with elapsed time since \code{ltime}.
+#' @param units
+#' Logical. If TRUE, print units
 #'
 #' @return
 #' "elapsed" component of current \code{\link{proc.time}}.
 #' 
 #' @export
-deltime = function(ltime = proc.time()["elapsed"], text = NULL) {
+deltime = function(ltime = proc.time()["elapsed"], text = NULL, units = FALSE) {
   time = proc.time()["elapsed"]
-  if(!is.null(text))
-    cat(paste0(text, round(time - ltime, 1)))
+  if(!is.null(text)) {
+    x = round(difftime(time, ltime), 2)
+    if(units) units = paste0(" ", attr(x, "units"))
+    else units = ""
+    cat(paste0(text, x, units))
+  }
   invisible(time)
 }
 
@@ -156,11 +162,12 @@ plot_silhouette = function(sil) {
   k = length(levels(sil$cluster))
   barplot(height = sil$silhouette, col = as.numeric(sil$cluster) + 1,
           border = as.numeric(sil$cluster) + 1)
-  legend("bottomright", legend = 1:k, fill = 1:k + 1)
+  legend("topright", legend = 1:k, fill = 1:k + 1)
   pct = round(mean(sil$silhouette), 2)
-  abline(h = pct)
-  text(x = nrow(sil), y = pct, labels = sprintf("Average %s", pct), 
-       adj = c(1, 1))
+  abline(h = pct, lty = 5, col = "red")
+  mtext(paste("Average Width", pct), col = "red")
+#  text(x = nrow(sil), y = pct, labels = sprintf("Average Width %s", pct), 
+#       adj = c(1, 1))
   invisible(pct)
 }
 

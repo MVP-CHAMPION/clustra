@@ -5,7 +5,7 @@
 \alias{mae_g}
 \alias{mme_g}
 \alias{mxe_g}
-\title{Loss functions}
+\title{Various Loss functions used internally by clustra}
 \usage{
 mse_g(pred, id, response)
 
@@ -29,8 +29,5 @@ For mxe_g(), returns the
 maximum absolute error.
 }
 \description{
-\code{mse_g()} Computes mean squared error.
-\code{mae_g()} Computes mean absolute error.
-\code{mme_g()} Computes median absolute error.
-\code{mxe_g()} Computes maximum absolute error.
+Various Loss functions used internally by clustra
 }
