@@ -26,7 +26,7 @@ library(haven); library(parallel);  library(dplyr)
 library(mgcv)
 #library(clusteval)
 mc = 1
-# If running on a unix or a Mac platform, change to number of cores (up to 2x cores on Intel chips with hyperthreading)
+# If running on a Unix or a Mac platform, change to number of cores (up to 2x cores on Intel chips with hyperthreading)
 # mc = detectCores()
 print(paste("Number of cores being used: mc parameter =", mc))
 data(bp) # get the package bp data set
@@ -112,7 +112,7 @@ Next, we try requesting too many clusters in the noisy data.
 set.seed(12345)
 t = deltime()
 cl10 = clustra(data, k = 10, maxdf = 30, conv = c(50, 0.5), mccores = mc, verbose = TRUE)
-deltime(t, paste("run time on", mc, "cores "), units = TRUE)
+deltime(t, paste("run time on", mc, "cores "), units = TRUE, nl = TRUE)
 cat(paste("Number of iterations completed:", cl10$iterations))
 cat(paste("Number of individuals changing groups in last iteration:", cl10$changes))
 ```
@@ -133,7 +133,7 @@ Next, we look at what the clusters would look like with 2 groups and plot the re
 set.seed(12345)
 t = deltime()
 cl2 = clustra(data, k = 2, maxdf = 30, conv = c(20,0.5), mccores=mc, verbose = FALSE)
-deltime(t, paste("Seconds run time on", mc, "cores "), units = TRUE) # (1.2 minutes on 8 cores)
+deltime(t, paste("Seconds run time on", mc, "cores "), units = TRUE, nl = TRUE) # (1.2 minutes on 8 cores)
 cat(paste("Number of iterations completed:",cl2$iterations))
 cat(paste("Number of individuals changing groups in last iteration:",cl2$changes))
 png(paste0(plot_path, "R_cl2_plot.png"))
@@ -165,7 +165,8 @@ lapply(sil2, plot_silhouette)
 set.seed(12345)
 sil10 = clustra_sil(cl10, mccores = mc, conv=c(20,0.5), verbose = FALSE)
 lapply(sil10, plot_silhouette)
-t = deltime(t, paste("Seconds silhouettes on", mc, "cores "), units = TRUE)
+t = deltime(t, paste("Seconds silhouettes on", mc, "cores "), units = TRUE, 
+            nl = TRUE)
 ```
 
 Here we produce silhouettes directly from the data, which runs clustra internally.
@@ -175,7 +176,8 @@ set.seed(12345)
 sil = clustra_sil(data, k = c(3,4,20), mccores = mc, conv = c(50,0.5), 
                   verbose = FALSE)
 lapply(sil, plot_silhouette)
-t = deltime(t, paste("Silhouettes and clustra on", mc, "cores "), units = TRUE)
+t = deltime(t, paste("Silhouettes and clustra on", mc, "cores "), units = TRUE, 
+            nl = TRUE)
 ```
 Another way to select the number of clusters is the Rand Index comparing different random starts and different numbers of clusters. When we replicate clustering with different random seeds, the "replicability" is an indicator of how stable the results are for a given k, the number of clusters. For this demonstration, we look at *k = c(2,3,4,5,6,7,8,9,10)*, and 10 replicates for each *k*.
 ```{r, randplot, fig.width = 6.5, fig.height=6, eval = FALSE}
@@ -183,7 +185,8 @@ set.seed(12345)
 t = deltime()
 ran = clustra_rand(data, k = seq(2, 10, 1), starts = "random", mccores = mc, 
                    replicates = 10, conv=c(40,0.5), verbose = TRUE, save = TRUE)
-t = deltime(t, paste("Seconds clustra_rand on", mc, "cores "), units = TRUE) # 4c-i7 mac 5 cores 3947 seconds
+t = deltime(t, paste("Seconds clustra_rand on", mc, "cores "), units = TRUE, 
+            nl = TRUE) # 4c-i7 mac 5 cores 3947 seconds
 rand_plot(ran, name = "R_randplot.pdf") # save pdf version
 rand_plot(ran) # render png version
 ```
@@ -200,11 +203,12 @@ gpred = function(tps, newdata) {
   as.numeric(mgcv::predict.bam(tps, newdata, type = "response",
                                newdata.guaranteed = TRUE))
 }
-resp = do.call(rbind, lapply(cl40$tps, gpred, 
-                             newdata = data.frame(time = seq(min(data$time), max(data$time), length.out = 100))))
+timep = data.frame(time = seq(min(data$time), max(data$time), length.out = 100))
+resp = do.call(rbind, lapply(cl40$tps, gpred, newdata = timep))
 plot(hclust(dist(resp)))
 ggsave(filename = "R_hclust_plot.png", path=plot_path)
-deltime(t, paste("clustra k = 40, conv = c(100, 0.5) on", mc, "cores + hclust + dist "), units = TRUE)
+deltime(t, paste("clustra k = 40, conv = c(100, 0.5) on", mc, "cores + hclust + dist "), 
+        units = TRUE, nl = TRUE)
 ```
 The cluster dendrogram clearly indicates there are only five clusters. Making the cut at a height of roughly 300 groups the 26 clusters into only three.
 
@@ -305,5 +309,5 @@ The high adjusted rand indices for 2 and 5 clusters indicate that there is great
 - No current random seed allocation, thus results may vary between executions/runs (related to the note above, this would require manual updates on next execution)
 
 ```{r echo=FALSE}
-deltime(start_knit, "clustra vignette run time ", units = TRUE)
+deltime(start_knit, "clustra vignette run time ", units = TRUE, nl = TRUE)
 ```

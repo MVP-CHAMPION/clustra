@@ -65,7 +65,7 @@ data$clus5.v2 <- cl.v2$data_group
 set.seed(12345)
 t = deltime()
 cl10 = clustra(data, k = 10, maxdf = 30, conv = c(50, 0.5), mccores = mc, verbose = TRUE)
-deltime(t, paste("run time on", mc, "cores "), units = TRUE)
+deltime(t, paste("run time on", mc, "cores "), units = TRUE, nl = TRUE)
 cat(paste("Number of iterations completed:", cl10$iterations))
 cat(paste("Number of individuals changing groups in last iteration:", cl10$changes))
 
@@ -80,7 +80,7 @@ data$clus10 <- cl10$data_group # Save the results to the data
 set.seed(12345)
 t = deltime()
 cl2 = clustra(data, k = 2, maxdf = 30, conv = c(20,0.5), mccores=mc, verbose = FALSE)
-deltime(t, paste("Seconds run time on", mc, "cores "), units = TRUE) # (1.2 minutes on 8 cores)
+deltime(t, paste("Seconds run time on", mc, "cores "), units = TRUE, nl = TRUE) # (1.2 minutes on 8 cores)
 cat(paste("Number of iterations completed:",cl2$iterations))
 cat(paste("Number of individuals changing groups in last iteration:",cl2$changes))
 png(paste0(plot_path, "R_cl2_plot.png"))
@@ -104,22 +104,25 @@ lapply(sil2, plot_silhouette)
 set.seed(12345)
 sil10 = clustra_sil(cl10, mccores = mc, conv=c(20,0.5), verbose = FALSE)
 lapply(sil10, plot_silhouette)
-t = deltime(t, paste("Seconds silhouettes on", mc, "cores "), units = TRUE)
+t = deltime(t, paste("Silhouettes on", mc, "cores "), units = TRUE, nl = TRUE)
 
 # Example running from the data step
 set.seed(12345)
 sil = clustra_sil(data, k = c(3,4,20), mccores = mc, conv = c(50,0.5), 
                   verbose = FALSE)
 lapply(sil, plot_silhouette)
-t = deltime(t, paste("Silhouettes and clustra on", mc, "cores "), units = TRUE)
+t = deltime(t, paste("Silhouettes and clustra on", mc, "cores "), units = TRUE, 
+            nl = TRUE)
 
+mc = 20
 set.seed(12345)
 t = deltime()
 ran = clustra_rand(data, k = seq(2, 10, 1), starts = "random", mccores = mc, 
                    replicates = 10, conv=c(40,0.5), verbose = TRUE, save = TRUE)
-t = deltime(t, paste("Seconds clustra_rand on", mc, "cores "), units = TRUE) # 4c-i7 mac 5 cores 3947 seconds
+t = deltime(t, paste("Seconds clustra_rand on", mc, "cores "), units = TRUE, 
+            nl = TRUE) # 4c-i7 mac 5 cores 3947 seconds
 rand_plot(ran, name = "R_randplot.pdf") # save pdf version
 rand_plot(ran) # render png version
 
-deltime(start_knit, "clustra vignette run time ", units = TRUE)
+deltime(start_knit, "clustra vignette run time ", units = TRUE, nl = TRUE)
 

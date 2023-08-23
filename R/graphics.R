@@ -6,18 +6,23 @@
 #' Text to display along with elapsed time since \code{ltime}.
 #' @param units
 #' Logical. If TRUE, print units
+#' @param nl
+#' Logical. If TRUE, a newline is added at the end.
 #'
 #' @return
 #' "elapsed" component of current \code{\link{proc.time}}.
 #' 
 #' @export
-deltime = function(ltime = proc.time()["elapsed"], text = NULL, units = FALSE) {
+deltime = function(ltime = proc.time()["elapsed"], text = NULL, units = FALSE,
+                   nl = FALSE) {
   time = proc.time()["elapsed"]
   if(!is.null(text)) {
     x = round(difftime(time, ltime), 2)
     if(units) units = paste0(" ", attr(x, "units"))
     else units = ""
-    cat(paste0(text, x, units))
+    if(nl) nl = "\n"
+    else nl = ""
+    cat(paste0(text, x, units, nl))
   }
   invisible(time)
 }
