@@ -254,7 +254,7 @@ start_groups = function(k, data, starts, maxdf, conv, mccores = 1,
     group = sample(k, n_id, replace = TRUE)
   }
 
-  data[, group:=..group[id]] # replicate group numbers within ids
+  data = data[, group:=..group[id]] # replicate group numbers within ids
   
   # Check if sufficient observations. Drop and reassign group if not.
   group = check_df(group, loss, data, maxdf)
@@ -519,6 +519,7 @@ clustra = function(data, k, starts = "random", maxdf = 30, conv = c(10, 0),
   vnames = c("id", "time", "response")
   if(!is.data.frame(data)) stop("Expecting a data frame.")
   if(!data.table::is.data.table(data)) data = data.table::as.data.table(data)
+  setalloccol(data, n = 1) # make room for extra column added in start_groups()
   if(!all(vnames %in% names(data))) 
     stop(paste0("Expecting (", paste0(vnames, collapse = ","), ") in data."))
   
@@ -530,7 +531,7 @@ clustra = function(data, k, starts = "random", maxdf = 30, conv = c(10, 0),
   n_id = data[, data.table::uniqueN(id)]
   
   ## Get initial group assignments. Populate into data in-place via data.table
-  group = start_groups(k, data, starts, maxdf, conv, mccores,
+  start_groups(k, data, starts, maxdf, conv, mccores,
                        verbose = verbose)
   
   ## Perform k-means iteration for groups
