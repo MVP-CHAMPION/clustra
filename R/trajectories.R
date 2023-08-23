@@ -519,7 +519,8 @@ clustra = function(data, k, starts = "random", maxdf = 30, conv = c(10, 0),
   vnames = c("id", "time", "response")
   if(!is.data.frame(data)) stop("Expecting a data frame.")
   if(!data.table::is.data.table(data)) data = data.table::as.data.table(data)
-  setalloccol(data, n = 1) # make room for extra column added in start_groups()
+  setalloccol(data, n = 1) # make room for group column added in start_groups()
+  
   if(!all(vnames %in% names(data))) 
     stop(paste0("Expecting (", paste0(vnames, collapse = ","), ") in data."))
   
@@ -531,7 +532,7 @@ clustra = function(data, k, starts = "random", maxdf = 30, conv = c(10, 0),
   n_id = data[, data.table::uniqueN(id)]
   
   ## Get initial group assignments. Populate into data in-place via data.table
-  start_groups(k, data, starts, maxdf, conv, mccores,
+  group = start_groups(k, data, starts, maxdf, conv, mccores,
                        verbose = verbose)
   
   ## Perform k-means iteration for groups
