@@ -4,14 +4,14 @@ library(data.table); library(magrittr);library(ggplot2); library(ggpubr)
 library(haven); library(parallel);  library(dplyr)
 library(mgcv)
 #library(clusteval)
-mc = 1
+mc = 5
 # If running on a unix or a Mac platform, change to number of cores (up to 2x cores on Intel chips with hyperthreading)
 # mc = detectCores()
 print(paste("Number of cores being used: mc parameter =", mc))
 data(bp) # get the package bp data set
 data <- bp
 head(data)
-plot_path <- "~/Git/go-ski/clustra/vignettes/" # output path for plots
+plot_path <- "./" # output path for plots
 
 set.seed(12345)
 plot_sample(data, layout = c(3, 3), group = "true_group")
