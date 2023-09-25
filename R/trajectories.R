@@ -295,6 +295,9 @@ start_groups = function(k, data, starts, maxdf, conv, mccores = 1,
 #' @param verbose
 #' Logical, whether to produce debug output. A value > 1 will plot tps fit lines
 #' in each iteration.
+#' @param ...
+#' See \code{\link{clustra}} for allowed `...` parameters.
+#' 
 #' @return 
 #' A list with components
 #' * `deviance` - The final deviance in each cluster added across clusters.

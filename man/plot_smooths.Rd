@@ -33,6 +33,8 @@ also the fits parameter can contain TPS fits to the starting points.}
 
 \item{group}{Character variable name in \code{data} to color the clusters. A NULL will produce
 a b&w point plot.}
+
+\item{...}{Other parameters to \code{plot} function, such as \code{xlim} or \code{ylim} axis limits.}
 }
 \description{
 Plots data and smooths from \code{clustra} output or internally from within

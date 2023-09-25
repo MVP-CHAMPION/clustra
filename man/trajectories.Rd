@@ -37,7 +37,9 @@ iterations until no more changes occur or \code{maxiter} is reached.}
 over \code{k}, the number of clusters.}
 
 \item{verbose}{Logical, whether to produce debug output. A value > 1 will plot tps fit lines
-in each iteration.}
+in each iteration.
+@param ...
+See \code{\link{clustra}} for allowed \code{...} parameters.}
 }
 \value{
 A list with components

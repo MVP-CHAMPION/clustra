@@ -53,7 +53,7 @@ deltimeT = function(ltime, text) {
 #' @return 
 #' Invisibly returns the number of trajectories plotted.
 #' 
-#' @importFrom graphics split.screen screen close.screen
+#' @importFrom graphics split.screen screen close.screen text
 #' @export
 plot_sample = function(dat, layout = c(3,3), sample = prod(layout),
                        group = NULL) {
@@ -121,6 +121,8 @@ plot_sample = function(dat, layout = c(3,3), sample = prod(layout),
 #' @param group
 #' Character variable name in `data` to color the clusters. A NULL will produce
 #' a b&w point plot.
+#' @param ...
+#' Other parameters to `plot` function, such as `xlim` or `ylim` axis limits.
 #' 
 #' @importFrom graphics lines points
 #' @export
@@ -172,7 +174,7 @@ plot_smooths = function(data, fits = NULL, max.data = 20000,
 #' @return
 #' Returns invisibly the average silhouette value.
 #' 
-#' @importFrom graphics barplot legend abline text
+#' @importFrom graphics barplot legend abline mtext
 #' @export
 plot_silhouette = function(sil) {
   k = length(levels(sil$cluster))
@@ -182,8 +184,6 @@ plot_silhouette = function(sil) {
   pct = round(mean(sil$silhouette), 2)
   abline(h = pct, lty = 5, col = "red")
   mtext(paste("Average Width", pct), col = "red")
-#  text(x = nrow(sil), y = pct, labels = sprintf("Average Width %s", pct), 
-#       adj = c(1, 1))
   invisible(pct)
 }
 

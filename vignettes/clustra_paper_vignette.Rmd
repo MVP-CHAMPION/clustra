@@ -1,5 +1,5 @@
 ---
-title: "clustra: clustering trajectories"
+title: "clustra: clustering trajectories (graphics for paper)"
 author: "Nimish Adhikari, George Ostrouchov, Hanna Gerlovin, and David Gagnon"
 date: "`r Sys.Date()`"
 output: html_vignette
@@ -21,13 +21,14 @@ The **clustra** package was built to **clus**ter medical **tra**jectories (time 
 
 Additional plots to explain the methodology and examine the data can be produced, but these code chunks do not evaluate by default so the vignette runtime is shorter. To enable the additional sections, set `extra = TRUE` in the chunk above.
 
-We start by loading the necessary R packages and grabbing the data that was generated for this example.
+We start by loading the necessary R packages and grabbing the data that was generated for this example. We also set the output path for plots to `tempdir()`, which should be changed to a user directory if they are needed beyond the Knit output.
 ```{r, LibsData, warning=FALSE}
 library(clustra)
 start_time = deltime()
 mc = 5
 # If running on a Unix or a Mac platform, set to number of available cores.
-# On Intel chips with hyperthreading, up to 2x cores can be used.
+# This vignette will experience notable speedup up to about 10 cores.
+# On Intel chips with hyperthreading, up to 2x available cores can be used.
 print(paste("Number of cores being used: mc parameter =", mc))
 data(bp) # get the package bp data set
 data = bp
@@ -207,15 +208,13 @@ deltimeT(t, paste("clustra k = 40, conv = c(100, 0.5) on", mc, "cores + hclust +
 The cluster dendrogram indicates there are five clusters. Making the cut at a height of roughly 300 groups the 26 clusters into only three.
 
 ## Comparison between SAS and R clustering 
-Look at the data output from the SAS clustering analysis. Since SAS and R produce slightly different labels, need to relabel and replot the SAS data output. The relabeling algorithm below matches pairs by distance, starting with shortest distance.
+Look at the data output from the SAS clustering analysis. Since SAS and R produce slightly different labels, need to relabel and replot the SAS data output. The relabeling algorithm below matches pairs by distance, starting with shortest distance pair.
 
 ```{r SAS_R_data, fig.width = 7, fig.height = 5}
-sas_git = "~/Git/mvp-champion/sas-trajectories-macros/"
-sas_graphout = paste0(sas_git, "Manuscript Files/Graph Data/")
-sas_rms = paste0(sas_git, "Manuscript Files/")
+sas.file = function(file) system.file("extdata", file, package = "clustra")
 
-sas_r_cplot = function(sasfile, clustra_out) {
-  sas = cbind(haven::read_sas(sasfile), source = 1)
+sas_r_cplot = function(file, clustra_out) {
+  sas = cbind(haven::read_sas(sas.file(file)), source = 1)
   r = data.frame(time = min(sas$time):max(sas$time))
   n = nrow(r)
   k = nrow(sas)/n
@@ -246,13 +245,13 @@ sas_r_cplot = function(sasfile, clustra_out) {
   rmap # output the mapping from SAS clusters to R: R = rmap[SAS]
 }
 png(paste0(plot_path, "R_SAS_cl2_compare.png"), width = 480, height = 360)
-  map2 = sas_r_cplot(paste0(sas_graphout, "graphout_cl2.sas7bdat"), cl2)
+  map2 = sas_r_cplot("graphout_cl2.sas7bdat", cl2)
 dev.off()
 png(paste0(plot_path, "R_SAS_cl5_compare.png"), width = 480, height = 360)
-  map5 = sas_r_cplot(paste0(sas_graphout, "graphout_cl5.sas7bdat"), cl5)
+  map5 = sas_r_cplot("graphout_cl5.sas7bdat", cl5)
 dev.off()
 png(paste0(plot_path, "R_SAS_cl10_compare.png"), width = 480, height = 360)
-  map10 = sas_r_cplot(paste0(sas_graphout, "graphout_cl10.sas7bdat"), cl10)
+  map10 = sas_r_cplot("graphout_cl10.sas7bdat", cl10)
 dev.off()
 knitr::include_graphics(paste0(plot_path, "R_SAS_cl2_compare.png"))
 knitr::include_graphics(paste0(plot_path, "R_SAS_cl5_compare.png"))
@@ -263,10 +262,9 @@ The k=2 and k=5 cluster results are almost identical between SAS (dashed lines) 
 
 Next, check the Rand index comparing R and SAS results:
 ```{r Rand_SAS_R}
-sas_rms = paste0(sas_git, "Manuscript Files/")
-MixSim::RandIndex(haven::read_sas(paste0(sas_rms, "rms_cl2.sas7bdat"))$newgroup, cl2$group)
-MixSim::RandIndex(haven::read_sas(paste0(sas_rms, "rms_cl5.sas7bdat"))$newgroup, cl5$group)
-MixSim::RandIndex(haven::read_sas(paste0(sas_rms, "rms_cl10.sas7bdat"))$newgroup, cl10$group)
+MixSim::RandIndex(haven::read_sas(sas.file("rms_cl2.sas7bdat"))$newgroup, cl2$group)
+MixSim::RandIndex(haven::read_sas(sas.file("rms_cl5.sas7bdat"))$newgroup, cl5$group)
+MixSim::RandIndex(haven::read_sas(sas.file("rms_cl10.sas7bdat"))$newgroup, cl10$group)
 ```
 
 **Nearly perfect!**
@@ -275,7 +273,7 @@ The high adjusted rand indices for 2 and 5 clusters indicate that there is great
 Now compare with true_group used to generate the data:
 ```{r true_group}
 true_group = data[, mean(true_group),by=id]
-MixSim::RandIndex(haven::read_sas(paste0(sas_rms, "rms_cl5.sas7bdat"))$newgroup, true_group$V1)
+MixSim::RandIndex(haven::read_sas(sas.file("rms_cl5.sas7bdat"))$newgroup, true_group$V1)
 MixSim::RandIndex(true_group$V1, cl5$group)
 ```
 
