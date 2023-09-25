@@ -105,6 +105,9 @@ kchoose = function(K, var = 5, maxdf = 10, mc = 1, fn = "ic.txt") {
 #' * `rep` - replicate number
 #' * `deviance` - final deviance
 #' * `group` - integer cluster assignments
+#' Note that item order is assumed to be the same across all `rep` and `k` but 
+#' `group` numbering need not be same. The algorithm only examines if pairs of
+#' items are in same or different clusters within each `results` list element.
 #' 
 #' @return A data frame with \code{\link[MixSim]{RandIndex}} for all pairs from
 #' trajectories results. The data frame names and its format is intended to be 

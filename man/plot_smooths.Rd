@@ -5,23 +5,34 @@
 \title{Plots data and smooths from \code{clustra} output or internally from within
 \code{start_groups}}
 \usage{
-plot_smooths(data, fits = NULL, max.data = 20000, select.data = NULL)
+plot_smooths(
+  data,
+  fits = NULL,
+  max.data = 20000,
+  select.data = NULL,
+  group = "group",
+  ...
+)
 }
 \arguments{
-\item{data}{The data. If after \code{clustra} run, it includes resulting clusters.}
+\item{data}{The data. If after \code{clustra} run, it includes resulting clusters as group.}
 
 \item{fits}{The \code{cl$tps} component of \code{clustra} output or internal \code{start_groups} fits.
 If fits are supplied and \code{select.data} is NULL, the data is colored by
 clusters. If NULL, or if \code{select.data} is not NULL, the data is black points.}
 
 \item{max.data}{The maximum number of data points to plot (defaults to 10,000). If zero,
-no points are plotted. Use \code{Inf} value to plot all points.}
+no points are plotted (overrides select.data). Use \code{Inf} value to plot all
+points.}
 
 \item{select.data}{Either NULL or a list of length k, each element a data.frame (like data)
 with time and response components. The select.data points will be
 highlighted with cluster colors on the plot. This is used internally in
 \code{start_groups} function to show the selected starting points. In this case,
 also the fits parameter can contain TPS fits to the starting points.}
+
+\item{group}{Character variable name in \code{data} to color the clusters. A NULL will produce
+a b&w point plot.}
 }
 \description{
 Plots data and smooths from \code{clustra} output or internally from within

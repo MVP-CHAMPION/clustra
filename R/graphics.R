@@ -26,6 +26,16 @@ deltime = function(ltime = proc.time()["elapsed"], text = NULL, units = FALSE,
   }
   invisible(time)
 }
+#' @describeIn deltime A shortcut frequent use. Requires ltime and text 
+#' parameters, includes units, and adds a newline after message.
+#' 
+#' @export
+deltimeT = function(ltime, text) {
+  time = deltime(ltime = ltime, text = text, units = TRUE)
+  cat("\n")
+
+  invisible(time)
+}
 
 #' Plots a sample of ids in a small mutiples layout
 #' 
@@ -140,7 +150,8 @@ plot_smooths = function(data, fits = NULL, max.data = 20000,
                col = i + 1)
     }
   } else { # just axes and no data plot
-    plot(x = sdt$time, y = sdt$response, type = "n", ...)
+    plot(x = sdt$time, y = sdt$response, type = "n",
+         xlab = "time", ylab = "response", ...)
   }
 
   ## tps plotting  
@@ -250,7 +261,9 @@ rand_plot = function(rand_pairs, name = NULL) {
   fg = "black"
   wd = 6.5
   ht = 6
-  if(is.character(name)) pdf(name, width = wd, height = ht, bg = bg)
+  save_pdf = is.character(name) && 
+    substr(name, nchar(name) - 3, nchar(name)) == ".pdf"
+  if(save_pdf) pdf(name, width = wd, height = ht, bg = bg)
   oldpar <- par(no.readonly = TRUE)
   on.exit(par(oldpar)) # restore old par when exit
   par(bg = bg, fg = fg, col = fg, col.axis = fg, col.lab = fg, col.main = fg,
@@ -272,7 +285,7 @@ rand_plot = function(rand_pairs, name = NULL) {
         col = var.col, axes = FALSE, xlab = "", ylab = "")
   axis(4)
   box()
-  if(is.character(name)) dev.off()
+  if(save_pdf) dev.off()
   layout(1)
   invisible(name)
 }

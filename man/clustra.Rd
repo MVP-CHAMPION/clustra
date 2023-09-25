@@ -11,7 +11,8 @@ clustra(
   maxdf = 30,
   conv = c(10, 0),
   mccores = 1,
-  verbose = FALSE
+  verbose = FALSE,
+  ...
 )
 }
 \arguments{
@@ -42,10 +43,14 @@ which all ids are classified.}
 \item{mccores}{See \code{\link{trajectories}}.}
 
 \item{verbose}{Logical to turn on more output during fit iterations.}
+
+\item{...}{Additional parameters of optional plotting under \code{verbose = 2}. At this time,
+only \code{xlim} and \code{ylim} are allowed.}
 }
 \value{
 A list returned by \code{\link{trajectories}} plus one more element \code{ido},
-giving the original id numbers.
+giving the original id numbers is invisibly returned. Invisible returns are
+useful for repeated runs that explore verbose clustra output.
 }
 \description{
 The usual top level function for clustering longitudinal trajectories. After

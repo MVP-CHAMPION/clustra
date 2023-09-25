@@ -33,7 +33,8 @@ clustra_rand(
 
 \item{save}{Logical. When TRUE, save all results as file \code{results.Rdata}.}
 
-\item{verbose}{Logical. When TRUE, information about each run of clustra is printed.}
+\item{verbose}{Logical. When TRUE, information about each run of clustra (but not iterations
+within) is printed.}
 }
 \value{
 See \code{\link{allpair_RandIndex}}.

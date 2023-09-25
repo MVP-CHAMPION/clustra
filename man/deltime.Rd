@@ -2,14 +2,21 @@
 % Please edit documentation in R/graphics.R
 \name{deltime}
 \alias{deltime}
+\alias{deltimeT}
 \title{Timing function}
 \usage{
-deltime(ltime = proc.time()["elapsed"], text = NULL)
+deltime(ltime = proc.time()["elapsed"], text = NULL, units = FALSE, nl = FALSE)
+
+deltimeT(ltime, text)
 }
 \arguments{
 \item{ltime}{Result of last call to deltime.}
 
-\item{text}{Text to display along with elapsed time.}
+\item{text}{Text to display along with elapsed time since \code{ltime}.}
+
+\item{units}{Logical. If TRUE, print units}
+
+\item{nl}{Logical. If TRUE, a newline is added at the end.}
 }
 \value{
 "elapsed" component of current \code{\link{proc.time}}.
@@ -17,3 +24,9 @@ deltime(ltime = proc.time()["elapsed"], text = NULL)
 \description{
 Timing function
 }
+\section{Functions}{
+\itemize{
+\item \code{deltimeT()}: A shortcut frequent use. Requires ltime and text
+parameters, includes units, and adds a newline after message.
+
+}}

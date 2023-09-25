@@ -494,7 +494,8 @@ xit_report = function(cl, maxdf, conv) {
 #' 
 #' @return 
 #' A list returned by \code{\link{trajectories}} plus one more element `ido`,
-#' giving the original id numbers.
+#' giving the original id numbers is invisibly returned. Invisible returns are
+#' useful for repeated runs that explore verbose clustra output.
 #' 
 #' @examples
 #' set.seed(13)
@@ -519,7 +520,7 @@ clustra = function(data, k, starts = "random", maxdf = 30, conv = c(10, 0),
   vnames = c("id", "time", "response")
   if(!is.data.frame(data)) stop("Expecting a data frame.")
   if(!data.table::is.data.table(data)) data = data.table::as.data.table(data)
-  setalloccol(data, n = 1) # make room for group column added in start_groups()
+  data.table::setalloccol(data, n = 1) # room for group column in start_groups()
   
   if(!all(vnames %in% names(data))) 
     stop(paste0("Expecting (", paste0(vnames, collapse = ","), ") in data."))
@@ -541,5 +542,5 @@ clustra = function(data, k, starts = "random", maxdf = 30, conv = c(10, 0),
   if(verbose && !is.null(er)) cat(" ", er, "\n")
   cl$ido = ido
 
-  cl
+  invisible(cl)
 }

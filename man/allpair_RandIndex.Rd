@@ -14,6 +14,9 @@ allpair_RandIndex(results)
 \item \code{rep} - replicate number
 \item \code{deviance} - final deviance
 \item \code{group} - integer cluster assignments
+Note that item order is assumed to be the same across all \code{rep} and \code{k} but
+\code{group} numbering need not be same. The algorithm only examines if pairs of
+items are in same or different clusters within each \code{results} list element.
 }}
 }
 \value{

@@ -11,7 +11,8 @@ trajectories(
   maxdf,
   conv = c(10, 0),
   mccores = 1,
-  verbose = FALSE
+  verbose = FALSE,
+  ...
 )
 }
 \arguments{
@@ -35,7 +36,8 @@ iterations until no more changes occur or \code{maxiter} is reached.}
 \item{mccores}{Integer number of cores to use by \code{mclapply} sections. Parallelization is
 over \code{k}, the number of clusters.}
 
-\item{verbose}{Logical, whether to produce debug output.}
+\item{verbose}{Logical, whether to produce debug output. A value > 1 will plot tps fit lines
+in each iteration.}
 }
 \value{
 A list with components

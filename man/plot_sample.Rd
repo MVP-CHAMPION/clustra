@@ -4,12 +4,18 @@
 \alias{plot_sample}
 \title{Plots a sample of ids in a small mutiples layout}
 \usage{
-plot_sample(dat, layout = c(3, 3))
+plot_sample(dat, layout = c(3, 3), sample = prod(layout), group = NULL)
 }
 \arguments{
 \item{dat}{A data frame with a few id trajectories to plot.}
 
 \item{layout}{The small multiples layout as c(rows, columns).}
+
+\item{sample}{If zero, all data in dat are displayed. If >0 a sample of that many data
+points from dat are displayed.}
+
+\item{group}{If not NULL, a character string giving the variable name in data that should
+color the data points.}
 }
 \value{
 Invisibly returns the number of trajectories plotted.

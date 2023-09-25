@@ -21,7 +21,8 @@ sequential starting from 1. This affects expanding group numbers to ids.}
 
 \item{mccores}{See \code{\link{trajectories}}.}
 
-\item{verbose}{Turn on more output for debugging.}
+\item{verbose}{Turn on more output for debugging. Values 0, 1, 2, 3 add more output. 2 and
+3 produce graphs during iterations - use carefully!}
 }
 \value{
 An integer vector corresponding to unique \code{id}s, giving group number

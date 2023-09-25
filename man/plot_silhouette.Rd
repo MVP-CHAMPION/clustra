@@ -3,7 +3,8 @@
 \name{plot_silhouette}
 \alias{plot_silhouette}
 \title{Plots a list item, a silhouette, from the result of \code{clustra_sil} along
-with the average silhouette value.}
+with the average silhouette value. Typically used via
+\code{lapply(list, plot_silhouette)}}
 \usage{
 plot_silhouette(sil)
 }
@@ -15,5 +16,6 @@ Returns invisibly the average silhouette value.
 }
 \description{
 Plots a list item, a silhouette, from the result of \code{clustra_sil} along
-with the average silhouette value.
+with the average silhouette value. Typically used via
+\code{lapply(list, plot_silhouette)}
 }
