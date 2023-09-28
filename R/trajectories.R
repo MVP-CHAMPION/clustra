@@ -249,8 +249,12 @@ start_groups = function(k, data, starts, maxdf, conv, mccores = 1,
     if(verbose) cat("\n distant ids: ", sid, "")
   } else if(starts == "random") {
     group = sample(k, n_id, replace = TRUE)
+  } else if(is.integer(starts) && 
+            length(starts) == n_id && 
+            all(sort(unique(starts)) == 1:k)) {
+    group = starts
   } else {
-    cat("starts", starts, "invalid. Proceeding with random groups.\n")
+    cat("starts invalid. Proceeding with random groups.\n")
     group = sample(k, n_id, replace = TRUE)
   }
 
@@ -414,7 +418,7 @@ trajectories = function(data, k, group, maxdf, conv = c(10, 0), mccores = 1,
 
   ## Compute AIC and BIC
   N = nrow(data)
-  ssq = unlist(lapply(1:k, m = tps, function(i, m)
+  ssq = unlist(lapply(1:length(tps), m = tps, function(i, m)
     sum((predict(m[[i]], data[group == i]) - data[group == i]$response)^2)))
   edf = round(sum(unlist(lapply(tps, function(x) sum(x$edf)))), 2)
   AIC = round(sum(ssq)/N + 2*edf, 2) 
