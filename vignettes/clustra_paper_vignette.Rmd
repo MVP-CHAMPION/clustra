@@ -1,72 +1,99 @@
 ---
-title: "clustra: clustering trajectories (graphics for paper)"
+title: "clustra: Graphics with BP Data"
 author: "Nimish Adhikari, George Ostrouchov, Hanna Gerlovin, and David Gagnon"
 date: "`r Sys.Date()`"
 output: html_vignette
 vignette: >
-  %\VignetteIndexEntry{clustra: clustering trajectories}
+  %\VignetteIndexEntry{clustra: Graphics with BP Data}
   %\VignetteEngine{knitr::rmarkdown}
   \VignetteEncoding[UTF-8]{inputenc}
 ---
 
+The **clustra** package was built to **clus**ter medical **tra**jectories (time series) related by an intervention time. This vignette is intended to reproduce the results of an associated paper "clustra: A multi-platform k-means clustering algorithm for analysis of longitudinal trajectories in large electronic health records data." To run the paper version, set `chunk = figs` and `full_data = TRUE` in the code chunk below, which takes about 70 minutes with `mc = 5` on a Quad-Core I7, and requires Internet access to get the full data from GitHub. The default for CRAN submission is limited to a sample of about 1/8 of the full data set to satisfy CRAN limits on package data size (runs about 40 seconds).
+
+Additional plots to explain the methodology and examine the data can be produced by setting `chunk = all` in the chunk below. This will run over 2 hours with the same system configuration.
+
+Below is the code that controls which chunks are evaluated and how many cores to use.
 ```{r, setup, echo = FALSE}
 knitr::opts_knit$set(
   collapse = TRUE,
   comment = "#>"
 )
-run_rand = FALSE
-run_extra = FALSE
-```
-The **clustra** package was built to **clus**ter medical **tra**jectories (time series) related by an intervention time. This vignette main purpose is to reproduce the figures in the paper "clustra: A multi-platform k-means clustering algorithm for analysis of longitudinal trajectories in large electronic health records data." The plots are rendered in the vignette and also saved in a temp directory. An exception is the Rand index plot, which takes a long time to produce, especially if using less than 5 cores. To enable its production, set `rand = TRUE` in the chunk above.
-
-Additional plots to explain the methodology and examine the data can be produced, but these code chunks do not evaluate by default so the vignette runtime is shorter. To enable the additional sections, set `extra = TRUE` in the chunk above.
-
-We start by loading the necessary R packages and grabbing the data that was generated for this example. We also set the output path for plots to `tempdir()`, which should be changed to a user directory if they are needed beyond the Knit output.
-```{r, LibsData, warning=FALSE}
-library(clustra)
-start_time = deltime()
-mc = 5
+cran = list(LibsData = TRUE, plot_true = TRUE, plot_raw = TRUE, run5 = TRUE,
+            run5_v2 = FALSE, iter_plots = TRUE, plot5_side_by_side = FALSE, 
+            fig1 = FALSE, comp_true = FALSE, run10 = FALSE, plot10 = FALSE, 
+            run2 = FALSE, rand2 = FALSE, silplot = FALSE, silplot2 = FALSE, 
+            rand_plot = FALSE, hclust40 = FALSE, SAS_R_data = FALSE, 
+            Rand_SAS_R = FALSE, true_group = FALSE)
+figs = list(LibsData = TRUE, plot_true = FALSE, plot_raw = FALSE, run5 = TRUE,
+            run5_v2 = TRUE, iter_plots = FALSE, plot5_side_by_side = FALSE, 
+            fig1 = TRUE, comp_true = TRUE, run10 = TRUE, plot10 = TRUE, 
+            run2 = TRUE, rand2 = TRUE, silplot = TRUE, silplot2 = FALSE,
+            rand_plot = TRUE, hclust40 = FALSE, SAS_R_data = TRUE, 
+            Rand_SAS_R = TRUE, true_group = TRUE)
+all = list(LibsData = TRUE, plot_true = TRUE, plot_raw = TRUE, run5 = TRUE,
+           run5_v2 = TRUE, iter_plots = TRUE, plot5_side_by_side = TRUE,
+           fig1 = TRUE, comp_true = TRUE, run10 = TRUE, plot10 = TRUE,
+           run2 = TRUE, rand2 = TRUE, silplot = TRUE, silplot2 = TRUE, 
+           rand_plot = TRUE, hclust40 = TRUE, SAS_R_data = TRUE, 
+           Rand_SAS_R = TRUE, true_group = TRUE)
+chunk = cran  # chose which version of the vignette to run
+full_data = FALSE # choose if full 80,000 id data or sample of 10,000 ids
+mc = 2
 # If running on a Unix or a Mac platform, set to number of available cores.
 # This vignette will experience notable speedup up to about 10 cores.
 # On Intel chips with hyperthreading, up to 2x available cores can be used.
+```
+
+We start by loading the `clustra` package and getting the data. We also set the output path for plots to `tempdir()`, which should be changed to a user directory if they are needed beyond the Knit output.
+```{r, LibsData, warning=FALSE}
+library(clustra)
+start_time = deltime()
 print(paste("Number of cores being used: mc parameter =", mc))
-data(bp) # get the package bp data set
-data = bp
+
+repo = "https://github.com/go-ski/clustra-SAS/raw/main/"
+if(full_data) {
+  url = paste0(repo, "bp_data/simulated_data_27June2023.csv.gz")
+  data = data.table::fread(url)
+} else {
+  data = bp10k
+}
+data$true_group = data$group
 head(data)
 plot_path <- paste0(tempdir(), "/") # output dir for plots
 cat("Resulting plots are saved in", plot_path, "directory\n")
 ```
 
-Select a few random *id*s and print their scatterplots colored by *true_group*. This only displays 9 individuals, and the data was generated based on five clusters. As the data used to simulate this synthetic dataset is extremely noisy, it would be difficult to ascertain any patterns by looking at a few subjects.
-```{r, plot_true, fig.width = 7, fig.height = 9, eval = run_extra}
+Select a few random *id*s and print their scatterplots colored by *true_group*. This only displays 9 individuals. The data was generated based on five clusters. As the data used to simulate this synthetic dataset is extremely noisy, it would be difficult to ascertain any patterns by looking at a few subjects.
+```{r, plot_true, fig.width = 7, fig.height = 9, eval = chunk$plot_true}
 set.seed(12345)
 plot_sample(data, layout = c(3, 3), group = "true_group")
 ```
 
 Now plot a 20,000 sample of the raw data. Use the true or simulated group assignment for coloring. As we can see, there is a lot of noise and it would be difficult to identify the clusters of trajectories by looking at the individual points, alone. A greater density of points is seen at time 0, where all trajectories have a data point.
-```{r, plot_raw, fig.width = 7, fig.height = 7, eval = run_extra}
+```{r, plot_raw, fig.width = 7, fig.height = 7, eval = chunk$plot_raw}
 plot_smooths(data, fits = NULL, max.data = 20000, group = "true_group")
 ```
 
 Next, cluster the trajectories. Set *k=5*, spline max degrees of freedom to 30, and maximum iterations to 20. Initial cluster assignments are the default "random". We print out full information for the iterations, including the elapsed time.
-```{r, run5}
+```{r run5, eval = chunk$run5}
 set.seed(12345)
 cl5 = clustra(data, k = 5, maxdf = 30, conv = c(20, 0.5), mccores = mc, verbose = TRUE)
 ```
-```{r run5_v2}
+```{r run5_v2, eval = chunk$run5_v2}
 # What happens if we cut the iterations at 5 maximum?
 set.seed(12345)
 cl5.v2 = clustra(data, k = 5, maxdf = 30, conv = c(5, 0.5), mccores = mc, verbose = FALSE)
 ```
 
 Setting the option `verbose = 2` produces plots of the cluster spline centers at every iteration. We also pass the *ylim* parameter because the yaxis extent of the data is much wider than the models.
-```{r, iter_plots, fig.width=7, fig.height=7, eval = run_extra}
+```{r, iter_plots, fig.width=7, fig.height=7, eval = chunk$iter_plots}
 set.seed(12345)
 clustra(data, k = 5, maxdf = 30, conv = c(10, 0.5), mccores = mc, verbose = 2, ylim = c(110, 170))
 ```
 
 Test producing two side-by-side plots.
-```{r, plot5_side_by_side, fig.width = 7, fig.height = 5, warnings=FALSE, eval = run_extra}
+```{r, plot5_side_by_side, fig.width = 7, fig.height = 5, warnings=FALSE, eval = chunk$plot5_side_by_side}
 plot_smooths(data, fits = cl5$tps, max.data = 30000)
 m = matrix(c(0.1, .95, 0.1, .95), nrow = 1)
 sc = split.screen(m)
@@ -80,7 +107,7 @@ close.screen(all.screens = TRUE)
 ```
 
 This is Figure 1 in the paper.
-```{r fig1, fig.width = 7, fig.height = 5, eval = run_extra}
+```{r fig1, fig.width = 7, fig.height = 5, eval = chunk$fig1}
 png(paste0(plot_path, "R_cl5_plot.png"), width = 480, height = 360)
     plot_smooths(data, fits = cl5$tps, max.data = 0, ylim = c(110, 180))
 dev.off()
@@ -88,22 +115,22 @@ knitr::include_graphics(paste0(plot_path, "R_cl5_plot.png"))
 ```
 
 Compute the Rand index for comparing with true_groups.
-```{r, comp_true}
+```{r, comp_true, eval = chunk$comp_true}
 MixSim::RandIndex(cl5$data_group, data[, true_group])$AR # compare the 20-max-iterations to true assignemnt
 MixSim::RandIndex(cl5.v2$data_group, data[, true_group])$AR # compare the 10-max-iterations to true assignment
 MixSim::RandIndex(cl5$data_group, cl5.v2$data_group)$AR # compare the 10-max-iterations and the 20-max-iterations assignments
 ```
 
 Next, we try requesting too many clusters in the noisy data. 
-```{r, run10}
+```{r, run10, eval = chunk$run10}
 set.seed(12345)
 t = deltime()
-cl10 = clustra(data, k = 10, maxdf = 30, conv = c(50, 0.5), mccores = mc, verbose = TRUE)
+cl10 = clustra(data, k = 10, maxdf = 30, conv = c(50, 0.5), mccores = mc, verbose = FALSE)
 deltimeT(t, paste("run time on", mc, "cores "))
 ```
 
 Next, plot the resulting fit. This is Figure 2 in the paper.
-```{r, plot10, fig.width = 7, fig.height = 5}
+```{r, plot10, fig.width = 7, fig.height = 5, eval = chunk$plot10}
 png(paste0(plot_path, "R_cl10_plot.png"), width = 480, height = 360)
   plot_smooths(data, cl10$tps, max.data = 0, ylim = c(110, 180))
 dev.off()
@@ -112,7 +139,7 @@ MixSim::RandIndex(cl10$data_group, data[, true_group])$AR
 ```
 
 Next, we look at what the clusters would look like with 2 groups and plot the result. This is figure 3 in the paper.
-```{r, run2, fig.width = 7, fig.height = 5}
+```{r, run2, fig.width = 7, fig.height = 5, eval = chunk$run2}
 set.seed(12345)
 t = deltime()
 cl2 = clustra(data, k = 2, maxdf = 30, conv = c(20,0.5), mccores=mc, verbose = FALSE)
@@ -124,11 +151,10 @@ png(paste0(plot_path, "R_cl2_plot.png"), width = 480, height = 360)
 dev.off()
 knitr::include_graphics(paste0(plot_path, "R_cl2_plot.png"))
 MixSim::RandIndex(cl2$data_group, data[, true_group])$AR
-data$clus2 <- cl2$data_group  # Save the results to the data
 ```
 
 Compute the Adjusted Rand Index between the various results.
-```{r rand2, comp.within, eval = run_extra}
+```{r rand2, comp.within, eval = chunk$rand2}
 MixSim::RandIndex(cl5$data_group,cl2$data_group)$AR # between 5 and 2 clusters
 MixSim::RandIndex(cl5$data_group,cl10$data_group)$AR # between 5 and 10 clusters
 MixSim::RandIndex(cl10$data_group,cl2$data_group)$AR # between 10 and 2 clusters
@@ -137,7 +163,7 @@ MixSim::RandIndex(cl10$data_group,cl2$data_group)$AR # between 10 and 2 clusters
 Average silhouette value is a way to select the number of clusters and a silhouette plot provides a way for a deeper evaluation (Rouseeuw 1986). A true silhouette requires distances between individual trajectories, which is not possible here due to unequal trajectory sampling without fitting a separate model for each id. As a proxy for distance between points, we use trajectory distances to cluster mean spline trajectories in the *clustra_sil()* function. The structure returned from the *clustra()* function contains the matrix *loss*, which has all the information needed to construct these proxy silhouette plots. The function *clustra_sil()* performs clustering for a number of *k* values and outputs information for the silhouette plot that is displayed next. 
 
 These plots are Figure 4, 5, and 6 in the paper.
-```{r, silplot, fig.width = 7, fig.height = 5}
+```{r, silplot, fig.width = 7, fig.height = 5, eval = chunk$silplot}
 t = deltime()
 set.seed(12345)
 sil = clustra_sil(cl5, mccores = mc, conv=c(20,0.5), verbose = FALSE)
@@ -161,7 +187,7 @@ deltimeT(t, paste("Seconds silhouettes on", mc, "cores "))
 ```
 
 Here we produce silhouettes directly from the data, which runs clustra internally.
-```{r silplot2, fig.width = 7, fig.height = 5, eval = run_extra}
+```{r silplot2, fig.width = 7, fig.height = 5, eval = chunk$silplot2}
 # Example running from the data step
 t = deltime()
 set.seed(12345)
@@ -172,7 +198,7 @@ deltimeT(t, paste("Silhouettes and clustra on", mc, "cores "))
 ```
 
 Another way to select the number of clusters is the Rand Index comparing different random starts and different numbers of clusters. When we replicate clustering with different random seeds, the "replicability" is an indicator of how stable the results are for a given k, the number of clusters. For this demonstration, we look at *k = c(2,3,4,5,6,7,8,9,10)*, and 10 replicates for each *k*. To run this chunk with Knit, set `rand = TRUE` at the top of this vignette (line 8).
-```{r, rand_plot, fig.width = 6.5, fig.height=6, eval = run_rand}
+```{r, rand_plot, fig.width = 6.5, fig.height=6, eval = chunk$rand_plot}
 t = deltime()
 set.seed(12345)
 ran = clustra_rand(data, k = seq(2, 10, 1), starts = "random", mccores = mc, 
@@ -193,7 +219,7 @@ gpred = function(tps, newdata) {
                                newdata.guaranteed = TRUE))
 }
 ```
-```{r, hclust_run40, fig.width = 7, fig.height = 5, eval = run_extra}
+```{r, hclust40, fig.width = 7, fig.height = 5, eval = chunk$hclust40}
 set.seed(12345)
 t = deltime()
 cl40 = clustra(data, k = 40, maxdf = 30, conv = c(100,0.5), mccores = mc, verbose = TRUE)
@@ -210,8 +236,8 @@ The cluster dendrogram indicates there are five clusters. Making the cut at a he
 ## Comparison between SAS and R clustering 
 Look at the data output from the SAS clustering analysis. Since SAS and R produce slightly different labels, need to relabel and replot the SAS data output. The relabeling algorithm below matches pairs by distance, starting with shortest distance pair.
 
-```{r SAS_R_data, fig.width = 7, fig.height = 5}
-sas.file = function(file) system.file("extdata", file, package = "clustra")
+```{r SAS_R_data, fig.width = 7, fig.height = 5, eval = chunk$SAS_R_data}
+sas.file = function(file, rp = repo) paste0(rp, "sas_results/", file)
 
 sas_r_cplot = function(file, clustra_out) {
   sas = cbind(haven::read_sas(sas.file(file)), source = 1)
@@ -261,7 +287,7 @@ knitr::include_graphics(paste0(plot_path, "R_SAS_cl10_compare.png"))
 The k=2 and k=5 cluster results are almost identical between SAS (dashed lines) and R (solid lines). The 10 cluster result appears to keep the bottom cluster (yellow) from the 5-cluster result and is nearly identical between SAS and R. The green clusters are also somewhat similar. The remaining 8 clusters seem to partition the data in a very unstable fashion that produces different results for different seeds.
 
 Next, check the Rand index comparing R and SAS results:
-```{r Rand_SAS_R}
+```{r Rand_SAS_R, eval = chunk$Rand_SAS_R}
 MixSim::RandIndex(haven::read_sas(sas.file("rms_cl2.sas7bdat"))$newgroup, cl2$group)
 MixSim::RandIndex(haven::read_sas(sas.file("rms_cl5.sas7bdat"))$newgroup, cl5$group)
 MixSim::RandIndex(haven::read_sas(sas.file("rms_cl10.sas7bdat"))$newgroup, cl10$group)
@@ -271,7 +297,7 @@ MixSim::RandIndex(haven::read_sas(sas.file("rms_cl10.sas7bdat"))$newgroup, cl10$
 The high adjusted rand indices for 2 and 5 clusters indicate that there is great agreement in the classification of clustering between the SAS and R results. This is also evident by the lines that are nearly identical (colors and labels have been remapped to align, while the dashed line indicates results from SAS and solid lines from R). The pattern does not, however, hold for the results from 10 clusters. We see that some of the patterns are consistent for the bounded clusters, however, the middle clusters that fluctuate the most are inconsistent between SAS and R. This is to be expected, as the R algorithm nears convergence to the minimum percent change, but there continues to be some instability in the clustering assignment. Also, we would expect that the rand index would not be quite as strong, since the true underlying cluster number was 5. This is also consistent with the full Rand Index plot results, above.
 
 Now compare with true_group used to generate the data:
-```{r true_group}
+```{r true_group, eval = chunk$true_group}
 true_group = data[, mean(true_group),by=id]
 MixSim::RandIndex(haven::read_sas(sas.file("rms_cl5.sas7bdat"))$newgroup, true_group$V1)
 MixSim::RandIndex(true_group$V1, cl5$group)
