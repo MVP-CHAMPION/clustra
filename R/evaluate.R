@@ -198,6 +198,9 @@ clustra_sil = function(data, kv = NULL, starts = "random", mccores = 1,
     s = (x[nk] - x[ck])/max(x[ck], x[nk])
     c(ck, nk, s)
   }
+  
+  ## Save random seed so we have same start for each clustra run
+  sil.seed = .Random.seed
 
   ## verify data and kv agreement
   if(is.data.frame(data) && is.null(kv)) {
@@ -227,6 +230,7 @@ clustra_sil = function(data, kv = NULL, starts = "random", mccores = 1,
     a_0 = deltime()
 
     if(is.data.frame(data)) {
+      .Random.seed = sil.seed
       f = clustra(data, kj, starts = starts, mccores = mccores, maxdf = maxdf,
                   conv = conv, verbose = verbose)
     } else {
@@ -310,8 +314,9 @@ traj_rep = function(group, data, k, maxdf, conv) {
 #' @return See \code{\link{allpair_RandIndex}}.
 #' 
 #' @export
-clustra_rand = function(data, k, starts, mccores, replicates = 10, maxdf = 30,
-                        conv = c(10, 0), save = FALSE, verbose = FALSE) {
+clustra_rand = function(data, k, starts = "random", mccores = 1, 
+                        replicates = 10, maxdf = 30, conv = c(10, 0), 
+                        save = FALSE, verbose = FALSE) {
   id = .GRP = ..group = NULL # for data.table R CMD check
   results = vector("list", replicates*length(k))
   

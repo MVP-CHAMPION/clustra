@@ -126,7 +126,7 @@ plot_sample = function(dat, layout = c(3,3), sample = prod(layout),
 #' 
 #' @importFrom graphics lines points
 #' @export
-plot_smooths = function(data, fits = NULL, max.data = 20000, 
+plot_smooths = function(data, fits = NULL, max.data = 100000, 
                         select.data = NULL, group = "group", ...) {
   k = length(fits)
   xrng = range(data$time)

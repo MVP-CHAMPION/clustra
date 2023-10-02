@@ -354,7 +354,7 @@ trajectories = function(data, k, group, maxdf, conv = c(10, 0), mccores = 1,
     ##
     ## M-step: Estimate model parameters for each cluster ---------------------
     ##   
-    if(verbose) cat("(M-step ")
+    if(verbose) cat("(M-")
     datg = parallel::mclapply(1:k_cl, 
                               function(g) data.table::copy(data[group == g]),
                               mc.cores = 1)
@@ -371,7 +371,7 @@ trajectories = function(data, k, group, maxdf, conv = c(10, 0), mccores = 1,
     ##
     ## E-step: predict (classify) each id to a model --------------------------
     ## 
-    if(verbose) cat(" (E-step ")
+    if(verbose) cat(" (E-")
     newdata = force(as.data.frame(data[, list(time, response)]))
     pred = parallel::mclapply(tps, pred_g, newdata = newdata, 
                               mc.cores = mccores)

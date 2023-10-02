@@ -43,6 +43,7 @@ mc = 2
 # If running on a Unix or a Mac platform, set to number of available cores.
 # This vignette will experience notable speedup up to about 10 cores.
 # On Intel chips with hyperthreading, up to 2x available cores can be used.
+if (.Platform$OS.type == "windows") mc = 1
 ```
 
 We start by loading the `clustra` package and getting the data. We also set the output path for plots to `tempdir()`, which should be changed to a user directory if they are needed beyond the Knit output.
@@ -51,9 +52,12 @@ library(clustra)
 start_time = deltime()
 print(paste("Number of cores being used: mc parameter =", mc))
 
-repo = "https://github.com/go-ski/clustra-SAS/raw/main/"
+#repo = "https://github.com/MVP-CHAMPION/"
+repo = "https://github.com/go-ski/"
+
+repo_sas = paste0(repo, "clustra-SAS/raw/main/")
 if(full_data) {
-  url = paste0(repo, "bp_data/simulated_data_27June2023.csv.gz")
+  url = paste0(repo_sas, "bp_data/simulated_data_27June2023.csv.gz")
   data = data.table::fread(url)
 } else {
   data = bp10k
@@ -237,7 +241,7 @@ The cluster dendrogram indicates there are five clusters. Making the cut at a he
 Look at the data output from the SAS clustering analysis. Since SAS and R produce slightly different labels, need to relabel and replot the SAS data output. The relabeling algorithm below matches pairs by distance, starting with shortest distance pair.
 
 ```{r SAS_R_data, fig.width = 7, fig.height = 5, eval = chunk$SAS_R_data}
-sas.file = function(file, rp = repo) paste0(rp, "sas_results/", file)
+sas.file = function(file, rp = repo_sas) paste0(rp, "sas_results/", file)
 
 sas_r_cplot = function(file, clustra_out) {
   sas = cbind(haven::read_sas(sas.file(file)), source = 1)
