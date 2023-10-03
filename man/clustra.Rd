@@ -31,10 +31,12 @@ which TPS models are fit and used as starting cluster centers to which ids
 are classified. Only id with more than median number of time points are
 used. Distance from an id to a TPS model is median absolute difference
 at id time points. Starting with a random id, distant ids are selected
-sequentially as the most distant id from a sum of distances to TPS fits of
-previous selections. The first random selection is discarded and the next k
-selected ids are kept. Their TPS fits become the first cluster centers to
-which all ids are classified.}
+sequentially as the id with the largest minimum absolute distance to
+previous selections (a maximin concept). The first random selection is
+discarded and the next k selected ids are kept. Their TPS fits become the
+first cluster centers to
+which all ids are classified. See comments in code and
+DOI: 10.1109/TPAMI.2005.164 for the FastMap analogy.}
 
 \item{maxdf}{Fitting parameters. See \code{\link{trajectories}}.}
 

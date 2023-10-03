@@ -1,6 +1,6 @@
 Package: clustra
 Version: 0.2.0
-Date: 2023-07-12
+Date: 2023-09-30
 Title: Clustering Longitudinal Trajectories
 Authors@R: c(person("George", "Ostrouchov", role = c("aut", "cre"), email = 
         "ostrouchovg@ornl.gov"),

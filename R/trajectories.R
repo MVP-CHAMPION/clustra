@@ -205,10 +205,10 @@ start_groups = function(k, data, starts, maxdf, conv, mccores = 1,
     sdata[[1]] = gdata[id==sid[1]]
     sfit[[1]] = mgcv::gam(response ~ s(time), data = sdata[[1]], maxdf = 5)
     pred = pred_g(sfit[[1]], gdata)
-    loss = mme_g(pred, gdata$id, gdata$response)
+    loss = mme_g(pred, gdata$id, gdata$response) # median absolute error
 
     ## Replace with farthest from first and remove farthest from available
-    imax = which.max(loss)
+    imax = which.max(loss) # largest median absolute error
     sid[1] = gmid[imax]
     gmid = gmid[-imax]
     sdata[[1]] = gdata[id==sid[1]]
@@ -216,18 +216,17 @@ start_groups = function(k, data, starts, maxdf, conv, mccores = 1,
     gdata = gdata[id!=sid[1]]
 
     for(i in 2:k) {
-      loss = rep(Inf, length(gmid))
-      for(j in 1:(i - 1)) {
+      loss = rep(Inf, length(gmid)) 
+      for(j in 1:(i - 1)) { # a vector of minimum distance to previous i - 1
         pred = pred_g(sfit[[j]], gdata)
         loss = pmin(loss, mme_g(pred, gdata$id, gdata$response)) 
-        ## minimum mean absolute error to previous selections
       }
-      imax = which.max(loss)
-      sid[i] = gmid[imax]
-      gmid = gmid[-imax]
-      sdata[[i]] = gdata[id==sid[i]]
+      imax = which.max(loss) # id with largest min dist to previous (maximin)
+      sid[i] = gmid[imax] # set next
+      gmid = gmid[-imax] # remove from available ids
+      sdata[[i]] = gdata[id==sid[i]] # get its values and fit spline next
       sfit[[i]] = mgcv::gam(response ~ s(time), data = sdata[[i]], maxdf = 5)
-      gdata = gdata[id!=sid[i]]
+      gdata = gdata[id!=sid[i]] # remove its data
     }
     
     ## plot selected ids (undocumented debug verbose)
@@ -483,10 +482,12 @@ xit_report = function(cl, maxdf, conv) {
 #' are classified. Only id with more than median number of time points are
 #' used. Distance from an id to a TPS model is median absolute difference
 #' at id time points. Starting with a random id, distant ids are selected
-#' sequentially as the most distant id from a sum of distances to TPS fits of
-#' previous selections. The first random selection is discarded and the next k
-#' selected ids are kept. Their TPS fits become the first cluster centers to 
-#' which all ids are classified.
+#' sequentially as the id with the largest minimum absolute distance to 
+#' previous selections (a maximin concept). The first random selection is 
+#' discarded and the next k selected ids are kept. Their TPS fits become the 
+#' first cluster centers to 
+#' which all ids are classified. See comments in code and
+#' DOI: 10.1109/TPAMI.2005.164 for the FastMap analogy.
 #' @param maxdf
 #' Fitting parameters. See \code{\link{trajectories}}.
 #' @param conv
