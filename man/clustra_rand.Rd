@@ -7,8 +7,8 @@
 clustra_rand(
   data,
   k,
-  starts,
-  mccores,
+  starts = "random",
+  mccores = 1,
   replicates = 10,
   maxdf = 30,
   conv = c(10, 0),

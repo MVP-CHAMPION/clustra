@@ -2,13 +2,12 @@
 % Please edit documentation in R/graphics.R
 \name{plot_smooths}
 \alias{plot_smooths}
-\title{Plots data and smooths from \code{clustra} output or internally from within
-\code{start_groups}}
+\title{plot_smooths}
 \usage{
 plot_smooths(
   data,
   fits = NULL,
-  max.data = 20000,
+  max.data = 1e+05,
   select.data = NULL,
   group = "group",
   ...
@@ -21,7 +20,7 @@ plot_smooths(
 If fits are supplied and \code{select.data} is NULL, the data is colored by
 clusters. If NULL, or if \code{select.data} is not NULL, the data is black points.}
 
-\item{max.data}{The maximum number of data points to plot (defaults to 10,000). If zero,
+\item{max.data}{The maximum number of data points to plot. If zero,
 no points are plotted (overrides select.data). Use \code{Inf} value to plot all
 points.}
 
@@ -38,5 +37,5 @@ a b&w point plot.}
 }
 \description{
 Plots data and smooths from \code{clustra} output or internally from within
-\code{start_groups}
+\code{start_groups()}
 }

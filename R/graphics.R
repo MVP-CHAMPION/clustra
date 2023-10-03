@@ -99,8 +99,10 @@ plot_sample = function(dat, layout = c(3,3), sample = prod(layout),
   invisible(length(ids))
 }
 
+#' plot_smooths
+#' 
 #' Plots data and smooths from `clustra` output or internally from within
-#' `start_groups`
+#' `start_groups()`
 #'
 #' @param data
 #' The data. If after `clustra` run, it includes resulting clusters as group.
@@ -109,7 +111,7 @@ plot_sample = function(dat, layout = c(3,3), sample = prod(layout),
 #' If fits are supplied and `select.data` is NULL, the data is colored by 
 #' clusters. If NULL, or if `select.data` is not NULL, the data is black points.
 #' @param max.data 
-#' The maximum number of data points to plot (defaults to 10,000). If zero,
+#' The maximum number of data points to plot. If zero,
 #' no points are plotted (overrides select.data). Use `Inf` value to plot all
 #' points.
 #' @param select.data 
