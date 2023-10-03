@@ -200,8 +200,11 @@ clustra_sil = function(data, kv = NULL, starts = "random", mccores = 1,
   }
   
   ## Save random seed so we have same start for each clustra run
-  sil.seed = .Random.seed
-
+  if (exists(".Random.seed", .GlobalEnv))
+    seed_sil = .GlobalEnv$.Random.seed
+  else
+    seed_sil = NULL
+  
   ## verify data and kv agreement
   if(is.data.frame(data) && is.null(kv)) {
     cat("clustra_sil: error: must specify kv \n")
@@ -230,7 +233,7 @@ clustra_sil = function(data, kv = NULL, starts = "random", mccores = 1,
     a_0 = deltime()
 
     if(is.data.frame(data)) {
-      .Random.seed = sil.seed
+      if (!is.null(seed_sil)) .GlobalEnv$.Random.seed <- seed_sil
       f = clustra(data, kj, starts = starts, mccores = mccores, maxdf = maxdf,
                   conv = conv, verbose = verbose)
     } else {
