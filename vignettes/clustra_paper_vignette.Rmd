@@ -68,7 +68,7 @@ plot_path <- paste0(tempdir(), "/") # output dir for plots
 cat("Resulting plots are saved in", plot_path, "directory\n")
 ```
 
-Select a few random *id*s and print their scatterplots colored by *true_group*. This only displays 9 individuals. The data was generated based on five clusters. As the data used to simulate this synthetic dataset is extremely noisy, it would be difficult to ascertain any patterns by looking at a few subjects.
+Select a few random `id`s and print their scatterplots colored by `true_group`. This only displays 9 individuals. The data was generated based on five clusters. As the data used to simulate this synthetic dataset is extremely noisy, it would be difficult to ascertain any patterns by looking at a few subjects.
 ```{r, plot_true, fig.width = 7, fig.height = 9, eval = chunk$plot_true}
 set.seed(12345)
 plot_sample(data, layout = c(3, 3), group = "true_group")
@@ -79,7 +79,7 @@ Now plot a 20,000 sample of the raw data. Use the true or simulated group assign
 plot_smooths(data, fits = NULL, max.data = 20000, group = "true_group")
 ```
 
-Next, cluster the trajectories. Set *k=5*, spline max degrees of freedom to 30, and maximum iterations to 20. Initial cluster assignments are the default "random". We print out full information for the iterations, including the elapsed time.
+Next, cluster the trajectories. Set `k=5`, spline max degrees of freedom to 30, and maximum iterations to 20. Initial cluster assignments are the default "random". We print out full information for the iterations, including the elapsed time.
 ```{r run5, eval = chunk$run5}
 set.seed(12345)
 cl5 = clustra(data, k = 5, maxdf = 30, conv = c(20, 0.5), mccores = mc, verbose = TRUE)
@@ -90,7 +90,7 @@ set.seed(12345)
 cl5.v2 = clustra(data, k = 5, maxdf = 30, conv = c(5, 0.5), mccores = mc, verbose = FALSE)
 ```
 
-Setting the option `verbose = 2` produces plots of the cluster spline centers at every iteration. We also pass the *ylim* parameter because the yaxis extent of the data is much wider than the models.
+Setting the option `verbose = 2` produces plots of the cluster spline centers at every iteration. We also pass the `ylim` parameter because the yaxis extent of the data is much wider than the models.
 ```{r, iter_plots, fig.width=7, fig.height=7, eval = chunk$iter_plots}
 set.seed(12345)
 clustra(data, k = 5, maxdf = 30, conv = c(10, 0.5), mccores = mc, verbose = 2, ylim = c(110, 170))
@@ -164,7 +164,7 @@ MixSim::RandIndex(cl5$data_group,cl10$data_group)$AR # between 5 and 10 clusters
 MixSim::RandIndex(cl10$data_group,cl2$data_group)$AR # between 10 and 2 clusters
 ```
 
-Average silhouette value is a way to select the number of clusters and a silhouette plot provides a way for a deeper evaluation (Rouseeuw 1986). A true silhouette requires distances between individual trajectories, which is not possible here due to unequal trajectory sampling without fitting a separate model for each id. As a proxy for distance between points, we use trajectory distances to cluster mean spline trajectories in the *clustra_sil()* function. The structure returned from the *clustra()* function contains the matrix *loss*, which has all the information needed to construct these proxy silhouette plots. The function *clustra_sil()* performs clustering for a number of *k* values and outputs information for the silhouette plot that is displayed next. 
+Average silhouette value is a way to select the number of clusters and a silhouette plot provides a way for a deeper evaluation (Rouseeuw 1986). A true silhouette requires distances between individual trajectories, which is not possible here due to unequal trajectory sampling without fitting a separate model for each id. As a proxy for distance between points, we use trajectory distances to cluster mean spline trajectories in the `clustra_sil()` function. The structure returned from the `clustra()` function contains the matrix `loss`, which has all the information needed to construct these proxy silhouette plots. The function `clustra_sil()` performs clustering for a number of `k` values and outputs information for the silhouette plot that is displayed next. 
 
 These plots are Figure 4, 5, and 6 in the paper.
 ```{r, silplot, fig.width = 7, fig.height = 5, eval = chunk$silplot}
@@ -201,7 +201,7 @@ lapply(sil, plot_silhouette)
 deltimeT(t, paste("Silhouettes and clustra on", mc, "cores "))
 ```
 
-Another way to select the number of clusters is the Rand Index comparing different random starts and different numbers of clusters. When we replicate clustering with different random seeds, the "replicability" is an indicator of how stable the results are for a given k, the number of clusters. For this demonstration, we look at *k = c(2,3,4,5,6,7,8,9,10)*, and 10 replicates for each *k*. To run this chunk with Knit, set `rand = TRUE` at the top of this vignette (line 8).
+Another way to select the number of clusters is the Rand Index comparing different random starts and different numbers of clusters. When we replicate clustering with different random seeds, the "replicability" is an indicator of how stable the results are for a given k, the number of clusters. For this demonstration, we look at `k = c(2, 3, 4, 5, 6, 7, 8, 9, 10)`, and 10 replicates for each `k`. To run this chunk with Knit, set `rand = TRUE` at the top of this vignette (line 8).
 ```{r, rand_plot, fig.width = 6.5, fig.height=6, eval = chunk$rand_plot}
 t = deltime()
 set.seed(12345)
@@ -211,11 +211,11 @@ deltimeT(t, paste("Seconds clustra_rand on", mc, "cores "))
 rand_plot(ran, name = paste0(plot_path, "R_randplot.pdf")) # save pdf version
 rand_plot(ran) # render png version
 ```
-The plot shows Adjusted Rand Index similarity level between all pairs of 90 clusterings (10 random starts for each of 2 to 10 clusters). The ten random starts agree the most for *k*=2 and *k*=5. 
+The plot shows Adjusted Rand Index similarity level between all pairs of 90 clusterings (10 random starts for each of 2 to 10 clusters). The ten random starts agree the most for `k = 2` and `k = 5`. 
 
-[From the deviance results shown during iterations, we also see that all of the *k*=3 clusters are near the best deviance attainable even with *k* = 4. Among the *k* = 4 results, several converged to only three clusters that agree with *k*=3 results.
+From the deviance results shown during iterations, we also see that all of the `k = 3` clusters are near the best deviance attainable even with `k = 4`. Among the `k = 4` results, several converged to only three clusters that agree with `k = 3` results.
 
-Another possible evaluation of the number of clusters is to first ask clustra for a large number of clusters, evaluate the cluster centers on a common set of time points, and feed the resulting matrix to a hierarchical clustering function. Below, we ask for 40 clusters on the *data2* data set but actually get back only 26 because several become empty or too small for *maxdf*. Below, the *hclust()* function clusters the 26 resulting cluster means, each evaluated on 100 time points.]
+Another possible evaluation of the number of clusters is to first ask clustra for a large number of clusters, evaluate the cluster centers on a common set of time points, and feed the resulting matrix to a hierarchical clustering function. Below, we ask for 40 clusters on the `data2` data set but actually get back only 26 because several become empty or too small for `maxdf`. Below, the `hclust()` function clusters the 26 resulting cluster means, each evaluated on 100 time points.]
 
 ```{r}
 gpred = function(tps, newdata) {
