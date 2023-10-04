@@ -52,8 +52,7 @@ library(clustra)
 start_time = deltime()
 print(paste("Number of cores being used: mc parameter =", mc))
 
-#repo = "https://github.com/MVP-CHAMPION/"
-repo = "https://github.com/go-ski/"
+repo = "https://github.com/MVP-CHAMPION/"
 
 repo_sas = paste0(repo, "clustra-SAS/raw/main/")
 if(full_data) {
@@ -206,7 +205,7 @@ Another way to select the number of clusters is the Rand Index comparing differe
 t = deltime()
 set.seed(12345)
 ran = clustra_rand(data, k = seq(2, 10, 1), starts = "random", mccores = mc, 
-                   replicates = 10, conv=c(40,0.5), verbose = TRUE, save = TRUE)
+                   replicates = 10, conv=c(40,0.5), verbose = TRUE)
 deltimeT(t, paste("Seconds clustra_rand on", mc, "cores "))
 rand_plot(ran, name = paste0(plot_path, "R_randplot.pdf")) # save pdf version
 rand_plot(ran) # render png version
