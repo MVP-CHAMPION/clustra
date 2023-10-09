@@ -9,11 +9,11 @@ vignette: >
   \VignetteEncoding[UTF-8]{inputenc}
 ---
 
-The **clustra** package was built to **clus**ter medical **tra**jectories (time series) related by an intervention time. This vignette is intended to reproduce the results of an associated paper "clustra: A multi-platform k-means clustering algorithm for analysis of longitudinal trajectories in large electronic health records data." To run the paper version, set `chunk = figs` and `full_data = TRUE` in the code chunk below, which takes about 70 minutes with `mc = 5` on a Quad-Core I7, and requires Internet access to get the full data from GitHub. The default for CRAN submission is limited to a sample of about 1/8 of the full data set to satisfy CRAN limits on package data size (runs about 40 seconds).
+The **clustra** package was built to **clus**ter medical **tra**jectories (time series) related by an intervention time. This vignette is intended to reproduce the results of an associated paper "clustra: A multi-platform k-means clustering algorithm for analysis of longitudinal trajectories in large electronic health records data." To run the paper version, set `chunk = figs` and `full_data = TRUE` in the code chunk below, which takes about 70 minutes with `mc = 5` on a Quad-Core I7, and requires Internet access to get the full data from GitHub. The default for CRAN submission is limited to a sample of about 1/8 of the full data set to satisfy CRAN limits on package data size and runs a smaller subset of the code chunks (takes about 40 seconds).
 
 Additional plots to explain the methodology and examine the data can be produced by setting `chunk = all` in the chunk below. This will run over 2 hours with the same system configuration.
 
-Below is the code that controls which chunks are evaluated and how many cores to use.
+Below is the code that controls which code chunks are evaluated and how many cores to use.
 ```{r, setup, echo = FALSE}
 knitr::opts_knit$set(
   collapse = TRUE,
@@ -47,7 +47,7 @@ if (.Platform$OS.type == "windows") mc = 1
 ```
 
 We start by loading the `clustra` package and getting the data. We also set the output path for plots to `tempdir()`, which should be changed to a user directory if they are needed beyond the Knit output.
-```{r, LibsData, warning=FALSE}
+```{r, LibsData, warning=FALSE, eval = chunk$LibsData}
 library(clustra)
 start_time = deltime()
 print(paste("Number of cores being used: mc parameter =", mc))
@@ -63,7 +63,7 @@ if(full_data) {
 }
 data$true_group = data$group
 head(data)
-plot_path <- paste0(tempdir(), "/") # output dir for plots
+plot_path <- "~/tmp/" #paste0(tempdir(), "/") # output dir for plots
 cat("Resulting plots are saved in", plot_path, "directory\n")
 ```
 
@@ -86,7 +86,7 @@ cl5 = clustra(data, k = 5, maxdf = 30, conv = c(20, 0.5), mccores = mc, verbose 
 ```{r run5_v2, eval = chunk$run5_v2}
 # What happens if we cut the iterations at 5 maximum?
 set.seed(12345)
-cl5.v2 = clustra(data, k = 5, maxdf = 30, conv = c(5, 0.5), mccores = mc, verbose = FALSE)
+cl5.v2 = clustra(data, k = 5, maxdf = 30, conv = c(5, 0.5), mccores = mc)
 ```
 
 Setting the option `verbose = 2` produces plots of the cluster spline centers at every iteration. We also pass the `ylim` parameter because the yaxis extent of the data is much wider than the models.
@@ -117,18 +117,18 @@ dev.off()
 knitr::include_graphics(paste0(plot_path, "R_cl5_plot.png"))
 ```
 
-Compute the Rand index for comparing with true_groups.
+Compute the Rand index for comparing with true_groups and with each other.
 ```{r, comp_true, eval = chunk$comp_true}
-MixSim::RandIndex(cl5$data_group, data[, true_group])$AR # compare the 20-max-iterations to true assignemnt
-MixSim::RandIndex(cl5.v2$data_group, data[, true_group])$AR # compare the 10-max-iterations to true assignment
-MixSim::RandIndex(cl5$data_group, cl5.v2$data_group)$AR # compare the 10-max-iterations and the 20-max-iterations assignments
+MixSim::RandIndex(cl5$data_group, data[, true_group])$AR 
+MixSim::RandIndex(cl5.v2$data_group, data[, true_group])$AR
+MixSim::RandIndex(cl5$data_group, cl5.v2$data_group)$AR
 ```
 
 Next, we try requesting too many clusters in the noisy data. 
 ```{r, run10, eval = chunk$run10}
 set.seed(12345)
 t = deltime()
-cl10 = clustra(data, k = 10, maxdf = 30, conv = c(50, 0.5), mccores = mc, verbose = FALSE)
+cl10 = clustra(data, k = 10, maxdf = 30, conv = c(50, 0.5), mccores = mc)
 deltimeT(t, paste("run time on", mc, "cores "))
 ```
 
@@ -145,7 +145,7 @@ Next, we look at what the clusters would look like with 2 groups and plot the re
 ```{r, run2, fig.width = 7, fig.height = 5, eval = chunk$run2}
 set.seed(12345)
 t = deltime()
-cl2 = clustra(data, k = 2, maxdf = 30, conv = c(20,0.5), mccores=mc, verbose = FALSE)
+cl2 = clustra(data, k = 2, maxdf = 30, conv = c(20,0.5), mccores=mc)
 deltimeT(t, paste("Seconds run time on", mc, "cores "))
 cat(paste("Number of iterations completed:",cl2$iterations))
 cat(paste("Number of individuals changing groups in last iteration:",cl2$changes))
@@ -158,9 +158,9 @@ MixSim::RandIndex(cl2$data_group, data[, true_group])$AR
 
 Compute the Adjusted Rand Index between the various results.
 ```{r rand2, comp.within, eval = chunk$rand2}
-MixSim::RandIndex(cl5$data_group,cl2$data_group)$AR # between 5 and 2 clusters
-MixSim::RandIndex(cl5$data_group,cl10$data_group)$AR # between 5 and 10 clusters
-MixSim::RandIndex(cl10$data_group,cl2$data_group)$AR # between 10 and 2 clusters
+MixSim::RandIndex(cl5$data_group,cl2$data_group)$AR 
+MixSim::RandIndex(cl5$data_group,cl10$data_group)$AR 
+MixSim::RandIndex(cl10$data_group,cl2$data_group)$AR 
 ```
 
 Average silhouette value is a way to select the number of clusters and a silhouette plot provides a way for a deeper evaluation (Rouseeuw 1986). A true silhouette requires distances between individual trajectories, which is not possible here due to unequal trajectory sampling without fitting a separate model for each id. As a proxy for distance between points, we use trajectory distances to cluster mean spline trajectories in the `clustra_sil()` function. The structure returned from the `clustra()` function contains the matrix `loss`, which has all the information needed to construct these proxy silhouette plots. The function `clustra_sil()` performs clustering for a number of `k` values and outputs information for the silhouette plot that is displayed next. 
@@ -168,18 +168,18 @@ Average silhouette value is a way to select the number of clusters and a silhoue
 These plots are Figure 4, 5, and 6 in the paper.
 ```{r, silplot, fig.width = 7, fig.height = 5, eval = chunk$silplot}
 t = deltime()
-set.seed(12345)
-sil = clustra_sil(cl5, mccores = mc, conv=c(20,0.5), verbose = FALSE)
+
+sil = clustra_sil(cl5, mccores = mc, conv=c(20,0.5))
 png(paste0(plot_path, "R_cl5_silplot.png"), width = 480, height = 360)
   lapply(sil, plot_silhouette)
 dev.off()
 set.seed(12345)
-sil2 = clustra_sil(cl2, mccores = mc, conv=c(20,0.5), verbose = FALSE)
+sil2 = clustra_sil(cl2, mccores = mc, conv=c(20,0.5))
 png(paste0(plot_path, "R_cl2_silplot.png"), width = 480, height = 360)
   lapply(sil2, plot_silhouette)
 dev.off()
 set.seed(12345)
-sil10 = clustra_sil(cl10, mccores = mc, conv=c(20,0.5), verbose = FALSE)
+sil10 = clustra_sil(cl10, mccores = mc, conv=c(20,0.5))
 png(paste0(plot_path, "R_cl10_silplot.png"), width = 480, height = 360)
   lapply(sil10, plot_silhouette)
 dev.off()
@@ -194,8 +194,7 @@ Here we produce silhouettes directly from the data, which runs clustra internall
 # Example running from the data step
 t = deltime()
 set.seed(12345)
-sil = clustra_sil(data, k = c(3,4,20), mccores = mc, conv = c(50,0.5), 
-                  verbose = FALSE)
+sil = clustra_sil(data, k = c(3,4,20), mccores = mc, conv = c(50,0.5))
 lapply(sil, plot_silhouette)
 deltimeT(t, paste("Silhouettes and clustra on", mc, "cores "))
 ```
