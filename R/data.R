@@ -1,16 +1,17 @@
 #' Simulated blood pressure data
 #' 
-#' A sample of 10,000 individuals from the full 80,000 individuals in dataset
+#' A sample of 10,000 individuals from the full 80,000 individuals in a dataset
 #' available on GitHub at 
-#' https://github.com/go-ski/clustra-SAS/raw/main/bp_data/simulated_data_27June2023.csv.gz
+#' https://github.com/MVP-CHAMPION/clustra-SAS/raw/main/bp_data/simulated_data_27June2023.csv.gz
 #' 
 #' The full data set contains 80,000 individuals, each with an average of about
-#' 17 observations in 5 clusters with scatter. Generated from a 5-cluster thin
-#' spline model of actual blood pressures collected from roughly the same number
-#' of individuals at U.S. Department of Veterans Affairs facilities in 
-#' connection with the MVP-CHAMPION project. Each cluster-mean generated 
-#' individual has a random number of observations at random times with one 
-#' observation at intervention time 0, and with added standard normal error.
+#' 17 observations in 5 clusters with scatter. The individuals are generated 
+#' from a 5-cluster thin spline model of actual blood pressures collected from 
+#' roughly the same number of individuals at U.S. Department of Veterans Affairs
+#' facilities in connection with the MVP-CHAMPION project. Each cluster-mean 
+#' generated individual has a random number of observations at random times with
+#' one observation at intervention time 0, and with added standard normal error.
+#' The resulting data has 1,353,910 rows and 4 columns.
 #' 
 #' @format ## `bp10k`
 #' A "data.table" and "data.frame" with 167,277 rows and 4 columns:
