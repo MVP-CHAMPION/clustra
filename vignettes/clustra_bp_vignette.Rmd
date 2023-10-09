@@ -309,10 +309,8 @@ A 0.58 result is possibly due to the wiggle observed in the trajectories.
 
 ### Some notes about the SAS execution and results
 ************************************************************************
-- Generated using v13 macros
-- Different convergence criteria currently being used (minimum percent change = 0.5% OR max iterations reached)
+- Generated using v14R1 macros
 - Currently using the method=0 (GAMPL with default optimization, NOT thin plate splines)
-- Mapping the cluster labels requires multiple plots to identify the ordering and manual change
 - No current random seed allocation, thus results may vary between executions/runs (related to the note above, this would require manual updates on next execution)
 
 
