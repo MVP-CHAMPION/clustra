@@ -63,7 +63,7 @@ if(full_data) {
 }
 data$true_group = data$group
 head(data)
-plot_path <- "~/tmp/" #paste0(tempdir(), "/") # output dir for plots
+plot_path = paste0(tempdir(), "/") # output dir for plots
 cat("Resulting plots are saved in", plot_path, "directory\n")
 ```
 
@@ -194,7 +194,7 @@ Here we produce silhouettes directly from the data, which runs clustra internall
 # Example running from the data step
 t = deltime()
 set.seed(12345)
-sil = clustra_sil(data, k = c(3,4,20), mccores = mc, conv = c(50,0.5))
+sil = clustra_sil(data, k = c(2, 5, 10), mccores = mc, conv = c(50, 0.5))
 lapply(sil, plot_silhouette)
 deltimeT(t, paste("Silhouettes and clustra on", mc, "cores "))
 ```
@@ -213,7 +213,7 @@ The plot shows Adjusted Rand Index similarity level between all pairs of 90 clus
 
 From the deviance results shown during iterations, we also see that all of the `k = 3` clusters are near the best deviance attainable even with `k = 4`. Among the `k = 4` results, several converged to only three clusters that agree with `k = 3` results.
 
-Another possible evaluation of the number of clusters is to first ask clustra for a large number of clusters, evaluate the cluster centers on a common set of time points, and feed the resulting matrix to a hierarchical clustering function. Below, we ask for 40 clusters on the `data2` data set but actually get back only 26 because several become empty or too small for `maxdf`. Below, the `hclust()` function clusters the 26 resulting cluster means, each evaluated on 100 time points.]
+Another possible evaluation of the number of clusters is to first ask clustra for a large number of clusters, evaluate the cluster centers on a common set of time points, and feed the resulting matrix to a hierarchical clustering function. Below, we ask for 40 clusters and the `hclust()` function clusters the 40 resulting cluster means, each evaluated on 100 time points.
 
 ```{r}
 gpred = function(tps, newdata) {
@@ -233,10 +233,10 @@ dev.off()
 knitr::include_graphics(paste0(plot_path, "R_hclust_plot.png"))
 deltimeT(t, paste("clustra k = 40, conv = c(100, 0.5) on", mc, "cores + hclust + dist "))
 ```
-The cluster dendrogram indicates there are five clusters. Making the cut at a height of roughly 300 groups the 26 clusters into only three.
+The cluster dendrogram indicates there are five clusters. Making the cut at a height of roughly 140 groups the 40 clusters into only five.
 
 ## Comparison between SAS and R clustering 
-Look at the data output from the SAS clustering analysis. Since SAS and R produce slightly different labels, need to relabel and replot the SAS data output. The relabeling algorithm below matches pairs by distance, starting with shortest distance pair.
+Look at the data output from the SAS clustering analysis. Since SAS and R produce different cluster labels, we need to relabel and replot the SAS data output, which is on the https://github.com/MVP-CHAMPION/clustra-SAS repository. The mapping algorithm in `sas_r_cplot()` below matches SAS and R pairs by distance, starting with shortest distance pair, and then plots the pairs with matching colors.
 
 ```{r SAS_R_data, fig.width = 7, fig.height = 5, eval = chunk$SAS_R_data}
 sas.file = function(file, rp = repo_sas) paste0(rp, "sas_results/", file)
