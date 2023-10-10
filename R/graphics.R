@@ -107,7 +107,7 @@ plot_sample = function(dat, layout = c(3,3), sample = prod(layout),
 #' @param data
 #' The data. If after `clustra` run, it includes resulting clusters as group.
 #' @param fits 
-#' The `cl$tps` component of `clustra` output or internal `start_groups` fits. 
+#' The `tps` component of `clustra` output or internal `start_groups` fits. 
 #' If fits are supplied and `select.data` is NULL, the data is colored by 
 #' clusters. If NULL, or if `select.data` is not NULL, the data is black points.
 #' @param max.data 
@@ -117,9 +117,9 @@ plot_sample = function(dat, layout = c(3,3), sample = prod(layout),
 #' @param select.data 
 #' Either NULL or a list of length k, each element a data.frame (like data)
 #' with time and response components. The select.data points will be
-#' highlighted with cluster colors on the plot. This is used internally in
+#' highlighted with cluster colors on the plot. This is used internally in the
 #' `start_groups` function to show the selected starting points. In this case,
-#' also the fits parameter can contain TPS fits to the starting points.
+#' also the `fits` parameter can contain TPS fits to the starting points.
 #' @param group
 #' Character variable name in `data` to color the clusters. A NULL will produce
 #' a b&w point plot.

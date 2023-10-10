@@ -1,11 +1,13 @@
 # clustra v0.2.0
+* Added a 10,000 id data set `bp10k`
+* Added a second vignette to reproduce associated paper graphics and more
 * Reduced vignette dependence to only base graphics
 * New function `plot_sample` built on base graphics
 * New function `plot_smooths` built on base graphics
 * New function `plot_silhouette` built on base graphics
 * Expanded capability of `gen_traj_data` beyond 3 clusters with `type` and `intercept` parameters
 * Modified parameters in `clustra`
-* `start_groups` now has added option "distant"
+* Added `starts = "distant"` option in function `start_groups`
 * Added parameter `starts` in `clustra_sil` and `clustra_rand`
 * New internal functions `kchoose` and `ic_fun` (not exported)
 
