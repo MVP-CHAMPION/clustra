@@ -43,7 +43,7 @@ ic_fun = function(cl, data, fn) {
                     ssq)
   cat(outline, "\n", file = fn, append = TRUE)
   
-  AIC
+  return(AIC)
 }
 
 #' A test function to evaluate information criteria for several k values. Not
@@ -90,6 +90,7 @@ kchoose = function(K, var = 5, maxdf = 10, mc = 1, fn = "ic.txt") {
   plot(BIC ~ k, data = res, type = "l")
   plot(deviance ~ k, data = res, type = "l")
   plot(ssq ~ k, data = res, type = "l")
+  invisible(NULL)
 }
 
 #' allpair_RandIndex: helper for replicated cluster comparison
@@ -139,7 +140,7 @@ allpair_RandIndex = function(results) {
   }
   ri_df = do.call(rbind, rand_pairs)
   class(ri_df) = c("RandIndex", class(ri_df))
-  ri_df
+  return(ri_df)
 }
 
 
@@ -372,5 +373,5 @@ clustra_rand = function(data, k, starts = "random", mccores = 1,
   ## compute and return Rand Index evaluations
   ret = allpair_RandIndex(results)
 
-  ret
+  return(ret)
 }

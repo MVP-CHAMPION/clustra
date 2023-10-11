@@ -165,6 +165,7 @@ plot_smooths = function(data, fits = NULL, max.data = 100000,
       lines(ptime, pred, col = i + 1, lwd = 2)
     }
   }
+  invisible(NULL)
 }
 
 #' Plots a list item, a silhouette, from the result of `clustra_sil` along 
