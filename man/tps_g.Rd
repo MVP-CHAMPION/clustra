@@ -24,7 +24,7 @@ If group data has zero rows, NULL is returned instead.
 }
 \description{
 Fits a thin plate spline to a single group (one list element) in data with
-\code{\link[mgcv]{bam}}. Uses data from only on group rather than a
+\code{\link[mgcv]{bam}}. Uses data from only one group rather than a
 zero weights approach. Zero weights would result in
 incorrect crossvalidation sampling.
 }
