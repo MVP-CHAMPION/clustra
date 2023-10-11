@@ -16,7 +16,7 @@ plot_smooths(
 \arguments{
 \item{data}{The data. If after \code{clustra} run, it includes resulting clusters as group.}
 
-\item{fits}{The \code{cl$tps} component of \code{clustra} output or internal \code{start_groups} fits.
+\item{fits}{The \code{tps} component of \code{clustra} output or internal \code{start_groups} fits.
 If fits are supplied and \code{select.data} is NULL, the data is colored by
 clusters. If NULL, or if \code{select.data} is not NULL, the data is black points.}
 
@@ -26,9 +26,9 @@ points.}
 
 \item{select.data}{Either NULL or a list of length k, each element a data.frame (like data)
 with time and response components. The select.data points will be
-highlighted with cluster colors on the plot. This is used internally in
+highlighted with cluster colors on the plot. This is used internally in the
 \code{start_groups} function to show the selected starting points. In this case,
-also the fits parameter can contain TPS fits to the starting points.}
+also the \code{fits} parameter can contain TPS fits to the starting points.}
 
 \item{group}{Character variable name in \code{data} to color the clusters. A NULL will produce
 a b&w point plot.}

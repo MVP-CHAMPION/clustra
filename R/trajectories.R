@@ -6,7 +6,7 @@
 #' 
 #' @description 
 #' Fits a thin plate spline to a single group (one list element) in data with
-#' \code{\link[mgcv]{bam}}. Uses data from only on group rather than a
+#' \code{\link[mgcv]{bam}}. Uses data from only one group rather than a
 #' zero weights approach. Zero weights would result in
 #' incorrect crossvalidation sampling.
 #'
@@ -139,7 +139,7 @@ check_df = function(group, loss, data, maxdf) {
     data[, group:=..group[id]]  # push group change into data
     counts_df = data[, tabulate(group)]
   }
-  group
+  return(group)
 }
 
 #' Function to assign starting groups.
@@ -266,7 +266,7 @@ start_groups = function(k, data, starts, maxdf, conv, mccores = 1,
     cat("  Start counts", tabulate(group, k), "")
     deltime(a_0, "  Starts time: ")
   }
-  group ## return group for each id
+  return(group) ## return group for each id
 }
 
 #' Cluster longitudinal trajectories over time.
@@ -425,9 +425,9 @@ trajectories = function(data, k, group, maxdf, conv = c(10, 0), mccores = 1,
 
   msg = paste0("\n AIC:", AIC, " BIC:", BIC, ' edf:', edf, "  Total time: ")
   if(verbose) deltime(a_0, msg)
-  list(deviance = deviance, group = group, loss = loss, k = k, k_cl = k_cl,
+  return(list(deviance = deviance, group = group, loss = loss, k = k, k_cl = k_cl,
        data_group = data[, group], tps = tps, iterations = i, counts = counts,
-       counts_df = counts_df, changes = changes, AIC = AIC, BIC = BIC)
+       counts_df = counts_df, changes = changes, AIC = AIC, BIC = BIC))
 }
 
 #' xit_report 
@@ -455,7 +455,7 @@ xit_report = function(cl, maxdf, conv) {
     xit = c(xit, "converged")
   if(cl$iterations >= conv[1] && conv[1] != 1)
     xit = c(xit, "max-iter")
-  xit
+  return(xit)
 }
 
 #' Cluster longitudinal trajectories over time

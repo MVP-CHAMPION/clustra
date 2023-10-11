@@ -79,10 +79,11 @@ gendata = function(n_id, types, intercepts, m_obs, s_range, e_range, min_obs,
   n_obs = min_obs + rpois(t_id, lambda = m_obs)
   type = sample(1:length(types), t_id, replace = TRUE, prob = n_id/t_id)
   id_vec = sample.int(idr[2], t_id, replace = FALSE) # non-consecutive
-  lapply(1:t_id,   # construct by id
-         function(i) oneid(id_vec[i], n_obs[i], types[type[i]], intercepts[type[i]],
-                           start[i], end[i], smin = min(start), emax = max(end),
-                           noise))
+  rlist = lapply(1:t_id,   # construct by id
+                 function(i) oneid(id_vec[i], n_obs[i], types[type[i]], 
+                                   intercepts[type[i]], start[i], end[i], 
+                                   smin = min(start), emax = max(end), noise))
+  return(rlist)
 }
 
 #' Data Generators
@@ -146,5 +147,6 @@ gen_traj_data = function(n_id, types, intercepts, m_obs, s_range, e_range,
   id_list = gendata(n_id, types, intercepts, m_obs, s_range, e_range, min_obs, 
                     noise)
   id_mat = do.call(rbind, id_list)
-  data.table::data.table(id_mat)
+  data = data.table::data.table(id_mat)
+  return(data)
 }
