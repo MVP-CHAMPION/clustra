@@ -13,8 +13,20 @@
 #' @docType package
 #' @author George Ostrouchov, David Gagnon, Hanna Gerlovin
 #' @keywords Package
+#' @details
+#' This research is based on data from the Million Veteran Program, Office of 
+#' Research and Development, Veterans Health Administration, and was supported 
+#' by award No.~MVP000. This research used resources from the Knowledge 
+#' Discovery Infrastructure (KDI) at Oak Ridge National Laboratory, which is 
+#' supported by the Office of Science of the US Department of Energy under 
+#' Contract No. DE-AC05-00OR22725.
 #' 
-#' # Import package operators
+#' This research used resources of the Compute and Data Environment 
+#' for Science (CADES) at the Oak Ridge National Laboratory, which is supported 
+#' by the Office of Science of the U.S. Department of Energy under Contract No. 
+#' DE-AC05-00OR22725.
+#' 
 #' @importFrom data.table ":="
 #' 
 NULL
+
