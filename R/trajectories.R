@@ -518,6 +518,12 @@ xit_report = function(cl, maxdf, conv) {
 clustra = function(data, k, starts = "random", maxdf = 30, conv = c(10, 0),
                    mccores = 1, verbose = FALSE, ...) {
   id = .GRP = .SD = ..group = NULL # for data.table R CMD check
+  
+  ## manage BLAS
+  old_blas = Sys.getenv("OPENBLAS_NUM_THREADS")
+  Sys.setenv("OPENBLAS_NUM_THREADS" = 1)
+  on.exit(Sys.setenv("OPENBLAS_NUM_THREADS" = old_blas))
+  
 
   ## check for required variables in data
   xargs = list(...)
