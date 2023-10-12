@@ -47,27 +47,27 @@ oneid = function(id, n_obs, type, intercept, start, end, smin, emax, noise) {
 #' Generates data for up to three trajectory clusters
 #' 
 #' @param n_id
-#' See parameters of {\code{\link{gen_traj_data}}}.
+#' See parameters of \code{\link{gen_traj_data}}.
 #' @param m_obs
-#' See parameters of {\code{\link{gen_traj_data}}}.
+#' See parameters of \code{\link{gen_traj_data}}.
 #' @param types
-#' See parameters of {\code{\link{gen_traj_data}}}.
+#' See parameters of \code{\link{gen_traj_data}}.
 #' @param intercepts
-#' See parameters of {\code{\link{gen_traj_data}}}.
+#' See parameters of \code{\link{gen_traj_data}}.
 #' @param s_range
-#' See parameters of {\code{\link{gen_traj_data}}}.
+#' See parameters of \code{\link{gen_traj_data}}.
 #' @param e_range
-#' See parameters of {\code{\link{gen_traj_data}}}.
+#' See parameters of \code{\link{gen_traj_data}}.
 #' @param min_obs
-#' See parameters of {\code{\link{gen_traj_data}}}.
+#' See parameters of \code{\link{gen_traj_data}}.
 #' @param noise
-#' See parameters of {\code{\link{gen_traj_data}}}.
+#' See parameters of \code{\link{gen_traj_data}}.
 #' 
 #' @details 
 #' Time support of each `id` is at least `s . . . 0 . . . . e`, where `s` is in
 #' `s_range` and `e` is in `e_range`. 
 #' @return 
-#' A list of length `sum(n_id)`, where each element is a matrix output by {\code{\link{oneid}}}.
+#' A list of length `sum(n_id)`, where each element is a matrix output by \code{\link{oneid}}.
 #' 
 gendata = function(n_id, types, intercepts, m_obs, s_range, e_range, min_obs,
                    noise) {

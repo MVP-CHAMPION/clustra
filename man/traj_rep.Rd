@@ -18,7 +18,7 @@ traj_rep(group, data, k, maxdf, conv)
 \item{conv}{Fitting parameters. See \code{\link{trajectories}}.}
 }
 \value{
-See return of {\code{\link{trajectories}}}.
+See return of \code{\link{trajectories}}.
 }
 \description{
 Function to run trajectories inside mclapply with one core.

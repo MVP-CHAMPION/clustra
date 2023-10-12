@@ -7,24 +7,24 @@
 gendata(n_id, types, intercepts, m_obs, s_range, e_range, min_obs, noise)
 }
 \arguments{
-\item{n_id}{See parameters of {\code{\link{gen_traj_data}}}.}
+\item{n_id}{See parameters of \code{\link{gen_traj_data}}.}
 
-\item{types}{See parameters of {\code{\link{gen_traj_data}}}.}
+\item{types}{See parameters of \code{\link{gen_traj_data}}.}
 
-\item{intercepts}{See parameters of {\code{\link{gen_traj_data}}}.}
+\item{intercepts}{See parameters of \code{\link{gen_traj_data}}.}
 
-\item{m_obs}{See parameters of {\code{\link{gen_traj_data}}}.}
+\item{m_obs}{See parameters of \code{\link{gen_traj_data}}.}
 
-\item{s_range}{See parameters of {\code{\link{gen_traj_data}}}.}
+\item{s_range}{See parameters of \code{\link{gen_traj_data}}.}
 
-\item{e_range}{See parameters of {\code{\link{gen_traj_data}}}.}
+\item{e_range}{See parameters of \code{\link{gen_traj_data}}.}
 
-\item{min_obs}{See parameters of {\code{\link{gen_traj_data}}}.}
+\item{min_obs}{See parameters of \code{\link{gen_traj_data}}.}
 
-\item{noise}{See parameters of {\code{\link{gen_traj_data}}}.}
+\item{noise}{See parameters of \code{\link{gen_traj_data}}.}
 }
 \value{
-A list of length \code{sum(n_id)}, where each element is a matrix output by {\code{\link{oneid}}}.
+A list of length \code{sum(n_id)}, where each element is a matrix output by \code{\link{oneid}}.
 }
 \description{
 Generates data for up to three trajectory clusters

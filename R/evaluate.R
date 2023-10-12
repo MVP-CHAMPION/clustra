@@ -273,7 +273,7 @@ clustra_sil = function(data, kv = NULL, starts = "random", mccores = 1,
 #' Fitting parameters. See \code{\link{trajectories}}.
 #' 
 #' @return
-#' See return of {\code{\link{trajectories}}}.
+#' See return of \code{\link{trajectories}}.
 #' 
 traj_rep = function(group, data, k, maxdf, conv) {
   id = ..group = NULL # for data.table R CMD check
