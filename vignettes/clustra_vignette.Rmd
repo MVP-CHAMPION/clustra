@@ -15,6 +15,7 @@ knitr::opts_knit$set(
   comment = "#>"
 )
 start_knit = proc.time()
+data.table::setDTthreads(1) # manage data.table threads
 ```
 The **clustra** package was built to **clus**ter longitudinal **tra**jectories (time series) on a common time axis. For example, a number of individuals are started on a specific drug regimen and their blood pressure data is collected for a varying amount of time before and after the start of the medication. Observations can be unequally spaced, unequal length, and only partially overlapping.  
 

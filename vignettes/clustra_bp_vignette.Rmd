@@ -44,6 +44,8 @@ mc = 2
 # This vignette will experience notable speedup up to about 10 cores.
 # On Intel chips with hyperthreading, up to 2x available cores can be used.
 if (.Platform$OS.type == "windows") mc = 1
+
+data.table::setDTthreads(1) # manage data.table threads (increase with full_data)
 ```
 
 We start by loading the `clustra` package and getting the data. We also set the output path for plots to `tempdir()`, which should be changed to a user directory if they are needed beyond the Knit output.

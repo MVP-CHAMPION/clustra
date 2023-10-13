@@ -192,6 +192,12 @@ allpair_RandIndex = function(results) {
 clustra_sil = function(data, kv = NULL, starts = "random", mccores = 1, 
                        maxdf = 30, conv = c(10, 0), save = FALSE, 
                        verbose = FALSE) {
+  
+  ## manage data.table threads
+  old_DTthreads = data.table::getDTthreads()
+  data.table::setDTthreads(1)
+  on.exit(data.table::setDTthreads(old_DTthreads))
+
   sil = function(x) {
     ord = order(x)
     ck = ord[1]
@@ -322,6 +328,12 @@ clustra_rand = function(data, k, starts = "random", mccores = 1,
                         replicates = 10, maxdf = 30, conv = c(10, 0), 
                         save = FALSE, verbose = FALSE) {
   id = .GRP = ..group = NULL # for data.table R CMD check
+  
+  ## manage data.table threads
+  old_DTthreads = data.table::getDTthreads()
+  data.table::setDTthreads(1)
+  on.exit(data.table::setDTthreads(old_DTthreads))
+
   results = vector("list", replicates*length(k))
   
   ## check for required variables in data
