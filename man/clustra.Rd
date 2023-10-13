@@ -11,6 +11,7 @@ clustra(
   maxdf = 30,
   conv = c(10, 0),
   mccores = 1,
+  DTthreads = 1,
   verbose = FALSE,
   ...
 )
@@ -43,6 +44,8 @@ DOI: 10.1109/TPAMI.2005.164 for the FastMap analogy.}
 \item{conv}{Fitting parameters. See \code{\link{trajectories}}.}
 
 \item{mccores}{See \code{\link{trajectories}}.}
+
+\item{DTthreads}{Sets \code{data.table} threads. Use carefully as it interacts with mccores!}
 
 \item{verbose}{Logical to turn on more output during fit iterations.}
 

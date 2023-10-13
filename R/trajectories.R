@@ -494,6 +494,8 @@ xit_report = function(cl, maxdf, conv) {
 #' Fitting parameters. See \code{\link{trajectories}}.
 #' @param mccores
 #' See \code{\link{trajectories}}. 
+#' @param DTthreads
+#' Sets `data.table` threads. Use carefully as it interacts with mccores!
 #' @param verbose
 #' Logical to turn on more output during fit iterations.
 #' @param ...
@@ -516,13 +518,13 @@ xit_report = function(cl, maxdf, conv) {
 #'
 #' @export
 clustra = function(data, k, starts = "random", maxdf = 30, conv = c(10, 0),
-                   mccores = 1, verbose = FALSE, ...) {
+                   mccores = 1, DTthreads = 1, verbose = FALSE, ...) {
   id = .GRP = .SD = ..group = NULL # for data.table R CMD check
   
-  ## manage BLAS
-  old_blas = Sys.getenv("OPENBLAS_NUM_THREADS")
-  Sys.setenv("OPENBLAS_NUM_THREADS" = 1)
-  on.exit(Sys.setenv("OPENBLAS_NUM_THREADS" = old_blas))
+  ## manage data.table threads
+  old_DTthreads = data.table::getDTthreads()
+  data.table::setDTthreads(DTthreads)
+  on.exit(data.table::setDTthreads(old_DTthreads))
   
 
   ## check for required variables in data
