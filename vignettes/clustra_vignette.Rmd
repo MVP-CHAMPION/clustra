@@ -15,6 +15,7 @@ knitr::opts_knit$set(
   comment = "#>"
 )
 start_knit = proc.time()
+data.table::setDTthreads(1) # manage data.table threads
 ```
 The **clustra** package was built to **clus**ter longitudinal **tra**jectories (time series) on a common time axis. For example, a number of individuals are started on a specific drug regimen and their blood pressure data is collected for a varying amount of time before and after the start of the medication. Observations can be unequally spaced, unequal length, and only partially overlapping.  
 
@@ -92,8 +93,8 @@ sil = clustra_sil(cl4)
 lapply(sil, plot_silhouette)
 ```
 
-Another way to select the number of clusters is the Rand Index comparing different random starts and different numbers of clusters. When we replicate clustering with different random seeds, the "replicability" is an indicator of how stable the results are for a given k, the number of clusters. For this demonstration, we look at `k = c(2, 3, 4)`, and 10 replicates for each `k`.
-```{r rand_plot, fig.width = 7, fig.height=7}
+Another way to select the number of clusters is the Rand Index comparing different random starts and different numbers of clusters. When we replicate clustering with different random seeds, the "replicability" is an indicator of how stable the results are for a given k, the number of clusters. For this demonstration, we look at `k = c(2, 3, 4)`, and 10 replicates for each `k`. To run this long-running chunk, set `eval = TRUE`.
+```{r rand_plot, fig.width = 7, fig.height=7, eval = FALSE}
 set.seed(12345)
 ran = clustra_rand(data, k = c(2, 3, 4, 5), mccores = mc,
                    replicates = 10, maxdf = 10, conv = c(7, 1), verbose = TRUE)
@@ -101,8 +102,8 @@ rand_plot(ran)
 ```
 The plot shows AR similarity level between all pairs of 40 clusterings (10 random starts for each of 2, 3, 4, and 5 clusters). It is difficult to distinguish between the 3, 4, and 5 results but the 4 result has the largest block of complete agreement.
 
-Here, we cat try running clustra with the "distant" starts option. The sequential selection of above-medial length series that are most distant from previous selections introduces less initial variability.
-```{r rand_plot_d, fig.width = 7, fig.height=7}
+Here, we cat try running clustra with the "distant" starts option. The sequential selection of above-medial length series that are most distant from previous selections introduces less initial variability. To run this long-running chunk, set `eval = TRUE`.
+```{r rand_plot_d, fig.width = 7, fig.height=7, eval = FALSE}
 set.seed(12345)
 ran = clustra_rand(data, k = c(2, 3, 4, 5), starts = "distant", mccores = mc,
                    replicates = 10, maxdf = 10, conv = c(7, 1), verbose = TRUE)

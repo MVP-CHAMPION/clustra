@@ -14,11 +14,20 @@ distant trajectories. The fitting is done with the \emph{mgcv} package function
 \emph{bam}, which scales well to very large data sets. Additional parallelism
 available via multicore on unix and mac platforms.
 }
+\details{
+This research is based on data from the Million Veteran Program, Office of
+Research and Development, Veterans Health Administration, and was supported
+by award No.~MVP000. This research used resources from the Knowledge
+Discovery Infrastructure (KDI) at Oak Ridge National Laboratory, which is
+supported by the Office of Science of the US Department of Energy under
+Contract No. DE-AC05-00OR22725.
+
+This research used resources of the Compute and Data Environment
+for Science (CADES) at the Oak Ridge National Laboratory, which is supported
+by the Office of Science of the U.S. Department of Energy under Contract No.
+DE-AC05-00OR22725.
+}
 \author{
 George Ostrouchov, David Gagnon, Hanna Gerlovin
 }
-\keyword{#}
-\keyword{Import}
 \keyword{Package}
-\keyword{operators}
-\keyword{package}

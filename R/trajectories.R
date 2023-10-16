@@ -335,6 +335,11 @@ trajectories = function(data, k, group, maxdf, conv = c(10, 0), mccores = 1,
   if(verbose) a = a_0 = deltime(a)
   xargs = list(...)
 
+  ## manage data.table threads
+  old_DTthreads = data.table::getDTthreads()
+  data.table::setDTthreads(1)
+  on.exit(data.table::setDTthreads(old_DTthreads))
+  
   time = response = id = ..new_group = ..group = NULL # for data.table R CMD check
   
   ## make sure that data is a data.table
@@ -518,7 +523,12 @@ xit_report = function(cl, maxdf, conv) {
 clustra = function(data, k, starts = "random", maxdf = 30, conv = c(10, 0),
                    mccores = 1, verbose = FALSE, ...) {
   id = .GRP = .SD = ..group = NULL # for data.table R CMD check
-
+  
+  ## manage data.table threads
+  old_DTthreads = data.table::getDTthreads()
+  data.table::setDTthreads(1)
+  on.exit(data.table::setDTthreads(old_DTthreads))
+  
   ## check for required variables in data
   xargs = list(...)
   unkn_param = !(names(xargs) %in% c("ylim", "xlim"))
