@@ -9,34 +9,21 @@ vignette: >
   \VignetteEncoding[UTF-8]{inputenc}
 ---
 
-The **clustra** package was built to **clus**ter medical **tra**jectories (time series) related by an intervention time. This vignette is intended to reproduce the results of an associated paper "clustra: A multi-platform k-means clustering algorithm for analysis of longitudinal trajectories in large electronic health records data." To run the paper version, set `chunk = figs` and `full_data = TRUE` in the code chunk below, which takes about 70 minutes with `mc = 5` on a Quad-Core I7, and requires Internet access to get the full data from GitHub. The default for CRAN submission is limited to a sample of about 1/8 of the full data set to satisfy CRAN limits on package data size and runs a smaller subset of the code chunks (takes about 40 seconds).
+The **clustra** package was built to **clus**ter medical **tra**jectories (time series) related by an intervention time. This vignette is intended to reproduce the results of an associated paper "clustra: A multi-platform k-means clustering algorithm for analysis of longitudinal trajectories in large electronic health records data." 
+
+To run the paper version, set `chunk = figs` and `full_data = TRUE` in the first code chunk below. It takes about 70 minutes with `mc = 5` on a Quad-Core I7, and requires Internet access to get the full data from GitHub. The default for CRAN submission is limited to a sample of about 1/8 of the full data set to satisfy CRAN limits on package data size and runs a smaller subset of the code chunks (takes about 40 seconds).
 
 Additional plots to explain the methodology and examine the data can be produced by setting `chunk = all` in the chunk below. This will run over 2 hours with the same system configuration.
 
 Below is the code that controls which code chunks are evaluated and how many cores to use.
-```{r, setup, echo = FALSE}
+```{r, setup}
 knitr::opts_knit$set(
   collapse = TRUE,
   comment = "#>"
 )
-cran = list(LibsData = TRUE, plot_true = TRUE, plot_raw = TRUE, run5 = TRUE,
-            run5_v2 = FALSE, iter_plots = TRUE, plot5_side_by_side = FALSE, 
-            fig1 = FALSE, comp_true = FALSE, run10 = FALSE, plot10 = FALSE, 
-            run2 = FALSE, rand2 = FALSE, silplot = FALSE, silplot2 = FALSE, 
-            rand_plot = FALSE, hclust40 = FALSE, SAS_R_data = FALSE, 
-            Rand_SAS_R = FALSE, true_group = FALSE)
-figs = list(LibsData = TRUE, plot_true = FALSE, plot_raw = FALSE, run5 = TRUE,
-            run5_v2 = TRUE, iter_plots = FALSE, plot5_side_by_side = FALSE, 
-            fig1 = TRUE, comp_true = TRUE, run10 = TRUE, plot10 = TRUE, 
-            run2 = TRUE, rand2 = TRUE, silplot = TRUE, silplot2 = FALSE,
-            rand_plot = TRUE, hclust40 = FALSE, SAS_R_data = TRUE, 
-            Rand_SAS_R = TRUE, true_group = TRUE)
-all = list(LibsData = TRUE, plot_true = TRUE, plot_raw = TRUE, run5 = TRUE,
-           run5_v2 = TRUE, iter_plots = TRUE, plot5_side_by_side = TRUE,
-           fig1 = TRUE, comp_true = TRUE, run10 = TRUE, plot10 = TRUE,
-           run2 = TRUE, rand2 = TRUE, silplot = TRUE, silplot2 = TRUE, 
-           rand_plot = TRUE, hclust40 = TRUE, SAS_R_data = TRUE, 
-           Rand_SAS_R = TRUE, true_group = TRUE)
+cran = list(LibsData = TRUE, plot_true = TRUE, plot_raw = TRUE, run5 = TRUE, run5_v2 = FALSE, iter_plots = TRUE, plot5_side_by_side = FALSE, fig1 = FALSE, comp_true = FALSE, run10 = FALSE, plot10 = FALSE, run2 = FALSE, rand2 = FALSE, silplot = FALSE, silplot2 = FALSE, rand_plot = FALSE, hclust40 = FALSE, SAS_R_data = FALSE, Rand_SAS_R = FALSE, true_group = FALSE)
+figs = list(LibsData = TRUE, plot_true = FALSE, plot_raw = FALSE, run5 = TRUE, run5_v2 = TRUE, iter_plots = FALSE, plot5_side_by_side = FALSE, fig1 = TRUE, comp_true = TRUE, run10 = TRUE, plot10 = TRUE, run2 = TRUE, rand2 = TRUE, silplot = TRUE, silplot2 = FALSE, rand_plot = TRUE, hclust40 = FALSE, SAS_R_data = TRUE, Rand_SAS_R = TRUE, true_group = TRUE)
+all = list(LibsData = TRUE, plot_true = TRUE, plot_raw = TRUE, run5 = TRUE, run5_v2 = TRUE, iter_plots = TRUE, plot5_side_by_side = TRUE, fig1 = TRUE, comp_true = TRUE, run10 = TRUE, plot10 = TRUE, run2 = TRUE, rand2 = TRUE, silplot = TRUE, silplot2 = TRUE, rand_plot = TRUE, hclust40 = TRUE, SAS_R_data = TRUE, Rand_SAS_R = TRUE, true_group = TRUE)
 chunk = cran  # chose which version of the vignette to run
 full_data = FALSE # choose if full 80,000 id data or sample of 10,000 ids
 mc = 2
