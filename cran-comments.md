@@ -1,6 +1,6 @@
 ## Test environments
-* local x86_64-apple-darwin20 (64-bit), macOS Ventura 13.6, R 4.3.0
-* win-builder (release and devel)
+* local aarch64-apple-darwin20 (64-bit), macOS Sonoma 14.2.1, R 4.3.2
+* win-builder (oldrelease, release, and devel)
 * R-hub builder (Fedora Linux, R-devel, clang, gfortran)
 
 ## R CMD check results

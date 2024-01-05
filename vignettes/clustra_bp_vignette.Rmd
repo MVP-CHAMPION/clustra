@@ -135,7 +135,7 @@ Next, we look at what the clusters would look like with 2 groups and plot the re
 set.seed(12345)
 t = deltime()
 cl2 = clustra(data, k = 2, maxdf = 30, conv = c(20,0.5), mccores=mc)
-deltimeT(t, paste("Seconds run time on", mc, "cores "))
+deltimeT(t, paste(" run time on", mc, "cores "))
 cat(paste("Number of iterations completed:",cl2$iterations))
 cat(paste("Number of individuals changing groups in last iteration:",cl2$changes))
 png(paste0(plot_path, "R_cl2_plot.png"), width = 480, height = 360)
@@ -175,7 +175,7 @@ dev.off()
 knitr::include_graphics(paste0(plot_path, "R_cl5_silplot.png"))
 knitr::include_graphics(paste0(plot_path, "R_cl2_silplot.png"))
 knitr::include_graphics(paste0(plot_path, "R_cl10_silplot.png"))
-deltimeT(t, paste("Seconds silhouettes on", mc, "cores "))
+deltimeT(t, paste(" silhouettes on", mc, "cores "))
 ```
 
 Here we produce silhouettes directly from the data, which runs clustra internally.
@@ -194,7 +194,7 @@ t = deltime()
 set.seed(12345)
 ran = clustra_rand(data, k = seq(2, 10, 1), starts = "random", mccores = mc, 
                    replicates = 10, conv=c(40,0.5), verbose = TRUE)
-deltimeT(t, paste("Seconds clustra_rand on", mc, "cores "))
+deltimeT(t, paste(" clustra_rand on", mc, "cores "))
 rand_plot(ran, name = paste0(plot_path, "R_randplot.pdf")) # save pdf version
 rand_plot(ran) # render png version
 ```

@@ -1,3 +1,7 @@
+# clustra v0.2.1
+* Fixed `difftime` bug for old release R
+* Updated maintainer email
+
 # clustra v0.2.0
 * Added a 10,000 id data set `bp10k`
 * Added a second vignette to reproduce associated paper graphics and more
