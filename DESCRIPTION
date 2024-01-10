@@ -42,6 +42,8 @@ Encoding: UTF-8
 Maintainer: George Ostrouchov <ostrouchovg@ornl.gov>
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
+URL: https://github.com/MVP-CHAMPION/clustra
+BugReports: https://github.com/MVP-CHAMPION/clustra/issues
 VignetteBuilder: knitr
 LazyData: true
 LazyDataCompression: xz
