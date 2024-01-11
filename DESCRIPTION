@@ -1,9 +1,9 @@
 Package: clustra
-Version: 0.2.0
-Date: 2023-09-30
+Version: 0.2.1
+Date: 2024-01-04
 Title: Clustering Longitudinal Trajectories
 Authors@R: c(person("George", "Ostrouchov", role = c("aut", "cre"), email = 
-        "ostrouchovg@ornl.gov"),
+        "go@tennessee.edu"),
         person("David", "Gagnon", role = "aut"),
         person("Hanna", "Gerlovin", role = "aut"),
         person("Chen", "Wei-Chen", role = "ctb"),
@@ -39,7 +39,7 @@ Description: Clusters longitudinal trajectories over time (can be unequally
 LazyLoad: yes
 License: BSD 2-clause License + file LICENSE
 Encoding: UTF-8
-Maintainer: George Ostrouchov <ostrouchovg@ornl.gov>
+Maintainer: George Ostrouchov <go@tennessee.edu>
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
 VignetteBuilder: knitr

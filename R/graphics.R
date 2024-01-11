@@ -17,8 +17,8 @@ deltime = function(ltime = proc.time()["elapsed"], text = NULL, units = FALSE,
                    nl = FALSE) {
   time = proc.time()["elapsed"]
   if(!is.null(text)) {
-    x = round(difftime(time, ltime), 2)
-    if(units) units = paste0(" ", attr(x, "units"))
+    x = round(ltime - time, 2)   # x = round(difftime(time, ltime), 2)
+    if(units) units = " seconds" # paste0(" ", attr(x, "units"))
     else units = ""
     if(nl) nl = "\n"
     else nl = ""
