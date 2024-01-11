@@ -4,7 +4,11 @@
 * R-hub builder (Fedora Linux, R-devel, clang, gfortran)
 
 ## R CMD check results
-0 errors | 0 warnings | 0 notes
+0 errors | 0 warnings | 1 note
+
+The note is new email address for the same maintainer. I have recently retired
+and no longer have access to ostrouchovg@ornl.gov. Instead, I use 
+go@tennessee.edu.
 
 ## Downstream dependencies
 There are currently no downstream dependencies for this package
