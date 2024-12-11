@@ -136,7 +136,7 @@ plot_smooths = function(data, fits = NULL, max.data = 100000,
   yrng = range(data$response)
   sdt = data
   if(max.data && nrow(data) > max.data) # reduce to max.data
-    sdt = data[sample(nrow(data), max.data)]
+    sdt = data[sample(nrow(data), max.data), ]
   
   ## data plotting
   if(max.data) {  # a zero will skip data plotting
