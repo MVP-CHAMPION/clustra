@@ -123,13 +123,19 @@ plot_sample = function(dat, layout = c(3,3), sample = prod(layout),
 #' @param group
 #' Character variable name in `data` to color the clusters. A NULL will produce
 #' a b&w point plot.
+#' @param interval
+#' If TRUE, add a dashed line of approximate 95% upper and lower confidence for
+#' the fitted spline. Note this is simply +- 2x the standard error returned by
+#' the spline fit. It is an approximate confidence for the cluster mean. To 
+#' assess approximate bounds for a cluster individual, plot the data.
 #' @param ...
 #' Other parameters to `plot` function, such as `xlim` or `ylim` axis limits.
 #' 
 #' @importFrom graphics lines points
 #' @export
 plot_smooths = function(data, fits = NULL, max.data = 100000, 
-                        select.data = NULL, group = "group", ...) {
+                        select.data = NULL, group = "group", interval = FALSE,
+                        ...) {
   k = length(fits)
   xrng = range(data$time)
   ptime = seq(xrng[1], xrng[2], length.out = 100)
@@ -161,7 +167,15 @@ plot_smooths = function(data, fits = NULL, max.data = 100000,
   ## tps plotting  
   if(!is.null(fits)) { # plot color fitted lines
     for(i in 1:k) {
-      pred = predict(fits[[i]], newdata = data.frame(time = ptime))
+      pred = predict(fits[[i]], newdata = data.frame(time = ptime), 
+                     se.fit = interval)
+      if(interval) {
+        upr <- pred$fit + (2 * pred$se.fit)
+        lwr <- pred$fit - (2 * pred$se.fit)
+        pred = pred$fit
+        lines(ptime, upr, col = i + 1, lwd = 1, lty = 'dashed') 
+        lines(ptime, lwr, col = i + 1, lwd = 1, lty = 'dashed') 
+      }
       lines(ptime, pred, col = i + 1, lwd = 2)
     }
   }
