@@ -27,6 +27,14 @@ for Science (CADES) at the Oak Ridge National Laboratory, which is supported
 by the Office of Science of the U.S. Department of Energy under Contract No.
 DE-AC05-00OR22725.
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/MVP-CHAMPION/clustra}
+  \item Report bugs at \url{https://github.com/MVP-CHAMPION/clustra/issues}
+}
+
+}
 \author{
 George Ostrouchov, David Gagnon, Hanna Gerlovin
 }
