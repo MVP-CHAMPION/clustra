@@ -41,7 +41,7 @@ License: BSD 2-clause License + file LICENSE
 Encoding: UTF-8
 Maintainer: George Ostrouchov <go@tennessee.edu>
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.2
 URL: https://github.com/MVP-CHAMPION/clustra
 BugReports: https://github.com/MVP-CHAMPION/clustra/issues
 VignetteBuilder: knitr

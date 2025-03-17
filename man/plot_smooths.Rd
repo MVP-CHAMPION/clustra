@@ -10,6 +10,7 @@ plot_smooths(
   max.data = 1e+05,
   select.data = NULL,
   group = "group",
+  interval = FALSE,
   ...
 )
 }
@@ -32,6 +33,13 @@ also the \code{fits} parameter can contain TPS fits to the starting points.}
 
 \item{group}{Character variable name in \code{data} to color the clusters. A NULL will produce
 a b&w point plot.}
+
+\item{interval}{If TRUE, add a dashed line of approximate 95\% upper and lower confidence for
+the fitted spline. Note this is simply +- 2x the standard error returned by
+the spline fit. It is an approximate confidence for the cluster mean. To
+assess approximate bounds for a cluster individual, consider plotting all the
+data in each cluster (\code{max.data = Inf}) as an indication of possible spread
+around each mean.}
 
 \item{...}{Other parameters to \code{plot} function, such as \code{xlim} or \code{ylim} axis limits.}
 }

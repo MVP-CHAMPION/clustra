@@ -10,7 +10,7 @@
 #' available via multicore on unix and mac platforms.
 #' 
 #' @name clustra-package
-#' @docType package
+#' @docType _PACKAGE
 #' @author George Ostrouchov, David Gagnon, Hanna Gerlovin
 #' @keywords Package
 #' @details
